@@ -35,6 +35,68 @@
       padding: 0 15px;
     }
 
+    .card {
+      background: white;
+      padding: 24px;
+      margin-bottom: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      max-width: 450px;
+      box-sizing: border-box;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 11px 20px;
+      background: #174f32;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 15px;
+    }
+
+    .success {
+      background: #e4f3e8;
+    }
+
+    .warning {
+      background: #fff4d6;
+    }
+
+    .error {
+      background: #f8dddd;
+    }
+
     .info {
       margin-bottom: 15px;
       font-size: 15px;
@@ -85,10 +147,6 @@
       color: #777;
     }
 
-    .loading {
-      padding: 20px;
-    }
-
     footer {
       text-align: center;
       color: #777;
@@ -107,37 +165,102 @@
 
 <main>
 
-  <div class="info" id="league-info">
-    Loading league...
+  <div id="registration-card" class="card hidden">
+    <h2>Join the Friday Club Golf Society</h2>
+
+    <p>
+      Your email address has been verified.
+      Please enter your details below.
+    </p>
+
+    <p>
+      <strong>Email:</strong>
+      <span id="registration-email"></span>
+    </p>
+
+    <form id="registration-form">
+
+      <label for="first-name">First name</label>
+      <input
+        type="text"
+        id="first-name"
+        required
+      >
+
+      <label for="last-name">Last name</label>
+      <input
+        type="text"
+        id="last-name"
+        required
+      >
+
+      <label for="phone">Phone number</label>
+      <input
+        type="tel"
+        id="phone"
+      >
+
+      <label for="handicap">Current handicap</label>
+      <input
+        type="number"
+        id="handicap"
+        step="0.1"
+        min="-10"
+        max="54"
+        required
+      >
+
+      <button type="submit">
+        Submit registration
+      </button>
+
+    </form>
+
+    <div id="registration-message"></div>
   </div>
 
-  <div class="table-container">
 
-    <table>
+  <div id="member-status" class="card hidden">
+    <h2 id="status-heading"></h2>
+    <p id="status-message"></p>
+  </div>
 
-      <thead>
-        <tr>
-          <th class="number">Pos</th>
-          <th>Player</th>
-          <th class="number">H'cap</th>
-          <th class="number">Played</th>
-          <th class="number">Average</th>
-          <th>Last 10 Scores</th>
-          <th>Status</th>
-        </tr>
-      </thead>
 
-      <tbody id="league-body">
+  <div id="league-section">
 
-        <tr>
-          <td colspan="7" class="loading">
-            Loading league table...
-          </td>
-        </tr>
+    <div class="info" id="league-info">
+      Loading league...
+    </div>
 
-      </tbody>
+    <div class="table-container">
 
-    </table>
+      <table>
+
+        <thead>
+          <tr>
+            <th class="number">Pos</th>
+            <th>Player</th>
+            <th class="number">H'cap</th>
+            <th class="number">Played</th>
+            <th class="number">Average</th>
+            <th>Last 10 Scores</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="league-body">
+
+          <tr>
+            <td colspan="7">
+              Loading league table...
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
 
   </div>
 
@@ -147,24 +270,164 @@
   Friday Club Golf Society
 </footer>
 
+
 <script>
+
+async function checkMembership() {
+
+  try {
+
+    const response = await fetch("/api/me");
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data = await response.json();
+
+    if (!data.registered) {
+
+      document.getElementById(
+        "registration-card"
+      ).classList.remove("hidden");
+
+      document.getElementById(
+        "registration-email"
+      ).textContent = data.email;
+
+      return;
+    }
+
+    const player = data.player;
+
+    if (player.membership_status === "pending") {
+
+      document.getElementById(
+        "member-status"
+      ).classList.remove("hidden");
+
+      document.getElementById(
+        "status-heading"
+      ).textContent =
+        "Registration awaiting approval";
+
+      document.getElementById(
+        "status-message"
+      ).textContent =
+        "Your registration has been received. " +
+        "The Friday Club administrator will approve your membership.";
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+}
+
+
+document.getElementById(
+  "registration-form"
+).addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  const message =
+    document.getElementById("registration-message");
+
+  message.className = "message warning";
+  message.textContent = "Submitting registration...";
+
+  const data = {
+
+    first_name:
+      document.getElementById("first-name").value,
+
+    last_name:
+      document.getElementById("last-name").value,
+
+    phone:
+      document.getElementById("phone").value,
+
+    handicap:
+      document.getElementById("handicap").value
+  };
+
+  try {
+
+    const response = await fetch(
+      "/api/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || "Registration failed"
+      );
+    }
+
+    document.getElementById(
+      "registration-card"
+    ).classList.add("hidden");
+
+    document.getElementById(
+      "member-status"
+    ).classList.remove("hidden");
+
+    document.getElementById(
+      "status-heading"
+    ).textContent =
+      "Registration submitted";
+
+    document.getElementById(
+      "status-message"
+    ).textContent =
+      "Thank you. Your registration is awaiting approval " +
+      "by the Friday Club administrator.";
+
+  } catch (error) {
+
+    message.className = "message error";
+    message.textContent = error.message;
+
+  }
+
+});
+
 
 async function loadLeague() {
 
   try {
 
-    const response = await fetch("/api/league");
+    const response =
+      await fetch("/api/league");
 
     if (!response.ok) {
-      throw new Error("Unable to load league");
+      throw new Error(
+        "Unable to load league"
+      );
     }
 
-    const data = await response.json();
+    const data =
+      await response.json();
 
-    document.getElementById("season-title").textContent =
+    document.getElementById(
+      "season-title"
+    ).textContent =
       data.season + " League";
 
-    document.getElementById("league-info").textContent =
+    document.getElementById(
+      "league-info"
+    ).textContent =
       "Minimum rounds required to qualify: " +
       data.minimum_rounds;
 
@@ -176,9 +439,6 @@ async function loadLeague() {
     let officialPosition = 0;
 
     data.players.forEach(player => {
-
-      const row =
-        document.createElement("tr");
 
       let position = "—";
 
@@ -200,11 +460,18 @@ async function loadLeague() {
       const status =
         player.eligible
           ? "Eligible"
-          : player.played + "/" +
+          : player.played +
+            "/" +
             player.minimum_rounds;
 
+      const row =
+        document.createElement("tr");
+
       row.innerHTML = `
-        <td class="number">${position}</td>
+
+        <td class="number">
+          ${position}
+        </td>
 
         <td>
           ${player.first_name}
@@ -234,6 +501,7 @@ async function loadLeague() {
         }">
           ${status}
         </td>
+
       `;
 
       tbody.appendChild(row);
@@ -249,6 +517,7 @@ async function loadLeague() {
           </td>
         </tr>
       `;
+
     }
 
   } catch (error) {
@@ -262,12 +531,16 @@ async function loadLeague() {
         </td>
       </tr>
     `;
+
   }
+
 }
 
+
+checkMembership();
 loadLeague();
 
 </script>
 
 </body>
-</html>>
+</html>
