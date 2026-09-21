@@ -599,13 +599,16 @@ async function loadExistingGolfDays() {
     data.golf_days.forEach(golfDay => {
       const row = document.createElement("div");
 
-      row.innerHTML = `
-        <p>
-          <strong>${golfDay.play_date}</strong><br>
-          ${golfDay.course_name}
-          ${golfDay.notes ? "<br>" + golfDay.notes : ""}
-        </p>
-      `;
+ row.innerHTML = `
+  <p>
+    <strong>${golfDay.play_date}</strong>
+    — ${golfDay.course_name}
+    ${golfDay.notes ? "<br>" + golfDay.notes : ""}
+  </p>
+  <button type="button" onclick="deleteGolfDay(${golfDay.id})">
+  Delete
+</button>
+`;
 
       container.appendChild(row);
     });
