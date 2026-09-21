@@ -367,6 +367,86 @@ if (url.pathname === "/api/admin/score-players") {
     );
   }
 }
+
+if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const golfDayId = Number(body.golf_day_id);
+    const results = body.results;
+
+    if (!Number.isInteger(golfDayId) || !Array.isArray(results)) {
+      return Response.json(
+        { error: "Invalid results data." },
+        { status: 400 }
+      );
+    }
+
+    const golfDay = await env.DB.prepare(`
+      SELECT id
+      FROM golf_days
+      WHERE id = ?
+      LIMIT 1
+    `).bind(golfDayId).first();
+
+    if (!golfDay) {
+      return Response.json(
+        { error: "Golf day not found." },
+        { status: 404 }
+      );
+    }
+
+    for (const result of results) {
+      const playerId = Number(result.player_id);
+      const handicap = Number(result.handicap);
+      const score = Number(result.stableford_score);
+
+      if (
+        !Number.isInteger(playerId) ||
+        !Number.isFinite(handicap) ||
+        !Number.isInteger(score) ||
+        score < 0
+      ) {
+        return Response.json(
+          { error: "Invalid player result." },
+          { status: 400 }
+        );
+      }
+
+      await env.DB.prepare(`
+        INSERT INTO results
+          (golf_day_id, player_id, stableford_score, handicap)
+        VALUES (?, ?, ?, ?)
+      `).bind(
+        golfDayId,
+        playerId,
+        score,
+        handicap
+      ).run();
+    }
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to save results",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
 if (url.pathname === "/api/admin/courses") {
 
