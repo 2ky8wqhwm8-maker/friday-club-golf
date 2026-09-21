@@ -618,6 +618,47 @@ async function loadExistingGolfDays() {
       "Unable to load golf days.";
   }
 }
+
+async function deleteGolfDay(golfDayId) {
+
+  const confirmed = confirm(
+    "Delete this golf day?\n\nAll scores entered for this golf day will also be deleted.\n\nThis cannot be undone."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/delete-golf-day", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        golf_day_id: golfDayId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to delete golf day.");
+      return;
+    }
+
+    alert("Golf day deleted successfully.");
+
+    loadExistingGolfDays();
+    loadGolfDays();
+    loadLeague();
+
+    document.getElementById("results-players").innerHTML = "";
+
+  } catch (error) {
+    alert("Unable to delete golf day.");
+  }
+}  
   
 async function loadScorePlayers() {
   const golfDayId =
