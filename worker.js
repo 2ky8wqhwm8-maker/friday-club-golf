@@ -713,6 +713,122 @@ if (url.pathname === "/api/admin/add-course" && request.method === "POST") {
     );
   }
 }    
+
+if (url.pathname === "/api/admin/update-course" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const courseId = Number(body.course_id);
+    const name = String(body.name || "").trim();
+    const location = String(body.location || "").trim();
+
+    if (!Number.isInteger(courseId) || !name) {
+      return Response.json(
+        { error: "Invalid golf club details." },
+        { status: 400 }
+      );
+    }
+
+    const duplicate = await env.DB.prepare(`
+      SELECT id
+      FROM courses
+      WHERE LOWER(name) = LOWER(?)
+        AND id != ?
+      LIMIT 1
+    `).bind(name, courseId).first();
+
+    if (duplicate) {
+      return Response.json(
+        { error: "Another golf club already has this name." },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      UPDATE courses
+      SET name = ?,
+          location = ?
+      WHERE id = ?
+    `).bind(
+      name,
+      location,
+      courseId
+    ).run();
+
+    return Response.json({ success: true });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to update golf club",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+
+if (url.pathname === "/api/admin/delete-course" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const courseId = Number(body.course_id);
+
+    if (!Number.isInteger(courseId)) {
+      return Response.json(
+        { error: "Invalid golf club." },
+        { status: 400 }
+      );
+    }
+
+    const golfDay = await env.DB.prepare(`
+      SELECT id
+      FROM golf_days
+      WHERE course_id = ?
+      LIMIT 1
+    `).bind(courseId).first();
+
+    if (golfDay) {
+      return Response.json(
+        {
+          error: "This golf club cannot be deleted because it has golf days recorded against it."
+        },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      DELETE FROM courses
+      WHERE id = ?
+    `).bind(courseId).run();
+
+    return Response.json({ success: true });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to delete golf club",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}    
     
     if (url.pathname === "/api/admin/approve" && request.method === "POST") {
 
