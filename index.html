@@ -813,7 +813,13 @@ row.innerHTML = `
       <strong>${golfDay.play_date}</strong>
       — ${golfDay.course_name}
     </span>
-
+<button
+  type="button"
+  onclick='editGolfDay(${golfDay.id}, ${JSON.stringify(golfDay.play_date)}, ${JSON.stringify(golfDay.course_name)}, ${JSON.stringify(golfDay.notes || "")})'
+  style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
+>
+  Edit
+</button>
     <button
       type="button"
       onclick="deleteGolfDay(${golfDay.id})"
@@ -835,6 +841,77 @@ row.innerHTML = `
   }
 }
 
+async function editGolfDay(golfDayId, currentDate, currentCourse, currentNotes) {
+
+const playDate = prompt(
+  "Enter the golf day date (YYYY-MM-DD):",
+  currentDate
+);
+
+  if (playDate === null) {
+    return;
+  }
+
+  if (!playDate.trim()) {
+    alert("The golf day date cannot be blank.");
+    return;
+  }
+
+ const courseName = prompt(
+  "Enter the golf club:",
+  currentCourse
+);
+
+if (courseName === null) {
+  return;
+}
+
+if (!courseName.trim()) {
+  alert("The golf club cannot be blank.");
+  return;
+}
+
+const notes = prompt(
+  "Enter notes (optional):",
+  currentNotes
+);
+
+  if (notes === null) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/update-golf-day", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+body: JSON.stringify({
+  golf_day_id: golfDayId,
+  play_date: playDate.trim(),
+  course_name: courseName.trim(),
+  notes: notes.trim()
+})
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to update golf day.");
+      return;
+    }
+
+    alert("Golf day updated successfully.");
+
+    loadGolfDays();
+    loadExistingGolfDays();
+    loadLeague();
+
+  } catch (error) {
+    alert("Unable to update golf day.");
+  }
+}
+  
 async function deleteGolfDay(golfDayId) {
 
   const confirmed = confirm(
