@@ -158,28 +158,29 @@ if (url.pathname === "/api/admin/add-member" && request.method === "POST") {
     if (
       !firstName ||
       !lastName ||
-      !memberEmail ||
       !Number.isFinite(handicap)
     ) {
       return Response.json(
-        { error: "First name, last name, email and handicap are required." },
+        { error: "First name, last name, and handicap are required." },
         { status: 400 }
       );
     }
 
-    const existing = await env.DB.prepare(`
-      SELECT id
-      FROM players
-      WHERE LOWER(email) = LOWER(?)
-      LIMIT 1
-    `).bind(memberEmail).first();
+if (memberEmail) {
+  const existing = await env.DB.prepare(`
+    SELECT id
+    FROM players
+    WHERE LOWER(email) = LOWER(?)
+    LIMIT 1
+  `).bind(memberEmail).first();
 
-    if (existing) {
-      return Response.json(
-        { error: "A member with this email address already exists." },
-        { status: 400 }
-      );
-    }
+  if (existing) {
+    return Response.json(
+      { error: "A member with this email address already exists." },
+      { status: 400 }
+    );
+  }
+}
 
     await env.DB.prepare(`
       INSERT INTO players
