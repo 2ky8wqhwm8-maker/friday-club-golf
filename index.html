@@ -3,36 +3,271 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Friday Club Golf Society</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f5;
+      color: #222;
+    }
+
+    header {
+      background: #174f32;
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+    }
+
+    header p {
+      margin: 8px 0 0;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+
+    .info {
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #e8eee9;
+      text-align: left;
+      padding: 12px;
+      border-bottom: 2px solid #ccc;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+      background: #f7f9f7;
+    }
+
+    .number {
+      text-align: center;
+    }
+
+    .average {
+      font-weight: bold;
+    }
+
+    .eligible {
+      color: #176b37;
+      font-weight: bold;
+    }
+
+    .not-eligible {
+      color: #777;
+    }
+
+    .loading {
+      padding: 20px;
+    }
+
+    footer {
+      text-align: center;
+      color: #777;
+      margin: 30px 0;
+      font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>
+
+<header>
   <h1>Friday Club Golf Society</h1>
-  <h2>2026 League</h2>
+  <p id="season-title">League Table</p>
+</header>
 
-  <p>Welcome to the Friday Club Golf Society.</p>
+<main>
 
-  <table border="1" cellpadding="8">
-    <thead>
+  <div class="info" id="league-info">
+    Loading league...
+  </div>
+
+  <div class="table-container">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th class="number">Pos</th>
+          <th>Player</th>
+          <th class="number">H'cap</th>
+          <th class="number">Played</th>
+          <th class="number">Average</th>
+          <th>Last 10 Scores</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="league-body">
+
+        <tr>
+          <td colspan="7" class="loading">
+            Loading league table...
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</main>
+
+<footer>
+  Friday Club Golf Society
+</footer>
+
+<script>
+
+async function loadLeague() {
+
+  try {
+
+    const response = await fetch("/api/league");
+
+    if (!response.ok) {
+      throw new Error("Unable to load league");
+    }
+
+    const data = await response.json();
+
+    document.getElementById("season-title").textContent =
+      data.season + " League";
+
+    document.getElementById("league-info").textContent =
+      "Minimum rounds required to qualify: " +
+      data.minimum_rounds;
+
+    const tbody =
+      document.getElementById("league-body");
+
+    tbody.innerHTML = "";
+
+    let officialPosition = 0;
+
+    data.players.forEach(player => {
+
+      const row =
+        document.createElement("tr");
+
+      let position = "—";
+
+      if (player.eligible) {
+        officialPosition++;
+        position = officialPosition;
+      }
+
+      const average =
+        player.average_score === null
+          ? "—"
+          : Number(player.average_score).toFixed(2);
+
+      const last10 =
+        player.last_10.length
+          ? player.last_10.join(", ")
+          : "—";
+
+      const status =
+        player.eligible
+          ? "Eligible"
+          : player.played + "/" +
+            player.minimum_rounds;
+
+      row.innerHTML = `
+        <td class="number">${position}</td>
+
+        <td>
+          ${player.first_name}
+          ${player.last_name}
+        </td>
+
+        <td class="number">
+          ${player.handicap ?? "—"}
+        </td>
+
+        <td class="number">
+          ${player.played}
+        </td>
+
+        <td class="number average">
+          ${average}
+        </td>
+
+        <td>
+          ${last10}
+        </td>
+
+        <td class="${
+          player.eligible
+            ? "eligible"
+            : "not-eligible"
+        }">
+          ${status}
+        </td>
+      `;
+
+      tbody.appendChild(row);
+
+    });
+
+    if (data.players.length === 0) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            No players have been added yet.
+          </td>
+        </tr>
+      `;
+    }
+
+  } catch (error) {
+
+    document.getElementById(
+      "league-body"
+    ).innerHTML = `
       <tr>
-        <th>Pos</th>
-        <th>Player</th>
-        <th>Handicap</th>
-        <th>Played</th>
-        <th>Average</th>
-        <th>Last 10</th>
-        <th>Status</th>
+        <td colspan="7">
+          Unable to load the league table.
+        </td>
       </tr>
-    </thead>
+    `;
+  }
+}
 
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>Test Player</td>
-        <td>18.0</td>
-        <td>12</td>
-        <td>35.50</td>
-        <td>36, 35, 38, 32, 37, 34, 36, 35, 37, 35</td>
-        <td>Eligible</td>
-      </tr>
-    </tbody>
+loadLeague();
+
+</script>
+
+</body>
+</html>>
