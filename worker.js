@@ -94,6 +94,49 @@ return Response.json({
   }
 } 
 
+if (url.pathname === "/api/admin/members") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        handicap,
+        membership_status,
+        role,
+        active
+      FROM players
+      WHERE membership_status = 'approved'
+      ORDER BY last_name, first_name
+    `).all();
+
+    return Response.json({
+      members: results
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to load members",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
     if (url.pathname === "/api/admin/approve" && request.method === "POST") {
 
   if (!isAdmin) {
