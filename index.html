@@ -401,6 +401,23 @@
 
 <script>
 
+function formatUKDate(dateString) {
+  const [year, month, day] = dateString.split("-");
+
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day)
+  );
+
+  return date.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}  
+  
 async function checkMembership() {
 
   try {
@@ -775,10 +792,10 @@ async function loadGolfDays() {
 
       option.value = golfDay.id;
 
-      option.textContent =
-        golfDay.play_date +
-        " — " +
-        golfDay.course_name;
+option.textContent =
+  formatUKDate(golfDay.play_date) +
+  " — " +
+  golfDay.course_name;
 
       select.appendChild(option);
     });
@@ -810,7 +827,7 @@ async function loadExistingGolfDays() {
 row.innerHTML = `
   <div style="display: flex; align-items: center; gap: 10px;">
     <span style="display: inline-flex; align-items: center;">
-      <strong>${golfDay.play_date}</strong>
+      <strong>${formatUKDate(golfDay.play_date)}</strong>
       — ${golfDay.course_name}
     </span>
 <button
