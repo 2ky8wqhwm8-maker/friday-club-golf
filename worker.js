@@ -412,6 +412,65 @@ if (url.pathname === "/api/admin/golf-days") {
   }
 }
 
+if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const golfDayId = Number(body.golf_day_id);
+
+    if (!Number.isInteger(golfDayId)) {
+      return Response.json(
+        { error: "Invalid golf day." },
+        { status: 400 }
+      );
+    }
+
+    const existing = await env.DB.prepare(`
+      SELECT id
+      FROM golf_days
+      WHERE id = ?
+      LIMIT 1
+    `).bind(golfDayId).first();
+
+    if (!existing) {
+      return Response.json(
+        { error: "Golf day not found." },
+        { status: 404 }
+      );
+    }
+
+    await env.DB.prepare(`
+      DELETE FROM results
+      WHERE golf_day_id = ?
+    `).bind(golfDayId).run();
+
+    await env.DB.prepare(`
+      DELETE FROM golf_days
+      WHERE id = ?
+    `).bind(golfDayId).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to delete golf day",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
 if (url.pathname === "/api/admin/score-players") {
 
   if (!isAdmin) {
