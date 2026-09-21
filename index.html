@@ -865,6 +865,65 @@ async function loadExistingMembers() {
   }
 }  
 
+async function addMember() {
+  const firstName =
+    document.getElementById("new-member-first-name").value.trim();
+
+  const lastName =
+    document.getElementById("new-member-last-name").value.trim();
+
+  const email =
+    document.getElementById("new-member-email").value.trim();
+
+  const phone =
+    document.getElementById("new-member-phone").value.trim();
+
+  const handicap =
+    document.getElementById("new-member-handicap").value;
+
+  if (!firstName || !lastName || !email || handicap === "") {
+    alert("Please enter first name, last name, email and handicap.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/add-member", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone: phone,
+        handicap: Number(handicap)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to add member.");
+      return;
+    }
+
+    alert("Member added successfully.");
+
+    document.getElementById("new-member-first-name").value = "";
+    document.getElementById("new-member-last-name").value = "";
+    document.getElementById("new-member-email").value = "";
+    document.getElementById("new-member-phone").value = "";
+    document.getElementById("new-member-handicap").value = "";
+
+    loadExistingMembers();
+    loadLeague();
+
+  } catch (error) {
+    alert("Unable to add member.");
+  }
+}
+  
 async function editMember(playerId) {
 
   const response =
