@@ -421,16 +421,41 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
         );
       }
 
-      await env.DB.prepare(`
-        INSERT INTO results
-          (golf_day_id, player_id, stableford_score, handicap)
-        VALUES (?, ?, ?, ?)
-      `).bind(
-        golfDayId,
-        playerId,
-        score,
-        handicap
-      ).run();
+const existingResult = await env.DB.prepare(`
+  SELECT id
+  FROM results
+  WHERE golf_day_id = ?
+    AND player_id = ?
+  LIMIT 1
+`).bind(
+  golfDayId,
+  playerId
+).first();
+
+if (existingResult) {
+  await env.DB.prepare(`
+    UPDATE results
+    SET stableford_score = ?,
+        handicap = ?
+    WHERE id = ?
+  `).bind(
+    score,
+    handicap,
+    existingResult.id
+  ).run();
+
+} else {
+  await env.DB.prepare(`
+    INSERT INTO results
+      (golf_day_id, player_id, stableford_score, handicap)
+    VALUES (?, ?, ?, ?)
+  `).bind(
+    golfDayId,
+    playerId,
+    score,
+    handicap
+  ).run();
+}
     }
 
     return Response.json({
