@@ -550,7 +550,9 @@ async function loadScorePlayers() {
   }
 
   try {
-    const response = await fetch("/api/admin/score-players");
+    const response = await fetch(
+  `/api/admin/score-players?golf_day_id=${golfDayId}`
+);
     const data = await response.json();
 
     container.innerHTML = "";
@@ -572,11 +574,12 @@ async function loadScorePlayers() {
         >
 
         <label>Stableford Score</label>
-        <input
-          type="number"
-          min="0"
-          id="score-${player.id}"
-        >
+<input
+  type="number"
+  min="0"
+  value="${player.stableford_score ?? ""}"
+  id="score-${player.id}"
+>
       `;
 
       container.appendChild(row);
