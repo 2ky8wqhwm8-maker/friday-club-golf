@@ -289,6 +289,43 @@ if (url.pathname === "/api/admin/create-golf-day" && request.method === "POST") 
     );
   }
 }
+
+if (url.pathname === "/api/admin/courses") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        name,
+        location
+      FROM courses
+      WHERE active = 1
+      ORDER BY name
+    `).all();
+
+    return Response.json({
+      courses: results
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to load courses",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
     if (url.pathname === "/api/admin/approve" && request.method === "POST") {
 
