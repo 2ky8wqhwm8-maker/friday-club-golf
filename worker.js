@@ -470,6 +470,85 @@ if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") 
     );
   }
 }
+
+if (url.pathname === "/api/admin/update-golf-day" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const golfDayId = Number(body.golf_day_id);
+    const playDate = String(body.play_date || "").trim();
+    const courseName = String(body.course_name || "").trim();
+    const notes = String(body.notes || "").trim();
+
+    if (!Number.isInteger(golfDayId) || !playDate || !courseName) {
+      return Response.json(
+        { error: "Golf day, date and golf club are required." },
+        { status: 400 }
+      );
+    }
+
+    const course = await env.DB.prepare(`
+      SELECT id
+      FROM courses
+      WHERE LOWER(name) = LOWER(?)
+        AND active = 1
+      LIMIT 1
+    `).bind(courseName).first();
+
+    if (!course) {
+      return Response.json(
+        { error: "Golf club not found. Please enter an existing golf club." },
+        { status: 400 }
+      );
+    }
+
+    const golfDay = await env.DB.prepare(`
+      SELECT id
+      FROM golf_days
+      WHERE id = ?
+      LIMIT 1
+    `).bind(golfDayId).first();
+
+    if (!golfDay) {
+      return Response.json(
+        { error: "Golf day not found." },
+        { status: 404 }
+      );
+    }
+
+    await env.DB.prepare(`
+      UPDATE golf_days
+      SET play_date = ?,
+          course_id = ?,
+          notes = ?
+      WHERE id = ?
+    `).bind(
+      playDate,
+      course.id,
+      notes,
+      golfDayId
+    ).run();
+
+    return Response.json({ success: true });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to update golf day",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
 if (url.pathname === "/api/admin/score-players") {
 
