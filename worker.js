@@ -290,6 +290,47 @@ if (url.pathname === "/api/admin/create-golf-day" && request.method === "POST") 
   }
 }
 
+if (url.pathname === "/api/admin/golf-days") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { results } = await env.DB.prepare(`
+      SELECT
+        gd.id,
+        gd.play_date,
+        gd.notes,
+        c.name AS course_name,
+        c.location AS course_location
+      FROM golf_days gd
+      JOIN courses c
+        ON c.id = gd.course_id
+      JOIN seasons s
+        ON s.id = gd.season_id
+      WHERE s.status = 'current'
+      ORDER BY gd.play_date DESC
+    `).all();
+
+    return Response.json({
+      golf_days: results
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to load golf days",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
 if (url.pathname === "/api/admin/courses") {
 
   if (!isAdmin) {
