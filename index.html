@@ -465,6 +465,9 @@ async function loadPendingMembers() {
           <button onclick="approveMember(${player.id})">
             Approve
           </button>
+          <button onclick="rejectMember(${player.id})">
+            Reject
+          </button>
         </p>
         <hr>
       `;
@@ -516,6 +519,50 @@ async function approveMember(playerId) {
 
   }
 }
+
+async function rejectMember(playerId) {
+
+  const confirmed = confirm(
+    "Are you sure you want to reject this registration?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/reject",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          player_id: playerId
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to reject member"
+      );
+    }
+
+    await loadPendingMembers();
+
+  } catch (error) {
+
+    alert(
+      "Rejection failed: " + error.message
+    );
+
+  }
+}  
   
 async function loadLeague() {
 
