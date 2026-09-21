@@ -179,6 +179,40 @@
 <div id="existing-members">
   Loading members...
 </div>
+
+ <hr>
+
+<h3>Add Member</h3>
+
+<div id="add-member-form">
+
+  <label for="new-member-first-name">First name</label>
+  <input type="text" id="new-member-first-name">
+
+  <label for="new-member-last-name">Last name</label>
+  <input type="text" id="new-member-last-name">
+
+  <label for="new-member-email">Email</label>
+  <input type="email" id="new-member-email">
+
+  <label for="new-member-phone">Phone</label>
+  <input type="text" id="new-member-phone">
+
+  <label for="new-member-handicap">Handicap</label>
+  <input
+    type="number"
+    step="0.1"
+    id="new-member-handicap"
+  >
+
+  <button type="button" onclick="addMember()">
+    Add Member
+  </button>
+
+  <div id="add-member-message"></div>
+
+</div> 
+  
 <hr>
 
 <h3>Create Golf Day</h3>
