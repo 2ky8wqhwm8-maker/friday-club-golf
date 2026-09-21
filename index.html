@@ -881,10 +881,10 @@ async function addMember() {
   const handicap =
     document.getElementById("new-member-handicap").value;
 
-  if (!firstName || !lastName || !email || handicap === "") {
-    alert("Please enter first name, last name, email and handicap.");
-    return;
-  }
+if (!firstName || !lastName || handicap === "") {
+  alert("Please enter first name, last name and handicap.");
+  return;
+}
 
   try {
     const response = await fetch("/api/admin/add-member", {
