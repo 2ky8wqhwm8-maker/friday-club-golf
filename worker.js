@@ -3,8 +3,16 @@ export default {
     const url = new URL(request.url);
     const email =
       request.headers.get("Cf-Access-Authenticated-User-Email") || "";
-    const isAdmin =
-  email.toLowerCase() === "humble@sky.com";
+const adminPlayer = await env.DB.prepare(`
+  SELECT id
+  FROM players
+  WHERE LOWER(email) = LOWER(?)
+    AND role = 'admin'
+    AND membership_status = 'approved'
+  LIMIT 1
+`).bind(email).first();
+
+const isAdmin = !!adminPlayer;
     if (url.pathname === "/api/whoami") {
         return Response.json({ email });
 }
@@ -31,11 +39,12 @@ export default {
       });
     }
 
-    return Response.json({
-      email,
-      registered: true,
-      player
-    });
+return Response.json({
+  email,
+  registered: true,
+  isAdmin,
+  player
+});
 
   } catch (error) {
     return Response.json(
