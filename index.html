@@ -207,6 +207,22 @@
   <div id="golf-day-message"></div>
 
 </div>
+  <hr>
+
+<h3>Enter Results</h3>
+
+<div id="results-entry">
+
+  <label for="results-golf-day">Golf Day</label>
+  <select id="results-golf-day" onchange="loadScorePlayers()">
+    <option value="">Loading golf days...</option>
+  </select>
+
+  <div id="results-players"></div>
+
+  <div id="results-message"></div>
+
+</div>
 
  <hr>
 
@@ -356,22 +372,7 @@ async function checkMembership() {
    loadExistingMembers();
    loadCourses();
    loadGolfDays();
-   <hr>
-
-<h3>Enter Results</h3>
-
-<div id="results-entry">
-
-  <label for="results-golf-day">Golf Day</label>
-  <select id="results-golf-day">
-    <option value="">Loading golf days...</option>
-  </select>
-
-  <div id="results-players"></div>
-
-  <div id="results-message"></div>
-
-</div>
+    
 }
 
     if (!data.registered) {
