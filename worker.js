@@ -341,17 +341,22 @@ if (url.pathname === "/api/admin/score-players") {
   }
 
   try {
-    const { results } = await env.DB.prepare(`
-      SELECT
-        id,
-        first_name,
-        last_name,
-        handicap
-      FROM players
-      WHERE membership_status = 'approved'
-        AND active = 1
-      ORDER BY last_name, first_name
-    `).all();
+    const golfDayId = Number(url.searchParams.get("golf_day_id"));
+const { results } = await env.DB.prepare(`
+  SELECT
+    p.id,
+    p.first_name,
+    p.last_name,
+    COALESCE(r.handicap, p.handicap) AS handicap,
+    r.stableford_score
+  FROM players p
+  LEFT JOIN results r
+    ON r.player_id = p.id
+    AND r.golf_day_id = ?
+  WHERE p.membership_status = 'approved'
+    AND p.active = 1
+  ORDER BY p.last_name, p.first_name
+`).bind(golfDayId).all();;
 
     return Response.json({
       players: results
