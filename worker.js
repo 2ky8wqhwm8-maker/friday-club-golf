@@ -6,7 +6,45 @@ export default {
     if (url.pathname === "/api/whoami") {
         return Response.json({ email });
 }
-    
+    if (url.pathname === "/api/me") {
+  try {
+    const player = await env.DB.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name,
+        email,
+        handicap,
+        membership_status,
+        role
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+      LIMIT 1
+    `).bind(email).first();
+
+    if (!player) {
+      return Response.json({
+        email,
+        registered: false
+      });
+    }
+
+    return Response.json({
+      email,
+      registered: true,
+      player
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to check membership",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     if (url.pathname === "/api/league") {
       try {
         const season = await env.DB.prepare(`
