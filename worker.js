@@ -654,6 +654,65 @@ if (url.pathname === "/api/admin/courses") {
     );
   }
 }
+
+if (url.pathname === "/api/admin/add-course" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const name = String(body.name || "").trim();
+    const location = String(body.location || "").trim();
+
+    if (!name) {
+      return Response.json(
+        { error: "Golf club name is required." },
+        { status: 400 }
+      );
+    }
+
+    const existing = await env.DB.prepare(`
+      SELECT id
+      FROM courses
+      WHERE LOWER(name) = LOWER(?)
+      LIMIT 1
+    `).bind(name).first();
+
+    if (existing) {
+      return Response.json(
+        { error: "This golf club already exists." },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      INSERT INTO courses (name, location, active)
+      VALUES (?, ?, 1)
+    `).bind(
+      name,
+      location
+    ).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to add golf club",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}    
     
     if (url.pathname === "/api/admin/approve" && request.method === "POST") {
 
