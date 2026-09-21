@@ -2,6 +2,15 @@
   "name": "friday-club-golf",
   "main": "worker.js",
   "compatibility_date": "2026-09-21",
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "friday-club-golf",
+      "database_id": "c5ab103e-d282-41f2-827f-a108df81e058"
+    }
+  ],
+
   "assets": {
     "directory": ".",
     "binding": "ASSETS"
