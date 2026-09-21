@@ -215,6 +215,22 @@
   
 <hr>
 
+<h3>Add Golf Club</h3>
+
+<div id="add-course-form">
+  <label for="new-course-name">Club name</label>
+  <input type="text" id="new-course-name">
+
+  <label for="new-course-location">Location</label>
+  <input type="text" id="new-course-location">
+
+  <button type="button" onclick="addCourse()">
+    Add Golf Club
+  </button>
+</div>
+
+<hr>
+  
 <h3>Create Golf Day</h3>
 
 <div id="golf-day-form">
@@ -550,6 +566,49 @@ async function loadCourses() {
       '<option value="">Unable to load courses</option>';
   }
 }
+
+ async function addCourse() {
+  const name =
+    document.getElementById("new-course-name").value.trim();
+
+  const location =
+    document.getElementById("new-course-location").value.trim();
+
+  if (!name) {
+    alert("Please enter the golf club name.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/add-course", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: name,
+        location: location
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to add golf club.");
+      return;
+    }
+
+    alert("Golf club added successfully.");
+
+    document.getElementById("new-course-name").value = "";
+    document.getElementById("new-course-location").value = "";
+
+    loadCourses();
+
+  } catch (error) {
+    alert("Unable to add golf club.");
+  }
+} 
 
 async function loadGolfDays() {
   try {
