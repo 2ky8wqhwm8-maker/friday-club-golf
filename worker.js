@@ -137,6 +137,86 @@ if (url.pathname === "/api/admin/members") {
   }
 }
 
+if (url.pathname === "/api/admin/add-member" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const firstName = String(body.first_name || "").trim();
+    const lastName = String(body.last_name || "").trim();
+    const memberEmail = String(body.email || "").trim();
+    const phone = String(body.phone || "").trim();
+    const handicap = Number(body.handicap);
+
+    if (
+      !firstName ||
+      !lastName ||
+      !memberEmail ||
+      !Number.isFinite(handicap)
+    ) {
+      return Response.json(
+        { error: "First name, last name, email and handicap are required." },
+        { status: 400 }
+      );
+    }
+
+    const existing = await env.DB.prepare(`
+      SELECT id
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+      LIMIT 1
+    `).bind(memberEmail).first();
+
+    if (existing) {
+      return Response.json(
+        { error: "A member with this email address already exists." },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      INSERT INTO players
+        (
+          first_name,
+          last_name,
+          email,
+          phone,
+          handicap,
+          membership_status,
+          role,
+          active
+        )
+      VALUES (?, ?, ?, ?, ?, 'approved', 'member', 1)
+    `).bind(
+      firstName,
+      lastName,
+      memberEmail,
+      phone,
+      handicap
+    ).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to add member",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
 if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
 
   if (!isAdmin) {
