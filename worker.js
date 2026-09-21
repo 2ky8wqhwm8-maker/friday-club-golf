@@ -2,44 +2,94 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Return the current league table
     if (url.pathname === "/api/league") {
       try {
+        const season = await env.DB.prepare(`
+          SELECT id, name, minimum_rounds
+          FROM seasons
+          WHERE status = 'current'
+          LIMIT 1
+        `).first();
+
+        if (!season) {
+          return Response.json(
+            { error: "No current season has been set." },
+            { status: 500 }
+          );
+        }
+
         const { results } = await env.DB.prepare(`
           SELECT
             p.id,
             p.first_name,
             p.last_name,
             p.handicap,
+
             COUNT(r.id) AS played,
+
             ROUND(AVG(r.stableford_score), 2) AS average_score,
-            SUM(r.stableford_score) AS total_points,
-            s.minimum_rounds
+
+            COALESCE(SUM(r.stableford_score), 0) AS total_points
+
           FROM players p
+
           LEFT JOIN results r
             ON r.player_id = p.id
-          LEFT JOIN golf_days gd
-            ON gd.id = r.golf_day_id
-          LEFT JOIN seasons s
-            ON s.id = gd.season_id
-            AND s.status = 'current'
+            AND r.golf_day_id IN (
+              SELECT id
+              FROM golf_days
+              WHERE season_id = ?
+            )
+
           WHERE p.active = 1
+
           GROUP BY
             p.id,
             p.first_name,
             p.last_name,
-            p.handicap,
-            s.minimum_rounds
-          ORDER BY average_score DESC
-        `).all();
+            p.handicap
 
-        return Response.json(results, {
+          ORDER BY
+            average_score DESC,
+            p.last_name ASC,
+            p.first_name ASC
+        `).bind(season.id).all();
+
+        for (const player of results) {
+
+          const recent = await env.DB.prepare(`
+            SELECT r.stableford_score
+            FROM results r
+            JOIN golf_days gd
+              ON gd.id = r.golf_day_id
+            WHERE r.player_id = ?
+              AND gd.season_id = ?
+            ORDER BY gd.play_date DESC
+            LIMIT 10
+          `).bind(player.id, season.id).all();
+
+          player.last_10 = recent.results.map(
+            row => row.stableford_score
+          );
+
+          player.minimum_rounds = season.minimum_rounds;
+
+          player.eligible =
+            player.played >= season.minimum_rounds;
+        }
+
+        return Response.json({
+          season: season.name,
+          minimum_rounds: season.minimum_rounds,
+          players: results
+        }, {
           headers: {
             "Cache-Control": "no-store"
           }
         });
 
       } catch (error) {
+
         return Response.json(
           {
             error: "Unable to load league table",
@@ -50,8 +100,6 @@ export default {
       }
     }
 
-    return new Response("Friday Club Golf Society", {
-      headers: { "Content-Type": "text/plain;charset=UTF-8" }
-    });
+    return env.ASSETS.fetch(request);
   }
 };
