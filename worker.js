@@ -210,6 +210,85 @@ if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
     );
   }
 }
+
+if (url.pathname === "/api/admin/create-golf-day" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const courseId = Number(body.course_id);
+    const playDate = String(body.play_date || "").trim();
+    const notes = String(body.notes || "").trim();
+
+    if (!Number.isInteger(courseId) || !playDate) {
+      return Response.json(
+        { error: "Course and date are required." },
+        { status: 400 }
+      );
+    }
+
+    const season = await env.DB.prepare(`
+      SELECT id
+      FROM seasons
+      WHERE status = 'current'
+      LIMIT 1
+    `).first();
+
+    if (!season) {
+      return Response.json(
+        { error: "No current season has been set." },
+        { status: 400 }
+      );
+    }
+
+    const course = await env.DB.prepare(`
+      SELECT id
+      FROM courses
+      WHERE id = ?
+        AND active = 1
+      LIMIT 1
+    `).bind(courseId).first();
+
+    if (!course) {
+      return Response.json(
+        { error: "Selected course is not available." },
+        { status: 400 }
+      );
+    }
+
+    const result = await env.DB.prepare(`
+      INSERT INTO golf_days
+        (season_id, course_id, play_date, notes)
+      VALUES (?, ?, ?, ?)
+    `).bind(
+      season.id,
+      courseId,
+      playDate,
+      notes
+    ).run();
+
+    return Response.json({
+      success: true,
+      golf_day_id: result.meta.last_row_id
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to create golf day",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
     if (url.pathname === "/api/admin/approve" && request.method === "POST") {
 
