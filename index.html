@@ -229,6 +229,12 @@
   </button>
 </div>
 
+<h3>Existing Golf Clubs</h3>
+
+<div id="existing-courses">
+  Loading golf clubs...
+</div>
+  
 <hr>
   
 <h3>Create Golf Day</h3>
@@ -415,6 +421,7 @@ async function checkMembership() {
   loadPendingMembers();
    loadExistingMembers();
    loadCourses();
+   loadExistingCourses();
    loadGolfDays();
    loadExistingGolfDays();
     
@@ -567,6 +574,40 @@ async function loadCourses() {
   }
 }
 
+async function loadExistingCourses() {
+  try {
+    const response = await fetch("/api/admin/courses");
+    const data = await response.json();
+
+    const container =
+      document.getElementById("existing-courses");
+
+    if (!data.courses || data.courses.length === 0) {
+      container.textContent = "No golf clubs have been added.";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.courses.forEach(course => {
+      const row = document.createElement("div");
+
+      row.innerHTML = `
+        <p>
+          <strong>${course.name}</strong>
+          ${course.location ? " — " + course.location : ""}
+        </p>
+      `;
+
+      container.appendChild(row);
+    });
+
+  } catch (error) {
+    document.getElementById("existing-courses").textContent =
+      "Unable to load golf clubs.";
+  }
+}
+  
  async function addCourse() {
   const name =
     document.getElementById("new-course-name").value.trim();
@@ -604,6 +645,7 @@ async function loadCourses() {
     document.getElementById("new-course-location").value = "";
 
     loadCourses();
+   loadExistingCourses(); 
 
   } catch (error) {
     alert("Unable to add golf club.");
