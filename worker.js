@@ -330,6 +330,43 @@ if (url.pathname === "/api/admin/golf-days") {
     );
   }
 }
+
+if (url.pathname === "/api/admin/score-players") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name,
+        handicap
+      FROM players
+      WHERE membership_status = 'approved'
+        AND active = 1
+      ORDER BY last_name, first_name
+    `).all();
+
+    return Response.json({
+      players: results
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to load players",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
 if (url.pathname === "/api/admin/courses") {
 
