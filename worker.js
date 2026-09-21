@@ -3,6 +3,8 @@ export default {
     const url = new URL(request.url);
     const email =
       request.headers.get("Cf-Access-Authenticated-User-Email") || "";
+    const isAdmin =
+  email.toLowerCase() === "humble@sky.com";
     if (url.pathname === "/api/whoami") {
         return Response.json({ email });
 }
@@ -45,6 +47,86 @@ export default {
     );
   }
 }
+  if (url.pathname === "/api/admin/pending") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        handicap
+      FROM players
+      WHERE membership_status = 'pending'
+      ORDER BY last_name, first_name
+    `).all();
+
+    return Response.json({
+      pending: results
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to load pending registrations",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+} 
+
+    if (url.pathname === "/api/admin/approve" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const playerId = Number(body.player_id);
+
+    if (!Number.isInteger(playerId)) {
+      return Response.json(
+        { error: "Invalid player ID." },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      UPDATE players
+      SET membership_status = 'approved'
+      WHERE id = ?
+        AND membership_status = 'pending'
+    `).bind(playerId).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to approve member",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
     if (url.pathname === "/api/register" && request.method === "POST") {
   try {
     const body = await request.json();
