@@ -593,16 +593,16 @@ async function loadExistingCourses() {
       const row = document.createElement("div");
 
      row.innerHTML = `
-  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-    <span>
+ <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+    <span style="display: inline-flex; align-items: center;">
       <strong>${course.name}</strong>
       ${course.location ? " — " + course.location : ""}
     </span>
 
     <button
       type="button"
-      onclick="editCourse(${course.id})"
-      style="padding: 3px 8px; font-size: 12px; width: auto;"
+      onclick='editCourse(${course.id}, ${JSON.stringify(course.name)}, ${JSON.stringify(course.location || "")})'
+      style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
     >
       Edit
     </button>
@@ -610,7 +610,7 @@ async function loadExistingCourses() {
     <button
       type="button"
       onclick="deleteCourse(${course.id})"
-      style="padding: 3px 8px; font-size: 12px; width: auto;"
+      style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
     >
       Delete
     </button>
@@ -626,9 +626,9 @@ async function loadExistingCourses() {
   }
 }
 
-async function editCourse(courseId) {
+async function editCourse(courseId, currentName, currentLocation) {
 
-  const name = prompt("Enter the golf club name:");
+  const name = prompt("Enter the golf club name:", currentName);
 
   if (name === null) {
     return;
@@ -639,7 +639,7 @@ async function editCourse(courseId) {
     return;
   }
 
-  const location = prompt("Enter the location:");
+const location = prompt("Enter the location:", currentLocation);
 
   if (location === null) {
     return;
