@@ -207,6 +207,23 @@
   <div id="golf-day-message"></div>
 
 </div>
+
+ <hr>
+
+<h3>Enter Results</h3>
+
+<div id="results-entry">
+
+  <label for="results-golf-day">Golf Day</label>
+  <select id="results-golf-day" onchange="loadScorePlayers()">
+    <option value="">Loading golf days...</option>
+  </select>
+
+  <div id="results-players"></div>
+
+  <div id="results-message"></div>
+
+</div> 
   
 </div>
   
@@ -338,6 +355,23 @@ async function checkMembership() {
   loadPendingMembers();
    loadExistingMembers();
    loadCourses();
+   loadGolfDays();
+   <hr>
+
+<h3>Enter Results</h3>
+
+<div id="results-entry">
+
+  <label for="results-golf-day">Golf Day</label>
+  <select id="results-golf-day">
+    <option value="">Loading golf days...</option>
+  </select>
+
+  <div id="results-players"></div>
+
+  <div id="results-message"></div>
+
+</div>
 }
 
     if (!data.registered) {
@@ -484,6 +518,87 @@ async function loadCourses() {
   } catch (error) {
     document.getElementById("golf-day-course").innerHTML =
       '<option value="">Unable to load courses</option>';
+  }
+}
+
+async function loadGolfDays() {
+  try {
+    const response = await fetch("/api/admin/golf-days");
+    const data = await response.json();
+
+    const select =
+      document.getElementById("results-golf-day");
+
+    select.innerHTML =
+      '<option value="">Select a golf day</option>';
+
+    data.golf_days.forEach(golfDay => {
+      const option = document.createElement("option");
+
+      option.value = golfDay.id;
+
+      option.textContent =
+        golfDay.play_date +
+        " — " +
+        golfDay.course_name;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    document.getElementById("results-golf-day").innerHTML =
+      '<option value="">Unable to load golf days</option>';
+  }
+}  
+
+async function loadScorePlayers() {
+  const golfDayId =
+    document.getElementById("results-golf-day").value;
+
+  const container =
+    document.getElementById("results-players");
+
+  if (!golfDayId) {
+    container.innerHTML = "";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/score-players");
+    const data = await response.json();
+
+    container.innerHTML = "";
+
+    data.players.forEach(player => {
+      const row = document.createElement("div");
+
+      row.innerHTML = `
+        <p>
+          <strong>${player.first_name} ${player.last_name}</strong>
+        </p>
+
+        <label>Handicap</label>
+        <input
+          type="number"
+          step="0.1"
+          value="${player.handicap}"
+          id="handicap-${player.id}"
+        >
+
+        <label>Stableford Score</label>
+        <input
+          type="number"
+          min="0"
+          id="score-${player.id}"
+        >
+      `;
+
+      container.appendChild(row);
+    });
+
+  } catch (error) {
+    container.textContent =
+      "Unable to load players.";
   }
 }
 
