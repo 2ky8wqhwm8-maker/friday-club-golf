@@ -1,7 +1,12 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
+    const email =
+      request.headers.get("Cf-Access-Authenticated-User-Email") || "";
+    if (url.pathname === "/api/whoami") {
+        return Response.json({ email });
+}
+    
     if (url.pathname === "/api/league") {
       try {
         const season = await env.DB.prepare(`
