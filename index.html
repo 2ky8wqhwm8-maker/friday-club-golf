@@ -179,6 +179,35 @@
 <div id="existing-members">
   Loading members...
 </div>
+<hr>
+
+<h3>Create Golf Day</h3>
+
+<div id="golf-day-form">
+
+  <label for="golf-day-course">Course</label>
+  <select id="golf-day-course">
+    <option value="">Loading courses...</option>
+  </select>
+
+  <label for="golf-day-date">Date</label>
+  <input type="date" id="golf-day-date">
+
+  <label for="golf-day-notes">Notes</label>
+  <input
+    type="text"
+    id="golf-day-notes"
+    placeholder="Optional"
+  >
+
+  <button type="button" onclick="createGolfDay()">
+    Create Golf Day
+  </button>
+
+  <div id="golf-day-message"></div>
+
+</div>
+  
 </div>
   
   <div id="registration-card" class="card hidden">
@@ -308,6 +337,7 @@ async function checkMembership() {
 
   loadPendingMembers();
    loadExistingMembers();
+   loadCourses();
 }
 
     if (!data.registered) {
@@ -431,6 +461,82 @@ document.getElementById(
 
 });
 
+async function loadCourses() {
+  try {
+    const response = await fetch("/api/admin/courses");
+    const data = await response.json();
+
+    const select = document.getElementById("golf-day-course");
+
+    select.innerHTML =
+      '<option value="">Select a course</option>';
+
+    data.courses.forEach(course => {
+      const option = document.createElement("option");
+      option.value = course.id;
+      option.textContent =
+        course.name +
+        (course.location ? " — " + course.location : "");
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    document.getElementById("golf-day-course").innerHTML =
+      '<option value="">Unable to load courses</option>';
+  }
+}
+
+async function createGolfDay() {
+  const courseId =
+    document.getElementById("golf-day-course").value;
+
+  const playDate =
+    document.getElementById("golf-day-date").value;
+
+  const notes =
+    document.getElementById("golf-day-notes").value.trim();
+
+  const message =
+    document.getElementById("golf-day-message");
+
+  if (!courseId || !playDate) {
+    message.textContent =
+      "Please select a course and date.";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/create-golf-day", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        course_id: Number(courseId),
+        play_date: playDate,
+        notes: notes
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      message.textContent =
+        data.error || "Unable to create golf day.";
+      return;
+    }
+
+    message.textContent = "Golf day created successfully.";
+
+    document.getElementById("golf-day-date").value = "";
+    document.getElementById("golf-day-notes").value = "";
+
+  } catch (error) {
+    message.textContent = "Unable to create golf day.";
+  }
+}  
+  
 async function loadPendingMembers() {
 
   const container =
