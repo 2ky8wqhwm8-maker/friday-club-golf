@@ -809,7 +809,7 @@ async function loadExistingGolfDays() {
 
 row.innerHTML = `
   <div style="display: flex; align-items: center; gap: 10px;">
-    <span>
+    <span style="display: inline-flex; align-items: center;">
       <strong>${golfDay.play_date}</strong>
       — ${golfDay.course_name}
     </span>
@@ -817,7 +817,7 @@ row.innerHTML = `
     <button
       type="button"
       onclick="deleteGolfDay(${golfDay.id})"
-      style="padding: 3px 8px; font-size: 12px; width: auto;"
+      style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
     >
       Delete
     </button>
