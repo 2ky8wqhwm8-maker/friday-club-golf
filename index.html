@@ -918,7 +918,12 @@ if (!firstName || !lastName || handicap === "") {
 
     loadExistingMembers();
     loadLeague();
+const selectedGolfDay =
+  document.getElementById("results-golf-day").value;
 
+if (selectedGolfDay) {
+  loadScorePlayers();
+}
   } catch (error) {
     alert("Unable to add member.");
   }
