@@ -592,12 +592,30 @@ async function loadExistingCourses() {
     data.courses.forEach(course => {
       const row = document.createElement("div");
 
-      row.innerHTML = `
-        <p>
-          <strong>${course.name}</strong>
-          ${course.location ? " — " + course.location : ""}
-        </p>
-      `;
+     row.innerHTML = `
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+    <span>
+      <strong>${course.name}</strong>
+      ${course.location ? " — " + course.location : ""}
+    </span>
+
+    <button
+      type="button"
+      onclick="editCourse(${course.id})"
+      style="padding: 3px 8px; font-size: 12px; width: auto;"
+    >
+      Edit
+    </button>
+
+    <button
+      type="button"
+      onclick="deleteCourse(${course.id})"
+      style="padding: 3px 8px; font-size: 12px; width: auto;"
+    >
+      Delete
+    </button>
+  </div>
+`;
 
       container.appendChild(row);
     });
@@ -605,6 +623,57 @@ async function loadExistingCourses() {
   } catch (error) {
     document.getElementById("existing-courses").textContent =
       "Unable to load golf clubs.";
+  }
+}
+
+async function editCourse(courseId) {
+
+  const name = prompt("Enter the golf club name:");
+
+  if (name === null) {
+    return;
+  }
+
+  if (!name.trim()) {
+    alert("Golf club name cannot be blank.");
+    return;
+  }
+
+  const location = prompt("Enter the location:");
+
+  if (location === null) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/update-course", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        course_id: courseId,
+        name: name.trim(),
+        location: location.trim()
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to update golf club.");
+      return;
+    }
+
+    alert("Golf club updated successfully.");
+
+    loadExistingCourses();
+    loadCourses();
+    loadGolfDays();
+    loadExistingGolfDays();
+
+  } catch (error) {
+    alert("Unable to update golf club.");
   }
 }
   
@@ -649,6 +718,44 @@ async function loadExistingCourses() {
 
   } catch (error) {
     alert("Unable to add golf club.");
+  }
+} 
+
+ async function deleteCourse(courseId) {
+
+  const confirmed = confirm(
+    "Delete this golf club?\n\nA club cannot be deleted if it has golf days recorded against it."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/delete-course", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        course_id: courseId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to delete golf club.");
+      return;
+    }
+
+    alert("Golf club deleted successfully.");
+
+    loadExistingCourses();
+    loadCourses();
+
+  } catch (error) {
+    alert("Unable to delete golf club.");
   }
 } 
 
