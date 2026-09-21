@@ -605,6 +605,74 @@ async function loadScorePlayers() {
   }
 }
 
+async function saveResults() {
+  const golfDayId =
+    document.getElementById("results-golf-day").value;
+
+  const message =
+    document.getElementById("results-message");
+
+  if (!golfDayId) {
+    alert("Please select a golf day.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/score-players");
+    const data = await response.json();
+
+    const results = [];
+
+    for (const player of data.players) {
+      const handicap =
+        document.getElementById(`handicap-${player.id}`).value;
+
+      const score =
+        document.getElementById(`score-${player.id}`).value;
+
+      if (score === "") {
+        continue;
+      }
+
+      results.push({
+        player_id: player.id,
+        handicap: Number(handicap),
+        stableford_score: Number(score)
+      });
+    }
+
+    if (results.length === 0) {
+      alert("Please enter at least one Stableford score.");
+      return;
+    }
+
+    const saveResponse = await fetch("/api/admin/save-results", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        golf_day_id: Number(golfDayId),
+        results: results
+      })
+    });
+
+    const saveData = await saveResponse.json();
+
+    if (!saveResponse.ok) {
+      alert(saveData.error || "Unable to save results.");
+      return;
+    }
+
+    alert("Results saved successfully.");
+
+    loadLeague();
+
+  } catch (error) {
+    message.textContent = "Unable to save results.";
+  }
+}
+  
 async function createGolfDay() {
   const courseId =
     document.getElementById("golf-day-course").value;
