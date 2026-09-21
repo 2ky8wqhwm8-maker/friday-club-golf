@@ -294,7 +294,7 @@ async function checkMembership() {
 
     const data = await response.json();
 
-    if (data.email.toLowerCase() === "humble@sky.com") {
+ if (data.isAdmin) {
   document.getElementById(
     "admin-card"
   ).classList.remove("hidden");
