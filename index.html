@@ -226,23 +226,6 @@
 
 </div>
 
- <hr>
-
-<h3>Enter Results</h3>
-
-<div id="results-entry">
-
-  <label for="results-golf-day">Golf Day</label>
-  <select id="results-golf-day" onchange="loadScorePlayers()">
-    <option value="">Loading golf days...</option>
-  </select>
-
-  <div id="results-players"></div>
-
-  <div id="results-message"></div>
-
-</div> 
-  
 </div>
   
   <div id="registration-card" class="card hidden">
@@ -665,7 +648,8 @@ async function saveResults() {
     }
 
     alert("Results saved successfully.");
-
+document.getElementById("results-golf-day").value = "";
+document.getElementById("results-players").innerHTML = "";
     loadLeague();
 
   } catch (error) {
