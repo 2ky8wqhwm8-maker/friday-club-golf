@@ -45,6 +45,80 @@ export default {
     );
   }
 }
+    if (url.pathname === "/api/register" && request.method === "POST") {
+  try {
+    const body = await request.json();
+
+    const firstName = String(body.first_name || "").trim();
+    const lastName = String(body.last_name || "").trim();
+    const phone = String(body.phone || "").trim();
+    const handicap = Number(body.handicap);
+
+    if (!email) {
+      return Response.json(
+        { error: "Your authenticated email address could not be identified." },
+        { status: 401 }
+      );
+    }
+
+    if (!firstName || !lastName) {
+      return Response.json(
+        { error: "First name and last name are required." },
+        { status: 400 }
+      );
+    }
+
+    if (!Number.isFinite(handicap)) {
+      return Response.json(
+        { error: "A valid handicap is required." },
+        { status: 400 }
+      );
+    }
+
+    const existing = await env.DB.prepare(`
+      SELECT id, membership_status
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+      LIMIT 1
+    `).bind(email).first();
+
+    if (existing) {
+      return Response.json({
+        registered: true,
+        membership_status: existing.membership_status
+      });
+    }
+
+    const result = await env.DB.prepare(`
+      INSERT INTO players
+        (first_name, last_name, email, phone, handicap,
+         membership_status, role)
+      VALUES (?, ?, ?, ?, ?, 'pending', 'member')
+    `).bind(
+      firstName,
+      lastName,
+      email,
+      phone,
+      handicap
+    ).run();
+
+    return Response.json({
+      registered: true,
+      membership_status: "pending",
+      player_id: result.meta.last_row_id
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to register",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
     if (url.pathname === "/api/league") {
       try {
         const season = await env.DB.prepare(`
