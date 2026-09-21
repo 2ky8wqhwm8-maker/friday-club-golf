@@ -532,6 +532,10 @@ async function loadExistingMembers() {
           Handicap: ${member.handicap ?? "Not supplied"}<br>
           Role: ${member.role}<br>
           Status: ${member.active ? "Active" : "Inactive"}
+          <br>
+          <button onclick="editMember(${member.id})">
+              Edit
+          </button>
         </p>
         <hr>
       `;
@@ -548,6 +552,81 @@ async function loadExistingMembers() {
   }
 }  
 
+async function editMember(playerId) {
+
+  const response =
+    await fetch("/api/admin/members");
+
+  const data = await response.json();
+
+  const member =
+    data.members.find(
+      m => m.id === playerId
+    );
+
+  if (!member) {
+    alert("Member not found.");
+    return;
+  }
+
+  const firstName =
+    prompt("First name:", member.first_name);
+
+  if (firstName === null) return;
+
+  const lastName =
+    prompt("Last name:", member.last_name);
+
+  if (lastName === null) return;
+
+  const phone =
+    prompt("Phone number:", member.phone || "");
+
+  if (phone === null) return;
+
+  const handicap =
+    prompt("Handicap:", member.handicap);
+
+  if (handicap === null) return;
+
+  const active =
+    confirm(
+      "Click OK for Active or Cancel for Inactive."
+    );
+
+  const updateResponse =
+    await fetch(
+      "/api/admin/update-member",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          player_id: playerId,
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          handicap: handicap,
+          active: active
+        })
+      }
+    );
+
+  const result =
+    await updateResponse.json();
+
+  if (!updateResponse.ok) {
+    alert(
+      result.error || "Unable to update member."
+    );
+    return;
+  }
+
+  await loadExistingMembers();
+  await loadLeague();
+}
+  
 async function approveMember(playerId) {
 
   try {
