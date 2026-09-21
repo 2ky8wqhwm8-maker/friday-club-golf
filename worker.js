@@ -135,6 +135,47 @@ return Response.json({
     );
   }
 }
+
+if (url.pathname === "/api/admin/reject" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const playerId = Number(body.player_id);
+
+    if (!Number.isInteger(playerId)) {
+      return Response.json(
+        { error: "Invalid player ID." },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      DELETE FROM players
+      WHERE id = ?
+        AND membership_status = 'pending'
+    `).bind(playerId).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to reject member",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
     if (url.pathname === "/api/register" && request.method === "POST") {
   try {
