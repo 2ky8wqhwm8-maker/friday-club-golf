@@ -241,6 +241,15 @@
   <div id="golf-day-message"></div>
 
 </div>
+
+  <hr>
+
+<h3>Existing Golf Days</h3>
+
+<div id="existing-golf-days">
+  Loading golf days...
+</div>
+  
   <hr>
 
 <h3>Enter Results</h3>
@@ -391,6 +400,7 @@ async function checkMembership() {
    loadExistingMembers();
    loadCourses();
    loadGolfDays();
+   loadExistingGolfDays();
     
 }
 
@@ -571,6 +581,41 @@ async function loadGolfDays() {
   }
 }  
 
+async function loadExistingGolfDays() {
+  try {
+    const response = await fetch("/api/admin/golf-days");
+    const data = await response.json();
+
+    const container =
+      document.getElementById("existing-golf-days");
+
+    if (data.golf_days.length === 0) {
+      container.textContent = "No golf days have been created.";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.golf_days.forEach(golfDay => {
+      const row = document.createElement("div");
+
+      row.innerHTML = `
+        <p>
+          <strong>${golfDay.play_date}</strong><br>
+          ${golfDay.course_name}
+          ${golfDay.notes ? "<br>" + golfDay.notes : ""}
+        </p>
+      `;
+
+      container.appendChild(row);
+    });
+
+  } catch (error) {
+    document.getElementById("existing-golf-days").textContent =
+      "Unable to load golf days.";
+  }
+}
+  
 async function loadScorePlayers() {
   const golfDayId =
     document.getElementById("results-golf-day").value;
