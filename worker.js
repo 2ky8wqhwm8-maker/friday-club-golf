@@ -212,6 +212,20 @@ return Response.json({
     
     if (url.pathname === "/api/league") {
       try {
+        const member = await env.DB.prepare(`
+  SELECT id
+  FROM players
+  WHERE LOWER(email) = LOWER(?)
+    AND membership_status = 'approved'
+  LIMIT 1
+`).bind(email).first();
+
+if (!member) {
+  return Response.json(
+    { error: "Approved membership required." },
+    { status: 403 }
+  );
+}
         const season = await env.DB.prepare(`
           SELECT id, name, minimum_rounds
           FROM seasons
