@@ -307,6 +307,7 @@ async function checkMembership() {
   ).classList.remove("hidden");
 
   loadPendingMembers();
+   loadExistingMembers();
 }
 
     if (!data.registered) {
@@ -487,6 +488,62 @@ async function loadPendingMembers() {
 
     container.innerHTML =
       "<p>Unable to load pending registrations.</p>";
+
+  }
+}  
+
+async function loadExistingMembers() {
+
+  const container =
+    document.getElementById("existing-members");
+
+  try {
+
+    const response =
+      await fetch("/api/admin/members");
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to load members"
+      );
+    }
+
+    if (data.members.length === 0) {
+      container.innerHTML =
+        "<p>There are no approved members.</p>";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.members.forEach(member => {
+
+      const item = document.createElement("div");
+
+      item.innerHTML = `
+        <p>
+          <strong>
+            ${member.first_name} ${member.last_name}
+          </strong><br>
+          Email: ${member.email || "Not supplied"}<br>
+          Phone: ${member.phone || "Not supplied"}<br>
+          Handicap: ${member.handicap ?? "Not supplied"}<br>
+          Role: ${member.role}<br>
+          Status: ${member.active ? "Active" : "Inactive"}
+        </p>
+        <hr>
+      `;
+
+      container.appendChild(item);
+
+    });
+
+  } catch (error) {
+
+    container.innerHTML =
+      "<p>Unable to load existing members.</p>";
 
   }
 }  
