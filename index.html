@@ -1923,7 +1923,9 @@ async function showPlayerResults(playerId) {
     `;
     document.getElementById("golf-day-results-view").style.display = "none";
     document.getElementById("player-results-view").style.display = "block";
-    showMainSection("results");
+    document.getElementById("main-home").style.display = "none";
+    document.getElementById("admin-card").style.display = "none";
+    document.getElementById("main-results").style.display = "block";
 
   } catch (error) {
     alert("Unable to load player results.");
