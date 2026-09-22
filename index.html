@@ -1861,23 +1861,65 @@ async function loadLeague() {
 
 }
 
-function showPlayerResults(playerId) {
+async function showPlayerResults(playerId) {
 
-  const player =
-    leagueData.players.find(
-      player => player.id === playerId
+  try {
+    const response = await fetch(
+      `/api/player-results?player_id=${playerId}`
     );
 
-  if (!player) {
-    alert("Unable to find this golfer.");
-    return;
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to load player results.");
+      return;
+    }
+
+    const resultsSection =
+      document.getElementById("main-results");
+
+    resultsSection.innerHTML = `
+      <h2>
+        Results — ${data.player.first_name} ${data.player.last_name}
+      </h2>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Golf Day</th>
+              <th class="number">H'cap</th>
+              <th class="number">Stableford</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${data.results.map(result => `
+              <tr>
+                <td>
+                  ${formatUKDate(result.play_date)}
+                  — ${result.course_name}
+                </td>
+                <td class="number">
+                  ${result.handicap ?? "—"}
+                </td>
+                <td class="number">
+                  ${result.stableford_score}
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    showMainSection("results");
+
+  } catch (error) {
+    alert("Unable to load player results.");
   }
-
-  alert(
-    `Results for ${player.first_name} ${player.last_name}`
-  );
 }
-
+  
 checkMembership();
 loadLeague();
 
