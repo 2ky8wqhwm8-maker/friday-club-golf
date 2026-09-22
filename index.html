@@ -429,7 +429,7 @@
   <h2>Golf Day Results</h2>
   <label for="view-results-golf-day">Golf Day</label>
 
-<select id="view-results-golf-day">
+<select id="view-results-golf-day" onchange="loadGolfDayResults()">
   <option value="">Loading golf days...</option>
 </select>
 
@@ -879,6 +879,83 @@ option.textContent =
   }
 } 
 
+async function loadGolfDayResults() {
+
+  const golfDayId =
+    document.getElementById("view-results-golf-day").value;
+
+  const container =
+    document.getElementById("golf-day-results");
+
+  if (!golfDayId) {
+    container.textContent =
+      "Select a golf day to view the results.";
+    return;
+  }
+
+  container.textContent = "Loading results...";
+
+  try {
+    const response = await fetch(
+      `/api/golf-day-results?golf_day_id=${golfDayId}`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      container.textContent =
+        data.error || "Unable to load results.";
+      return;
+    }
+
+    if (!data.results || data.results.length === 0) {
+      container.textContent =
+        "No results have been entered for this golf day.";
+      return;
+    }
+
+    let html = `
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th class="number">H'cap</th>
+              <th class="number">Stableford</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    data.results.forEach(result => {
+      html += `
+        <tr>
+          <td>
+            ${result.first_name} ${result.last_name}
+          </td>
+          <td class="number">
+            ${result.handicap ?? "—"}
+          </td>
+          <td class="number">
+            ${result.stableford_score}
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  } catch (error) {
+    container.textContent = "Unable to load results.";
+  }
+}
+  
 async function loadExistingGolfDays() {
   try {
     const response = await fetch("/api/admin/golf-days");
