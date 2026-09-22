@@ -566,6 +566,68 @@ if (url.pathname === "/api/golf-day-results") {
     );
   }
 }
+
+if (url.pathname === "/api/player-results") {
+
+  try {
+    const playerId =
+      Number(url.searchParams.get("player_id"));
+
+    if (!Number.isInteger(playerId) || playerId <= 0) {
+      return Response.json(
+        { error: "Invalid player." },
+        { status: 400 }
+      );
+    }
+
+    const player = await env.DB.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name
+      FROM players
+      WHERE id = ?
+        AND membership_status = 'approved'
+      LIMIT 1
+    `).bind(playerId).first();
+
+    if (!player) {
+      return Response.json(
+        { error: "Player not found." },
+        { status: 404 }
+      );
+    }
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        gd.play_date,
+        c.name AS course_name,
+        r.handicap,
+        r.stableford_score
+      FROM results r
+      JOIN golf_days gd
+        ON gd.id = r.golf_day_id
+      JOIN courses c
+        ON c.id = gd.course_id
+      WHERE r.player_id = ?
+      ORDER BY gd.play_date DESC
+    `).bind(playerId).all();
+
+    return Response.json({
+      player: player,
+      results: results
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to load player results",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
 if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") {
 
