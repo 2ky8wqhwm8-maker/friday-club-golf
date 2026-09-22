@@ -425,7 +425,9 @@
     </div>
 
   </div>
-<div id="main-results" style="display: none;">
+    
+  <div id="main-results" style="display: none;">
+  <div id="golf-day-results-view">
   <h2>Golf Day Results</h2>
   <label for="view-results-golf-day">Golf Day</label>
 
@@ -437,6 +439,9 @@
   Select a golf day to view the results.
 </div>
 </div>
+</div>
+<div id="player-results-view" style="display: none;">
+</div>    
 </main>
 
 <footer>
@@ -1305,6 +1310,10 @@ function showMainSection(section) {
 
   if (section === "results") {
     document.getElementById("main-results").style.display = "block";
+
+    document.getElementById("golf-day-results-view").style.display = "block";
+    document.getElementById("player-results-view").style.display = "none";
+
     loadResultsGolfDays();
   }
 
@@ -1876,7 +1885,7 @@ async function showPlayerResults(playerId) {
     }
 
     const resultsSection =
-      document.getElementById("main-results");
+      document.getElementById("player-results-view");
 
     resultsSection.innerHTML = `
       <h2>
@@ -1912,7 +1921,8 @@ async function showPlayerResults(playerId) {
         </table>
       </div>
     `;
-
+    document.getElementById("golf-day-results-view").style.display = "none";
+    document.getElementById("player-results-view").style.display = "block";
     showMainSection("results");
 
   } catch (error) {
