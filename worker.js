@@ -445,6 +445,50 @@ if (url.pathname === "/api/golf-days") {
     );
   }
 }
+
+if (url.pathname === "/api/golf-day-results") {
+
+  try {
+    const golfDayId =
+      Number(url.searchParams.get("golf_day_id"));
+
+    if (!Number.isInteger(golfDayId) || golfDayId <= 0) {
+      return Response.json(
+        { error: "Invalid golf day." },
+        { status: 400 }
+      );
+    }
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        p.first_name,
+        p.last_name,
+        r.handicap,
+        r.stableford_score
+      FROM results r
+      JOIN players p
+        ON p.id = r.player_id
+      WHERE r.golf_day_id = ?
+      ORDER BY
+        r.stableford_score DESC,
+        p.last_name,
+        p.first_name
+    `).bind(golfDayId).all();
+
+    return Response.json({
+      results: results
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to load golf day results",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
 if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") {
 
