@@ -292,6 +292,83 @@ if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
   }
 }
 
+if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const playerId = Number(body.player_id);
+    const newRole = String(body.role || "").trim();
+
+    if (
+      !Number.isInteger(playerId) ||
+      !["member", "admin"].includes(newRole)
+    ) {
+      return Response.json(
+        { error: "Invalid member or role." },
+        { status: 400 }
+      );
+    }
+
+    const player = await env.DB.prepare(`
+      SELECT id, role
+      FROM players
+      WHERE id = ?
+        AND membership_status = 'approved'
+      LIMIT 1
+    `).bind(playerId).first();
+
+    if (!player) {
+      return Response.json(
+        { error: "Member not found." },
+        { status: 404 }
+      );
+    }
+
+    if (player.role === "admin" && newRole === "member") {
+
+      const adminCount = await env.DB.prepare(`
+        SELECT COUNT(*) AS count
+        FROM players
+        WHERE role = 'admin'
+          AND membership_status = 'approved'
+          AND active = 1
+      `).first();
+
+      if (Number(adminCount.count) <= 1) {
+        return Response.json(
+          { error: "You cannot remove the last administrator." },
+          { status: 400 }
+        );
+      }
+    }
+
+    await env.DB.prepare(`
+      UPDATE players
+      SET role = ?
+      WHERE id = ?
+    `).bind(newRole, playerId).run();
+
+    return Response.json({ success: true });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to update administrator status",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
 if (url.pathname === "/api/admin/create-golf-day" && request.method === "POST") {
 
   if (!isAdmin) {
