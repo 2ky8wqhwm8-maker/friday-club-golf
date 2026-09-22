@@ -1723,7 +1723,8 @@ async function rejectMember(playerId) {
 
   }
 }  
-  
+
+let leagueData = null;
 async function loadLeague() {
 
   try {
@@ -1739,7 +1740,7 @@ async function loadLeague() {
 
     const data =
       await response.json();
-
+    leagueData = data;
     document.getElementById(
       "season-title"
     ).textContent =
@@ -1793,10 +1794,24 @@ async function loadLeague() {
           ${position}
         </td>
 
-        <td>
-          ${player.first_name}
-          ${player.last_name}
-        </td>
+<td>
+  <button
+    type="button"
+    onclick="showPlayerResults(${player.id})"
+    style="
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      width: auto;
+      font: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    "
+  >
+    ${player.first_name} ${player.last_name}
+  </button>
+</td>
 
         <td class="number">
           ${player.handicap ?? "—"}
@@ -1856,6 +1871,22 @@ async function loadLeague() {
 
 }
 
+function showPlayerResults(playerId) {
+
+  const player =
+    leagueData.players.find(
+      player => player.id === playerId
+    );
+
+  if (!player) {
+    alert("Unable to find this golfer.");
+    return;
+  }
+
+  alert(
+    `Results for ${player.first_name} ${player.last_name}`
+  );
+}
 
 checkMembership();
 loadLeague();
