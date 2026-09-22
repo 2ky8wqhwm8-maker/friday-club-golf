@@ -427,7 +427,15 @@
   </div>
 <div id="main-results" style="display: none;">
   <h2>Golf Day Results</h2>
-  <p>Individual golf day results will appear here.</p>
+  <label for="view-results-golf-day">Golf Day</label>
+
+<select id="view-results-golf-day">
+  <option value="">Loading golf days...</option>
+</select>
+
+<div id="golf-day-results">
+  Select a golf day to view the results.
+</div>
 </div>
 </main>
 
@@ -841,6 +849,36 @@ option.textContent =
   }
 }  
 
+ async function loadResultsGolfDays() {
+  try {
+    const response = await fetch("/api/golf-days");
+    const data = await response.json();
+
+    const select =
+      document.getElementById("view-results-golf-day");
+
+    select.innerHTML =
+      '<option value="">Select a golf day...</option>';
+
+    data.golf_days.forEach(golfDay => {
+      const option = document.createElement("option");
+
+      option.value = golfDay.id;
+
+      option.textContent =
+        formatUKDate(golfDay.play_date) +
+        " — " +
+        golfDay.course_name;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    document.getElementById("view-results-golf-day").innerHTML =
+      '<option value="">Unable to load golf days</option>';
+  }
+} 
+
 async function loadExistingGolfDays() {
   try {
     const response = await fetch("/api/admin/golf-days");
@@ -1190,6 +1228,7 @@ function showMainSection(section) {
 
   if (section === "results") {
     document.getElementById("main-results").style.display = "block";
+    loadResultsGolfDays();
   }
 
   if (section === "admin") {
