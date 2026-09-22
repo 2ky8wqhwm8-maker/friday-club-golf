@@ -160,12 +160,26 @@
 
 <header>
   <h1>Friday Club Golf Society</h1>
+  <div id="main-menu">
+  <button type="button" onclick="showMainSection('home')">Home</button>
+  <button type="button" onclick="showMainSection('results')">Results</button>
+  <button
+  type="button"
+  id="main-admin-button"
+  style="display: none;"
+  onclick="showMainSection('admin')"
+>
+  Administration
+</button>
+</div>
+
+<hr>
   <p id="season-title">League Table</p>
 </header>
 
 <main>
 
-<div id="admin-card" class="card hidden">
+<div id="admin-card" class="card" style="display: none;">
   <h2>Administrator</h2>
   <div id="admin-menu">
 <button type="button" onclick="showAdminSection('members')">Members</button>
@@ -380,8 +394,8 @@
       Loading league...
     </div>
 
-    <div class="table-container">
-
+<div id="main-home">
+  <div class="table-container">
       <table>
 
         <thead>
@@ -411,7 +425,10 @@
     </div>
 
   </div>
-
+<div id="main-results" style="display: none;">
+  <h2>Golf Day Results</h2>
+  <p>Individual golf day results will appear here.</p>
+</div>
 </main>
 
 <footer>
@@ -451,10 +468,8 @@ async function checkMembership() {
     const data = await response.json();
 
  if (data.isAdmin) {
-  document.getElementById(
-    "admin-card"
-  ).classList.remove("hidden");
-
+   document.getElementById("main-admin-button").style.display = "inline-block";
+  
   loadPendingMembers();
    loadExistingMembers();
    loadCourses();
@@ -1163,6 +1178,25 @@ async function createGolfDay() {
   }
 }  
 
+function showMainSection(section) {
+
+  document.getElementById("main-home").style.display = "none";
+  document.getElementById("main-results").style.display = "none";
+  document.getElementById("admin-card").style.display = "none";
+
+  if (section === "home") {
+    document.getElementById("main-home").style.display = "block";
+  }
+
+  if (section === "results") {
+    document.getElementById("main-results").style.display = "block";
+  }
+
+  if (section === "admin") {
+    document.getElementById("admin-card").style.display = "block";
+  }
+}
+  
 function showAdminSection(section) {
 
   document.getElementById("admin-members").style.display = "none";
