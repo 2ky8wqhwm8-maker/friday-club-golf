@@ -1415,22 +1415,34 @@ async function loadExistingMembers() {
       const item = document.createElement("div");
 
       item.innerHTML = `
-        <p>
-          <strong>
-            ${member.first_name} ${member.last_name}
-          </strong><br>
-          Email: ${member.email || "Not supplied"}<br>
-          Phone: ${member.phone || "Not supplied"}<br>
-          Handicap: ${member.handicap ?? "Not supplied"}<br>
-          Role: ${member.role}<br>
-          Status: ${member.active ? "Active" : "Inactive"}
-          <br>
-          <button onclick="editMember(${member.id})">
-              Edit
-          </button>
-        </p>
-        <hr>
-      `;
+  <p>
+    <strong>
+      ${member.first_name} ${member.last_name}
+    </strong><br>
+    Email: ${member.email || "Not supplied"}<br>
+    Phone: ${member.phone || "Not supplied"}<br>
+    Handicap: ${member.handicap ?? "Not supplied"}<br>
+    Role: ${member.role}<br>
+
+    <button
+      type="button"
+      onclick="changeMemberRole(${member.id}, '${member.role}')"
+    >
+      ${member.role === "admin"
+        ? "Remove Administrator"
+        : "Make Administrator"}
+    </button>
+
+    <br>
+    Status: ${member.active ? "Active" : "Inactive"}
+    <br>
+
+    <button onclick="editMember(${member.id})">
+      Edit
+    </button>
+  </p>
+  <hr>
+`;
 
       container.appendChild(item);
 
@@ -1444,6 +1456,55 @@ async function loadExistingMembers() {
   }
 }  
 
+async function changeMemberRole(memberId, currentRole) {
+
+  const newRole =
+    currentRole === "admin" ? "member" : "admin";
+
+  const message =
+    newRole === "admin"
+      ? "Make this member an administrator?"
+      : "Remove administrator access from this member?";
+
+  if (!confirm(message)) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "/api/admin/update-role",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          player_id: memberId,
+          role: newRole
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Unable to update administrator status.");
+      return;
+    }
+
+    alert(
+      newRole === "admin"
+        ? "Administrator access added."
+        : "Administrator access removed."
+    );
+
+    loadExistingMembers();
+
+  } catch (error) {
+    alert("Unable to update administrator status.");
+  }
+}
+  
 async function addMember() {
   const firstName =
     document.getElementById("new-member-first-name").value.trim();
