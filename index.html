@@ -1795,22 +1795,12 @@ async function loadLeague() {
         </td>
 
 <td>
-  <button
-    type="button"
-    onclick="showPlayerResults(${player.id})"
-    style="
-      background: none;
-      border: none;
-      padding: 0;
-      margin: 0;
-      width: auto;
-      font: inherit;
-      text-decoration: underline;
-      cursor: pointer;
-    "
+  <a
+    href="#"
+    onclick="showPlayerResults(${player.id}); return false;"
   >
     ${player.first_name} ${player.last_name}
-  </button>
+  </a>
 </td>
 
         <td class="number">
