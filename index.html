@@ -167,6 +167,15 @@
 
 <div id="admin-card" class="card hidden">
   <h2>Administrator</h2>
+  <div id="admin-menu">
+<button type="button" onclick="showAdminSection('members')">Members</button>
+<button type="button" onclick="showAdminSection('courses')">Golf Clubs</button>
+<button type="button" onclick="showAdminSection('golf-days')">Golf Days</button>
+<button type="button" onclick="showAdminSection('results')">Enter Results</button>
+</div>
+
+<hr>
+  <div id="admin-members">
   <h3>Pending member registrations</h3>
 
   <div id="pending-members">
@@ -214,7 +223,10 @@
 </div> 
   
 <hr>
+</div>
 
+<div id="admin-courses" style="display: none;">
+    
 <h3>Add Golf Club</h3>
 
 <div id="add-course-form">
@@ -236,6 +248,10 @@
 </div>
   
 <hr>
+
+</div>
+
+<div id="admin-golf-days" style="display: none;">
   
 <h3>Create Golf Day</h3>
 
@@ -274,6 +290,10 @@
   
   <hr>
 
+</div>
+
+<div id="admin-results" style="display: none;">
+  
 <h3>Enter Results</h3>
 
 <div id="results-entry">
@@ -290,7 +310,7 @@
   <div id="results-message"></div>
 
 </div>
-
+</div>
 </div>
   
   <div id="registration-card" class="card hidden">
@@ -1142,6 +1162,16 @@ async function createGolfDay() {
     message.textContent = "Unable to create golf day.";
   }
 }  
+
+function showAdminSection(section) {
+
+  document.getElementById("admin-members").style.display = "none";
+  document.getElementById("admin-courses").style.display = "none";
+  document.getElementById("admin-golf-days").style.display = "none";
+  document.getElementById("admin-results").style.display = "none";
+
+  document.getElementById("admin-" + section).style.display = "block";
+}
   
 async function loadPendingMembers() {
 
