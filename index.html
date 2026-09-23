@@ -1260,6 +1260,7 @@ async function createGolfDay() {
 
   const message =
     document.getElementById("golf-day-message");
+    message.textContent = "";
 
   if (!courseId || !playDate) {
     message.textContent =
@@ -1289,7 +1290,7 @@ async function createGolfDay() {
     }
 
     alert("Golf day created successfully.");
-
+    message.textContent = "Golf day created successfully.";
     document.getElementById("golf-day-date").value = "";
     document.getElementById("golf-day-notes").value = "";
 
