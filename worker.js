@@ -56,6 +56,11 @@ return Response.json({
     );
   }
 }
+
+// ========================================
+// MEMBERS - REGISTRATION & ADMINISTRATION
+// ========================================
+    
   if (url.pathname === "/api/admin/pending") {
 
   if (!isAdmin) {
@@ -368,6 +373,10 @@ if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
     );
   }
 }
+
+// ========================================
+// GOLF DAYS - ADMINISTRATION
+// ========================================
     
 if (url.pathname === "/api/admin/create-golf-day" && request.method === "POST") {
 
@@ -488,7 +497,7 @@ if (url.pathname === "/api/admin/golf-days") {
     );
   }
 }
-
+  
 if (url.pathname === "/api/golf-days") {
 
   try {
@@ -766,6 +775,10 @@ if (url.pathname === "/api/admin/update-golf-day" && request.method === "POST") 
     );
   }
 }
+
+// ========================================
+// RESULTS - ADMINISTRATION
+// ========================================
     
 if (url.pathname === "/api/admin/score-players") {
 
@@ -913,6 +926,10 @@ if (existingResult) {
     );
   }
 }
+
+// ========================================
+// GOLF CLUBS - ADMINISTRATION (ADD, UPDATE, DELETE
+// ========================================
     
 if (url.pathname === "/api/admin/courses") {
 
@@ -1125,6 +1142,10 @@ if (url.pathname === "/api/admin/delete-course" && request.method === "POST") {
     );
   }
 }    
+
+// ========================================
+// MEMBER MANAGEMENT - APPROVE; REJECT, REGISTER
+// ========================================
     
     if (url.pathname === "/api/admin/approve" && request.method === "POST") {
 
@@ -1282,6 +1303,119 @@ if (url.pathname === "/api/admin/reject" && request.method === "POST") {
     );
   }
 }
+
+// ========================================
+// NEXT GOLF DAY NOTICE
+// ========================================
+ if (
+  url.pathname === "/api/admin/publish-golf-day-notice" &&
+  request.method === "POST"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const body = await request.json();
+
+    const golfDayId = Number(body.golf_day_id);
+    const firstTeeTime =
+      String(body.first_tee_time || "").trim();
+    const message =
+      String(body.message || "").trim();
+
+    if (
+      !Number.isInteger(golfDayId) ||
+      golfDayId <= 0 ||
+      !firstTeeTime
+    ) {
+      return Response.json(
+        { error: "Golf day and first tee time are required." },
+        { status: 400 }
+      );
+    }
+
+    const golfDay = await env.DB.prepare(`
+      SELECT id
+      FROM golf_days
+      WHERE id = ?
+      LIMIT 1
+    `).bind(golfDayId).first();
+
+    if (!golfDay) {
+      return Response.json(
+        { error: "Golf day not found." },
+        { status: 404 }
+      );
+    }
+
+    await env.DB.prepare(`
+      DELETE FROM golf_day_notice
+    `).run();
+
+    await env.DB.prepare(`
+      INSERT INTO golf_day_notice
+        (golf_day_id, first_tee_time, message, updated_at)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    `).bind(
+      golfDayId,
+      firstTeeTime,
+      message
+    ).run();
+
+    return Response.json({ success: true });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to publish golf day notice." },
+      { status: 500 }
+    );
+
+  }
+}   
+
+if (url.pathname === "/api/golf-day-notice") {
+
+  try {
+
+    const notice = await env.DB.prepare(`
+      SELECT
+        n.golf_day_id,
+        n.first_tee_time,
+        n.message,
+        n.updated_at,
+        gd.play_date,
+        c.name AS course_name,
+        c.location AS course_location
+      FROM golf_day_notice n
+      JOIN golf_days gd ON gd.id = n.golf_day_id
+      JOIN courses c ON c.id = gd.course_id
+      LIMIT 1
+    `).first();
+
+    return Response.json({
+      notice: notice || null
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to load golf day notice." },
+      { status: 500 }
+    );
+
+  }
+}
+    
+// ========================================
+// MEMBER-FACING LEAGUE & RESULTS
+// ========================================
     
     if (url.pathname === "/api/league") {
       try {
