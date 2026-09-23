@@ -1293,9 +1293,10 @@ async function createGolfDay() {
     document.getElementById("golf-day-date").value = "";
     document.getElementById("golf-day-notes").value = "";
 
-  } catch (error) {
-    message.textContent = "Unable to create golf day.";
-  }
+} catch (error) {
+  message.textContent =
+    "Unable to create golf day: " + error.message;
+}
 }  
 
 function showMainSection(section) {
