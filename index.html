@@ -1124,8 +1124,13 @@ async function deleteGolfDay(golfDayId) {
     alert("Unable to delete golf day.");
   }
 }  
+
+// ========================================
+// ENTER RESULTS - LOAD PLAYERS AND SCORES
+// ========================================
   
 async function loadScorePlayers() {
+
   const golfDayId =
     document.getElementById("results-golf-day").value;
 
@@ -1137,45 +1142,85 @@ async function loadScorePlayers() {
     return;
   }
 
+  container.textContent = "Loading players...";
+
   try {
+
     const response = await fetch(
-  `/api/admin/score-players?golf_day_id=${golfDayId}`
-);
+      `/api/admin/score-players?golf_day_id=${golfDayId}`
+    );
+
     const data = await response.json();
 
-    container.innerHTML = "";
+    if (!response.ok) {
+      container.textContent =
+        data.error || "Unable to load players.";
+      return;
+    }
+
+    if (!data.players || data.players.length === 0) {
+      container.textContent =
+        "No active members found.";
+      return;
+    }
+
+    let html = `
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th class="number">Handicap</th>
+              <th class="number">Stableford</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
 
     data.players.forEach(player => {
-      const row = document.createElement("div");
 
-      row.innerHTML = `
-        <p>
-          <strong>${player.first_name} ${player.last_name}</strong>
-        </p>
+      html += `
+        <tr>
+          <td>
+            ${player.first_name} ${player.last_name}
+          </td>
 
-        <label>Handicap</label>
-        <input
-          type="number"
-          step="0.1"
-          value="${player.handicap}"
-          id="handicap-${player.id}"
-        >
+          <td class="number">
+            <input
+              type="number"
+              step="0.1"
+              value="${player.handicap ?? ""}"
+              id="handicap-${player.id}"
+              style="width: 70px;"
+            >
+          </td>
 
-        <label>Stableford Score</label>
-<input
-  type="number"
-  min="0"
-  value="${player.stableford_score ?? ""}"
-  id="score-${player.id}"
->
+          <td class="number">
+            <input
+              type="number"
+              min="0"
+              value="${player.stableford_score ?? ""}"
+              id="score-${player.id}"
+              style="width: 70px;"
+            >
+          </td>
+        </tr>
       `;
-
-      container.appendChild(row);
     });
 
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
   } catch (error) {
+
     container.textContent =
-      "Unable to load players.";
+      "Unable to load players: " + error.message;
+
   }
 }
 
