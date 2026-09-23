@@ -639,6 +639,10 @@ async function loadCourses() {
   }
 }
 
+// ========================================
+// GOLF CLUBS - EXISTING CLUBS
+// ========================================
+  
 async function loadExistingCourses() {
   try {
     const response = await fetch("/api/admin/courses");
@@ -658,8 +662,15 @@ async function loadExistingCourses() {
       const row = document.createElement("div");
 
      row.innerHTML = `
- <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
-    <span style="display: inline-flex; align-items: center;">
+  <div style="
+    display: grid;
+    grid-template-columns: minmax(250px, 1fr) 60px 60px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  ">
+
+    <span>
       <strong>${course.name}</strong>
       ${course.location ? " — " + course.location : ""}
     </span>
@@ -667,7 +678,13 @@ async function loadExistingCourses() {
     <button
       type="button"
       onclick='editCourse(${course.id}, ${JSON.stringify(course.name)}, ${JSON.stringify(course.location || "")})'
-      style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
+      style="
+        padding: 3px 8px;
+        font-size: 12px;
+        width: 60px;
+        margin: 0;
+        line-height: 1.2;
+      "
     >
       Edit
     </button>
@@ -675,10 +692,17 @@ async function loadExistingCourses() {
     <button
       type="button"
       onclick="deleteCourse(${course.id})"
-      style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
+      style="
+        padding: 3px 8px;
+        font-size: 12px;
+        width: 60px;
+        margin: 0;
+        line-height: 1.2;
+      "
     >
       Delete
     </button>
+
   </div>
 `;
 
@@ -960,6 +984,10 @@ async function loadGolfDayResults() {
     container.textContent = "Unable to load results.";
   }
 }
+
+// ========================================
+// GOLF DAYS - EXISTING GOLF DAYS
+// ========================================
   
 async function loadExistingGolfDays() {
   try {
@@ -980,30 +1008,51 @@ async function loadExistingGolfDays() {
       const row = document.createElement("div");
 
 row.innerHTML = `
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <span style="display: inline-flex; align-items: center;">
+  <div style="
+    display: grid;
+    grid-template-columns: minmax(250px, 1fr) 60px 60px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  ">
+
+    <span>
       <strong>${formatUKDate(golfDay.play_date)}</strong>
       — ${golfDay.course_name}
     </span>
-<button
-  type="button"
-  onclick='editGolfDay(${golfDay.id}, ${JSON.stringify(golfDay.play_date)}, ${JSON.stringify(golfDay.course_name)}, ${JSON.stringify(golfDay.notes || "")})'
-  style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
->
-  Edit
-</button>
+
+    <button
+      type="button"
+      onclick='editGolfDay(${golfDay.id}, ${JSON.stringify(golfDay.play_date)}, ${JSON.stringify(golfDay.course_name)}, ${JSON.stringify(golfDay.notes || "")})'
+      style="
+        padding: 3px 8px;
+        font-size: 12px;
+        width: 60px;
+        margin: 0;
+        line-height: 1.2;
+      "
+    >
+      Edit
+    </button>
+
     <button
       type="button"
       onclick="deleteGolfDay(${golfDay.id})"
-      style="padding: 3px 8px; font-size: 12px; width: auto; margin: 0; line-height: 1.2;"
+      style="
+        padding: 3px 8px;
+        font-size: 12px;
+        width: 60px;
+        margin: 0;
+        line-height: 1.2;
+      "
     >
       Delete
     </button>
+
   </div>
 
   ${golfDay.notes ? `<div>${golfDay.notes}</div>` : ""}
 `;
-
       container.appendChild(row);
     });
 
