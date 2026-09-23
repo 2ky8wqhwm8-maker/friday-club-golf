@@ -434,6 +434,19 @@
     </div>
 
 <div id="main-home">
+<!-- ========================================
+     NEXT GOLF DAY - MEMBER NOTICE
+========================================= -->
+
+<div
+  id="next-golf-day-notice"
+  class="card"
+  style="display: none;"
+>
+  <h2>Next Golf Day</h2>
+  <div id="next-golf-day-notice-content"></div>
+</div>
+  
   <div class="table-container">
       <table>
 
@@ -1630,7 +1643,61 @@ async function createGolfDay() {
 }
 }  
 
+// ========================================
+// NEXT GOLF DAY - MEMBER NOTICE
+// ========================================  
+async function loadNextGolfDayNotice() {
 
+  const noticeBox =
+    document.getElementById("next-golf-day-notice");
+
+  const content =
+    document.getElementById("next-golf-day-notice-content");
+
+  try {
+
+    const response =
+      await fetch("/api/golf-day-notice");
+
+    const data = await response.json();
+
+    if (!response.ok || !data.notice) {
+      noticeBox.style.display = "none";
+      return;
+    }
+
+    const notice = data.notice;
+
+    content.innerHTML = `
+      <p>
+        <strong>${formatUKDate(notice.play_date)}</strong>
+      </p>
+
+      <p>
+        <strong>${notice.course_name}</strong>
+        ${notice.course_location
+          ? " — " + notice.course_location
+          : ""}
+      </p>
+
+      <p>
+        First tee: <strong>${notice.first_tee_time}</strong>
+      </p>
+
+      ${notice.message
+        ? `<p>${notice.message}</p>`
+        : ""}
+    `;
+
+    noticeBox.style.display = "block";
+
+  } catch (error) {
+
+    noticeBox.style.display = "none";
+
+  }
+}
+  
 // MAIN PAGE NAVIGATION  
 function showMainSection(section) {
 
@@ -1640,6 +1707,7 @@ function showMainSection(section) {
 
   if (section === "home") {
     document.getElementById("main-home").style.display = "block";
+    loadNextGolfDayNotice();
   }
 
   if (section === "results") {
