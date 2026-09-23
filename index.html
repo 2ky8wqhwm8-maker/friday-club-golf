@@ -1120,6 +1120,104 @@ async function publishGolfDayNotice() {
 
   }
 }
+
+// ========================================
+// NEXT GOLF DAY NOTICE
+// ========================================
+async function loadNoticeGolfDays() {
+
+  const select =
+    document.getElementById("notice-golf-day");
+
+  if (!select) return;
+
+  try {
+
+    const response = await fetch("/api/admin/golf-days");
+    const data = await response.json();
+
+    select.innerHTML =
+      `<option value="">Select golf day...</option>`;
+
+    data.golf_days.forEach(golfDay => {
+
+      const option = document.createElement("option");
+
+      option.value = golfDay.id;
+      option.textContent =
+        `${formatUKDate(golfDay.play_date)} — ${golfDay.course_name}`;
+
+      select.appendChild(option);
+
+    });
+
+  } catch (error) {
+
+    select.innerHTML =
+      `<option value="">Unable to load golf days</option>`;
+
+  }
+}
+
+async function publishGolfDayNotice() {
+
+  const golfDayId =
+    document.getElementById("notice-golf-day").value;
+
+  const firstTeeTime =
+    document.getElementById("notice-tee-time").value;
+
+  const message =
+    document.getElementById("notice-message").value.trim();
+
+  const result =
+    document.getElementById("notice-message-result");
+
+  result.textContent = "";
+
+  if (!golfDayId || !firstTeeTime) {
+    result.textContent =
+      "Please select a golf day and enter the first tee time.";
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/publish-golf-day-notice",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          golf_day_id: Number(golfDayId),
+          first_tee_time: firstTeeTime,
+          message: message
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      result.textContent =
+        data.error || "Unable to publish notice.";
+      return;
+    }
+
+    result.textContent =
+      "Next Golf Day notice published successfully.";
+
+    alert("Next Golf Day notice published successfully.");
+
+  } catch (error) {
+
+    result.textContent =
+      "Unable to publish notice: " + error.message;
+
+  }
+}
   
 // ========================================
 // GOLF DAYS - EXISTING GOLF DAYS
@@ -1597,38 +1695,6 @@ if (url.pathname === "/api/admin/publish-golf-day-notice" && request.method === 
   }
 }
 
-if (url.pathname === "/api/golf-day-notice") {
-
-  try {
-
-    const notice = await env.DB.prepare(`
-      SELECT
-        n.golf_day_id,
-        n.first_tee_time,
-        n.message,
-        n.updated_at,
-        gd.play_date,
-        c.name AS course_name,
-        c.location AS course_location
-      FROM golf_day_notice n
-      JOIN golf_days gd ON gd.id = n.golf_day_id
-      JOIN courses c ON c.id = gd.course_id
-      LIMIT 1
-    `).first();
-
-    return Response.json({
-      notice: notice || null
-    });
-
-  } catch (error) {
-
-    return Response.json(
-      { error: "Unable to load golf day notice." },
-      { status: 500 }
-    );
-
-  }
-}
   
 function showMainSection(section) {
 
