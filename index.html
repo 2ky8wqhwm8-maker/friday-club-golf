@@ -1293,6 +1293,8 @@ async function createGolfDay() {
     message.textContent = "Golf day created successfully.";
     document.getElementById("golf-day-date").value = "";
     document.getElementById("golf-day-notes").value = "";
+    loadExistingGolfDays();
+    loadGolfDays();
 
 } catch (error) {
   message.textContent =
