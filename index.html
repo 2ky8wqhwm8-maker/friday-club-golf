@@ -296,6 +296,45 @@
 
   <hr>
 
+<!-- ========================================
+     NEXT GOLF DAY NOTICE
+========================================= -->
+
+<h3>Next Golf Day Notice</h3>
+
+<p>
+  Publish a notice for members about the next golf day.
+</p>
+
+<label for="notice-golf-day">Golf Day</label>
+<select id="notice-golf-day">
+  <option value="">Select golf day...</option>
+</select>
+
+<label for="notice-tee-time">First Tee Time</label>
+<input
+  type="time"
+  id="notice-tee-time"
+>
+
+<label for="notice-message">Additional Message</label>
+<textarea
+  id="notice-message"
+  rows="3"
+  placeholder="Optional message for members"
+></textarea>
+
+<button
+  type="button"
+  onclick="publishGolfDayNotice()"
+>
+  Publish Notice
+</button>
+
+<div id="notice-message-result"></div>
+
+<hr>
+  
 <h3>Existing Golf Days</h3>
 
 <div id="existing-golf-days">
@@ -986,6 +1025,103 @@ async function loadGolfDayResults() {
 }
 
 // ========================================
+// NEXT GOLF DAY NOTICE
+// ========================================
+async function loadNoticeGolfDays() {
+
+  const select =
+    document.getElementById("notice-golf-day");
+
+  try {
+
+    const response = await fetch("/api/admin/golf-days");
+    const data = await response.json();
+
+    select.innerHTML =
+      `<option value="">Select golf day...</option>`;
+
+    data.golf_days.forEach(golfDay => {
+
+      const option = document.createElement("option");
+
+      option.value = golfDay.id;
+
+      option.textContent =
+        `${formatUKDate(golfDay.play_date)} — ${golfDay.course_name}`;
+
+      select.appendChild(option);
+
+    });
+
+  } catch (error) {
+
+    select.innerHTML =
+      `<option value="">Unable to load golf days</option>`;
+
+  }
+}
+
+async function publishGolfDayNotice() {
+
+  const golfDayId =
+    document.getElementById("notice-golf-day").value;
+
+  const firstTeeTime =
+    document.getElementById("notice-tee-time").value;
+
+  const message =
+    document.getElementById("notice-message").value.trim();
+
+  const result =
+    document.getElementById("notice-message-result");
+
+  result.textContent = "";
+
+  if (!golfDayId || !firstTeeTime) {
+    result.textContent =
+      "Please select a golf day and enter the first tee time.";
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/publish-golf-day-notice",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          golf_day_id: Number(golfDayId),
+          first_tee_time: firstTeeTime,
+          message: message
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      result.textContent =
+        data.error || "Unable to publish notice.";
+      return;
+    }
+
+    result.textContent =
+      "Next Golf Day notice published successfully.";
+
+    alert("Next Golf Day notice published successfully.");
+
+  } catch (error) {
+
+    result.textContent =
+      "Unable to publish notice: " + error.message;
+
+  }
+}
+  
+// ========================================
 // GOLF DAYS - EXISTING GOLF DAYS
 // ========================================
   
@@ -1526,6 +1662,10 @@ function showAdminSection(section) {
   document.getElementById("admin-results").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
+
+  if (section === "golf-days") {
+    loadNoticeGolfDays();
+  }
 }
   
 async function loadPendingMembers() {
