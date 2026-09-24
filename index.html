@@ -2355,6 +2355,10 @@ if (score < 20) {
 
 }
 
+// ========================================
+// INDIVIDUAL PLAYER RESULTS
+// ========================================
+  
 async function showPlayerResults(playerId) {
 
   try {
@@ -2397,9 +2401,26 @@ async function showPlayerResults(playerId) {
                 <td class="number">
                   ${result.handicap ?? "—"}
                 </td>
-                <td class="number">
-                  ${result.stableford_score}
-                </td>
+<td class="number">
+  <span style="
+    display: inline-block;
+    min-width: 24px;
+    padding: 3px 5px;
+    text-align: center;
+    border-radius: 4px;
+    background: ${
+      result.stableford_score < 20
+        ? "rgb(255, 200, 200)"
+        : result.stableford_score >= 30 && result.stableford_score < 36
+          ? "rgb(255, 220, 170)"
+          : result.stableford_score >= 36
+            ? "rgb(190, 235, 190)"
+            : "transparent"
+    };
+  ">
+    ${result.stableford_score}
+  </span>
+</td>
               </tr>
             `).join("")}
           </tbody>
