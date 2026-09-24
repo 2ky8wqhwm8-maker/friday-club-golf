@@ -1309,6 +1309,10 @@ row.innerHTML = `
   }
 }
 
+// ========================================
+// GOLF DAYS - EDIT EXISTING GOLF DAYS
+// ========================================
+  
 async function editGolfDay(golfDayId, currentDate, currentCourse, currentNotes) {
 
 const playDate = prompt(
@@ -1379,6 +1383,10 @@ body: JSON.stringify({
     alert("Unable to update golf day.");
   }
 }
+
+// ========================================
+// GOLF DAYS - DELETE EXISTING GOLF DAYS
+// ========================================
   
 async function deleteGolfDay(golfDayId) {
 
@@ -1520,6 +1528,10 @@ async function loadScorePlayers() {
   }
 }
 
+// ========================================
+// RESULTS - SAVE
+// ========================================
+  
 async function saveResults() {
   const golfDayId =
     document.getElementById("results-golf-day").value;
@@ -1588,6 +1600,10 @@ document.getElementById("results-players").innerHTML = "";
     message.textContent = "Unable to save results.";
   }
 }
+
+// ========================================
+// GOLF DAYS - CREATE
+// ========================================
   
 async function createGolfDay() {
   const courseId =
@@ -1723,6 +1739,10 @@ function showMainSection(section) {
     document.getElementById("admin-card").style.display = "block";
   }
 }
+
+// ========================================
+// ADMINISTRATION NAVIGATION
+// ========================================
   
 function showAdminSection(section) {
 
@@ -1737,6 +1757,10 @@ function showAdminSection(section) {
     loadNoticeGolfDays();
   }
 }
+
+// ========================================
+// MEMBERS _ MANAGE PENDING
+// ========================================
   
 async function loadPendingMembers() {
 
@@ -1799,6 +1823,10 @@ async function loadPendingMembers() {
   }
 }  
 
+// ========================================
+// MEMBERS - EXISTING
+// ========================================
+  
 async function loadExistingMembers() {
 
   const container =
@@ -1871,6 +1899,10 @@ async function loadExistingMembers() {
   }
 }  
 
+// ========================================
+// MEMBERS - CHANGE ROLE
+// ========================================
+  
 async function changeMemberRole(memberId, currentRole) {
 
   const newRole =
@@ -1919,6 +1951,10 @@ async function changeMemberRole(memberId, currentRole) {
     alert("Unable to update administrator status.");
   }
 }
+
+// ========================================
+// MEMBERS - ADD NEW
+// ========================================
   
 async function addMember() {
   const firstName =
@@ -1983,6 +2019,10 @@ if (selectedGolfDay) {
     alert("Unable to add member.");
   }
 }
+
+// ========================================
+// MEMBERS _ EDIT
+// ========================================
   
 async function editMember(playerId) {
 
@@ -2058,6 +2098,10 @@ async function editMember(playerId) {
   await loadExistingMembers();
   await loadLeague();
 }
+
+// ========================================
+// MEMBERS - APPROVE
+// ========================================
   
 async function approveMember(playerId) {
 
@@ -2095,6 +2139,10 @@ async function approveMember(playerId) {
   }
 }
 
+// ========================================
+// MEMBERS - REJECT
+// ========================================
+  
 async function rejectMember(playerId) {
 
   const confirmed = confirm(
@@ -2139,6 +2187,10 @@ async function rejectMember(playerId) {
   }
 }  
 
+// ========================================
+// LOAD LEAGUE TABLE
+// ========================================
+  
 let leagueData = null;
 
   async function loadLeague() {
@@ -2195,12 +2247,14 @@ const last10 =
 
         let background = "transparent";
 
+let background = "transparent";
+
 if (score < 20) {
-  background = "#fde8e8";
-} else if (score >= 30 && score <= 35) {
-  background = "#fff0dc";
+  background = "rgb(255, 200, 200)";       // pale red
+} else if (score >= 30 && score < 36) {
+  background = "rgb(255, 220, 170)";       // pale orange
 } else if (score >= 36) {
-  background = "#e3f4e8";
+  background = "rgb(190, 235, 190)";       // pale green
 }
 
         return `
