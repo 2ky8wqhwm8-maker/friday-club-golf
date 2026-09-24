@@ -589,8 +589,7 @@ async function checkMembership() {
   }
 }
 
-
-document.getElementById(
+  document.getElementById(
   "registration-form"
 ).addEventListener("submit", async function(event) {
 
@@ -2141,7 +2140,8 @@ async function rejectMember(playerId) {
 }  
 
 let leagueData = null;
-async function loadLeague() {
+
+  async function loadLeague() {
 
   try {
 
@@ -2189,10 +2189,36 @@ async function loadLeague() {
           ? "—"
           : Number(player.average_score).toFixed(2);
 
-      const last10 =
-        player.last_10.length
-          ? player.last_10.join(", ")
-          : "—";
+const last10 =
+  player.last_10.length
+    ? player.last_10.map(score => {
+
+        let background = "transparent";
+
+        if (score < 20) {
+          background = "#f8d7da";
+        } else if (score >= 30 && score <= 35) {
+          background = "#ffe5b4";
+        } else if (score >= 36) {
+          background = "#d4edda";
+        }
+
+        return `
+          <span style="
+            display: inline-block;
+            min-width: 24px;
+            padding: 3px 5px;
+            margin: 1px;
+            text-align: center;
+            border-radius: 4px;
+            background: ${background};
+          ">
+            ${score}
+          </span>
+        `;
+
+      }).join("")
+    : "—";
 
       const status =
         player.eligible
