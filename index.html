@@ -371,6 +371,16 @@
     <option value="">Select Friday</option>
   </select>
 </div>
+
+<div style="margin: 15px 0;">
+  <label for="planning-course">
+    <strong>Golf Club:</strong>
+  </label>
+
+  <select id="planning-course">
+    <option value="">Select Golf Club</option>
+  </select>
+</div>
   
   <div id="admin-availability-grid">
     Loading availability...
@@ -2783,9 +2793,32 @@ async function loadAdminAvailabilityPlanning() {
     const response =
       await fetch("/api/availability");
 
+    const coursesResponse =
+  await fetch("/api/admin/courses");
+
+const coursesData =
+  await coursesResponse.json();
+    
     const data =
       await response.json();
 
+    if (!coursesResponse.ok) {
+  throw new Error(
+    coursesData.error || "Unable to load golf clubs"
+  );
+}
+
+const planningCourse =
+  document.getElementById("planning-course");
+
+planningCourse.innerHTML =
+  `<option value="">Select Golf Club</option>` +
+  coursesData.courses.map(course => `
+    <option value="${course.id}">
+      ${course.name}
+    </option>
+  `).join("");
+    
     if (!response.ok) {
       throw new Error(
         data.error || "Unable to load availability"
