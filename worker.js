@@ -375,6 +375,139 @@ if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
 }
 
 // ========================================
+// AVAILABILITY & GOLF DAY PLANNING
+// ========================================
+ if (url.pathname === "/api/availability") {
+
+  try {
+
+    const { results: players } = await env.DB.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name
+      FROM players
+      WHERE membership_status = 'approved'
+        AND active = 1
+      ORDER BY last_name, first_name
+    `).all();
+
+    const { results: availability } = await env.DB.prepare(`
+      SELECT
+        player_id,
+        play_date,
+        status
+      FROM availability
+      ORDER BY play_date
+    `).all();
+
+    const { results: plannedGolfDays } = await env.DB.prepare(`
+  SELECT
+    pgd.id,
+    pgd.play_date,
+    pgd.status,
+    pgd.notes,
+    pgd.golf_day_id,
+    c.name AS course_name
+  FROM planned_golf_days pgd
+  LEFT JOIN courses c
+    ON c.id = pgd.course_id
+  ORDER BY pgd.play_date
+`).all();
+    
+return Response.json({
+  players,
+  availability,
+  planned_golf_days: plannedGolfDays
+});
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to load availability.",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}   
+
+// ========================================
+// SAVE PLAYER AVAILABILITY
+// ========================================    
+ if (
+  url.pathname === "/api/availability/save" &&
+  request.method === "POST"
+) {
+
+  try {
+
+    const body = await request.json();
+
+    const playDate =
+      String(body.play_date || "").trim();
+
+    const status =
+      String(body.status || "").trim();
+
+    if (
+      !playDate ||
+      !["available", "unavailable"].includes(status)
+    ) {
+      return Response.json(
+        { error: "Invalid availability." },
+        { status: 400 }
+      );
+    }
+
+    const player = await env.DB.prepare(`
+      SELECT id
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+        AND membership_status = 'approved'
+        AND active = 1
+      LIMIT 1
+    `).bind(email).first();
+
+    if (!player) {
+      return Response.json(
+        { error: "Approved membership required." },
+        { status: 403 }
+      );
+    }
+
+    await env.DB.prepare(`
+      INSERT INTO availability
+        (player_id, play_date, status, updated_at)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(player_id, play_date)
+      DO UPDATE SET
+        status = excluded.status,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      player.id,
+      playDate,
+      status
+    ).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to save availability.",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
+// ========================================
 // GOLF DAYS - ADMINISTRATION
 // ========================================
     
