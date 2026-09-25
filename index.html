@@ -2515,8 +2515,40 @@ for (let i = 0; i < 8; i++) {
 
 console.log("Next 8 Fridays:", fridays);
 
-container.innerHTML =
-  "<p>8-week availability grid dates calculated successfully.</p>";
+const dateHeadings = fridays.map(friday => {
+
+  return `
+    <th>
+      ${friday.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short"
+      })}
+    </th>
+  `;
+
+}).join("");
+
+container.innerHTML = `
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Golfer</th>
+          ${dateHeadings}
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td colspan="9">
+            Player availability will appear here.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+`;
 
   } catch (error) {
 
