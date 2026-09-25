@@ -2597,6 +2597,41 @@ return `
   `;
 
 }).join("");
+
+const golfDayCells = fridays.map(friday => {
+
+  const dateString =
+    friday.getFullYear() + "-" +
+    String(friday.getMonth() + 1).padStart(2, "0") + "-" +
+    String(friday.getDate()).padStart(2, "0");
+
+  const golfDay = data.planned_golf_days.find(item =>
+    item.play_date === dateString
+  );
+
+  if (!golfDay) {
+    return `
+      <td style="text-align: center;">
+        —
+      </td>
+    `;
+  }
+
+  const background =
+    golfDay.status === "booked"
+      ? "rgb(190, 235, 190)"
+      : "rgb(255, 220, 170)";
+
+  return `
+    <td style="
+      text-align: center;
+      background: ${background};
+    ">
+      ${golfDay.course_name || "Golf Planned"}
+    </td>
+  `;
+
+}).join("");
     
 const dateHeadings = fridays.map(friday => {
 
@@ -2621,6 +2656,13 @@ container.innerHTML = `
           ${dateHeadings}
         </tr>
       </thead>
+
+<tbody>
+  <tr>
+    <td><strong>Golf Club</strong></td>
+    ${golfDayCells}
+  </tr>
+</tbody>
 
 <tbody>
   ${playerRows}
