@@ -2495,8 +2495,28 @@ async function loadAvailabilityGrid() {
 
     console.log("Availability data:", data);
 
-    container.innerHTML =
-      "<p>Availability data loaded successfully.</p>";
+const fridays = [];
+
+const today = new Date();
+const firstFriday = new Date(today);
+
+const daysUntilFriday =
+  (5 - today.getDay() + 7) % 7;
+
+firstFriday.setDate(
+  today.getDate() + daysUntilFriday
+);
+
+for (let i = 0; i < 8; i++) {
+  const friday = new Date(firstFriday);
+  friday.setDate(firstFriday.getDate() + (i * 7));
+  fridays.push(friday);
+}
+
+console.log("Next 8 Fridays:", fridays);
+
+container.innerHTML =
+  "<p>8-week availability grid dates calculated successfully.</p>";
 
   } catch (error) {
 
