@@ -2517,11 +2517,35 @@ console.log("Next 8 Fridays:", fridays);
 
 const playerRows = data.players.map(player => {
 
-  const availabilityCells = fridays.map(() => `
+const availabilityCells = fridays.map(friday => {
+
+  const dateString =
+    friday.getFullYear() + "-" +
+    String(friday.getMonth() + 1).padStart(2, "0") + "-" +
+    String(friday.getDate()).padStart(2, "0");
+
+  const entry = data.availability.find(item =>
+    item.player_id === player.id &&
+    item.play_date === dateString
+  );
+
+  let symbol = "?";
+
+  if (entry?.status === "available") {
+    symbol = "✓";
+  }
+
+  if (entry?.status === "unavailable") {
+    symbol = "✗";
+  }
+
+  return `
     <td style="text-align: center;">
-      ?
+      ${symbol}
     </td>
-  `).join("");
+  `;
+
+}).join("");
 
   return `
     <tr>
