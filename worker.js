@@ -1274,6 +1274,46 @@ if (url.pathname === "/api/admin/reject" && request.method === "POST") {
       });
     }
 
+// ========================================
+// LINK REGISTRATION TO EXISTING PLAYER
+// ========================================
+const matchingPlayers = await env.DB.prepare(`
+  SELECT id
+  FROM players
+  WHERE LOWER(first_name) = LOWER(?)
+    AND LOWER(last_name) = LOWER(?)
+    AND (email IS NULL OR TRIM(email) = '')
+`).bind(
+  firstName,
+  lastName
+).all();
+
+const existingPlayer =
+  matchingPlayers.results.length === 1
+    ? matchingPlayers.results[0]
+    : null;
+    if (existingPlayer) {
+
+  await env.DB.prepare(`
+    UPDATE players
+    SET email = ?,
+        phone = ?,
+        handicap = ?,
+        membership_status = 'pending'
+    WHERE id = ?
+  `).bind(
+    email,
+    phone,
+    handicap,
+    existingPlayer.id
+  ).run();
+
+  return Response.json({
+    registered: true,
+    membership_status: "pending",
+    player_id: existingPlayer.id
+  });
+}
     const result = await env.DB.prepare(`
       INSERT INTO players
         (first_name, last_name, email, phone, handicap,
