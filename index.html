@@ -480,6 +480,25 @@
     </div>
 
   </div>
+
+<!-- ========================================
+     PLAYER AVAILABILITY
+========================================= -->
+
+<div id="main-availability" style="display: none;">
+
+  <h2>Friday Club Availability</h2>
+
+  <p>
+    Select your availability for the next 8 Fridays.
+    Everyone's availability is shown below.
+  </p>
+
+  <div id="availability-grid">
+    Loading availability...
+  </div>
+
+</div>
     
   <div id="main-results" style="display: none;">
   <div id="golf-day-results-view">
@@ -1719,8 +1738,9 @@ async function loadNextGolfDayNotice() {
 // MAIN PAGE NAVIGATION  
 function showMainSection(section) {
 
-  document.getElementById("main-home").style.display = "none";
-  document.getElementById("main-results").style.display = "none";
+document.getElementById("main-home").style.display = "none";
+document.getElementById("main-availability").style.display = "none";
+document.getElementById("main-results").style.display = "none";
   document.getElementById("admin-card").style.display = "none";
 
   if (section === "home") {
@@ -1728,6 +1748,11 @@ function showMainSection(section) {
     loadNextGolfDayNotice();
   }
 
+  if (section === "availability") {
+  document.getElementById("main-availability").style.display = "block";
+  loadAvailabilityGrid();
+}
+  
   if (section === "results") {
     document.getElementById("main-results").style.display = "block";
 
@@ -2442,7 +2467,43 @@ async function showPlayerResults(playerId) {
     alert("Unable to load player results.");
   }
 }
-  
+// ========================================
+// PLAYER AVAILABILITY GRID
+// ========================================
+
+async function loadAvailabilityGrid() {
+
+  const container =
+    document.getElementById("availability-grid");
+
+  container.innerHTML = "Loading availability...";
+
+  try {
+
+    const response =
+      await fetch("/api/availability");
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to load availability"
+      );
+    }
+
+    console.log("Availability data:", data);
+
+    container.innerHTML =
+      "<p>Availability data loaded successfully.</p>";
+
+  } catch (error) {
+
+    container.innerHTML =
+      "<p>Unable to load availability.</p>";
+
+  }
+}  
 checkMembership();
 loadLeague();
 
