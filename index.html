@@ -2542,14 +2542,17 @@ const availabilityCells = fridays.map(friday => {
   );
 
   let symbol = "?";
+  let background = "transparent";
+  
+if (entry?.status === "available") {
+  symbol = "✓";
+  background = "rgb(190, 235, 190)";
+}
 
-  if (entry?.status === "available") {
-    symbol = "✓";
-  }
-
-  if (entry?.status === "unavailable") {
-    symbol = "✗";
-  }
+if (entry?.status === "unavailable") {
+  symbol = "✗";
+  background = "rgb(255, 200, 200)";
+}
 
 return `
   <td style="text-align: center;">
@@ -2562,11 +2565,19 @@ return `
                min-width: 38px;
                padding: 5px 8px;
                cursor: pointer;
+                background: ${background};
              "
            >
              ${symbol}
            </button>`
-        : symbol
+        : `<span style="
+     display: inline-block;
+     min-width: 38px;
+     padding: 5px 8px;
+     background: ${background};
+   ">
+     ${symbol}
+   </span>`
     }
   </td>
 `;
