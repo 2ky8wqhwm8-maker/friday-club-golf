@@ -362,6 +362,16 @@
     Plan future Friday Club golf days using members' availability.
   </p>
 
+  <div style="margin: 15px 0;">
+  <label for="planning-date">
+    <strong>Friday:</strong>
+  </label>
+
+  <select id="planning-date">
+    <option value="">Select Friday</option>
+  </select>
+</div>
+  
   <div id="admin-availability-grid">
     Loading availability...
   </div>
@@ -2800,6 +2810,34 @@ for (let i = 0; i < 8; i++) {
   fridays.push(friday);
 }
 
+const planningDate =
+  document.getElementById("planning-date");
+
+planningDate.innerHTML =
+  `<option value="">Select Friday</option>` +
+  fridays.map(friday => {
+
+    const dateString =
+      friday.getFullYear() + "-" +
+      String(friday.getMonth() + 1).padStart(2, "0") + "-" +
+      String(friday.getDate()).padStart(2, "0");
+
+    const label =
+      friday.toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+    return `
+      <option value="${dateString}">
+        ${label}
+      </option>
+    `;
+
+  }).join("");
+    
 const playerRows = data.players.map(player => {
 
   const availabilityCells = fridays.map(friday => {
