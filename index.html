@@ -189,6 +189,7 @@
 <button type="button" onclick="showAdminSection('members')">Members</button>
 <button type="button" onclick="showAdminSection('courses')">Golf Clubs</button>
 <button type="button" onclick="showAdminSection('golf-days')">Golf Days</button>
+<button type="button" onclick="showAdminSection('planning')">Availability Planning</button>    
 <button type="button" onclick="showAdminSection('results')">Enter Results</button>
 </div>
 
@@ -349,6 +350,26 @@
 
 </div>
 
+<!-- ========================================
+     AVAILABILITY PLANNING - ADMINISTRATION
+========================================= -->
+
+<div id="admin-planning" style="display: none;">
+
+  <h2>Availability Planning</h2>
+
+  <p>
+    Plan future Friday Club golf days using members' availability.
+  </p>
+
+  <div id="admin-availability-grid">
+    Loading availability...
+  </div>
+
+</div>
+
+<hr>
+  
 <div id="admin-results" style="display: none;">
   
 <h3>Enter Results</h3>
@@ -1777,9 +1798,14 @@ function showAdminSection(section) {
   document.getElementById("admin-members").style.display = "none";
   document.getElementById("admin-courses").style.display = "none";
   document.getElementById("admin-golf-days").style.display = "none";
+  document.getElementById("admin-planning").style.display = "none";
   document.getElementById("admin-results").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
+
+  if (section === "planning") {
+  loadAdminAvailabilityPlanning();
+}
 
   if (section === "golf-days") {
     loadNoticeGolfDays();
@@ -2727,6 +2753,42 @@ async function changeAvailability(playDate, currentStatus) {
   } catch (error) {
 
     alert("Unable to update your availability.");
+
+  }
+}
+
+// ========================================
+// ADMIN - AVAILABILITY PLANNING
+// ========================================
+async function loadAdminAvailabilityPlanning() {
+
+  const container =
+    document.getElementById("admin-availability-grid");
+
+  container.innerHTML =
+    "Loading availability...";
+
+  try {
+
+    const response =
+      await fetch("/api/availability");
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to load availability"
+      );
+    }
+
+    container.innerHTML =
+      "<p>Availability planning data loaded successfully.</p>";
+
+  } catch (error) {
+
+    container.innerHTML =
+      "<p>Unable to load availability planning.</p>";
 
   }
 }
