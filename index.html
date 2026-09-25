@@ -2800,6 +2800,55 @@ for (let i = 0; i < 8; i++) {
   fridays.push(friday);
 }
 
+const playerRows = data.players.map(player => {
+
+  const availabilityCells = fridays.map(friday => {
+
+    const dateString =
+      friday.getFullYear() + "-" +
+      String(friday.getMonth() + 1).padStart(2, "0") + "-" +
+      String(friday.getDate()).padStart(2, "0");
+
+    const entry = data.availability.find(item =>
+      item.player_id === player.id &&
+      item.play_date === dateString
+    );
+
+    let symbol = "?";
+    let background = "transparent";
+
+    if (entry?.status === "available") {
+      symbol = "✓";
+      background = "rgb(190, 235, 190)";
+    }
+
+    if (entry?.status === "unavailable") {
+      symbol = "✗";
+      background = "rgb(255, 200, 200)";
+    }
+
+    return `
+      <td style="
+        text-align: center;
+        background: ${background};
+      ">
+        ${symbol}
+      </td>
+    `;
+
+  }).join("");
+
+  return `
+    <tr>
+      <td>
+        <strong>${player.first_name} ${player.last_name}</strong>
+      </td>
+      ${availabilityCells}
+    </tr>
+  `;
+
+}).join("");
+    
 const dateHeadings = fridays.map(friday => `
   <th>
     ${friday.toLocaleDateString("en-GB", {
@@ -2819,13 +2868,9 @@ container.innerHTML = `
           ${dateHeadings}
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td colspan="9">
-            Availability planning grid
-          </td>
-        </tr>
-      </tbody>
+<tbody>
+  ${playerRows}
+</tbody>
     </table>
   </div>
 `;
