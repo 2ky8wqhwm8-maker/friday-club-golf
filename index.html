@@ -2487,6 +2487,15 @@ async function loadAvailabilityGrid() {
     const data =
       await response.json();
 
+    const meResponse =
+  await fetch("/api/me");
+
+const meData =
+  await meResponse.json();
+
+const myPlayerId =
+  meData.player?.id || null;
+    
     if (!response.ok) {
       throw new Error(
         data.error || "Unable to load availability"
@@ -2517,6 +2526,9 @@ console.log("Next 8 Fridays:", fridays);
 
 const playerRows = data.players.map(player => {
 
+const isMe =
+  player.id === myPlayerId;  
+  
 const availabilityCells = fridays.map(friday => {
 
   const dateString =
@@ -2539,11 +2551,25 @@ const availabilityCells = fridays.map(friday => {
     symbol = "✗";
   }
 
-  return `
-    <td style="text-align: center;">
-      ${symbol}
-    </td>
-  `;
+return `
+  <td style="text-align: center;">
+    ${
+      isMe
+        ? `<button
+             type="button"
+             onclick="changeAvailability('${dateString}', '${entry?.status || ""}')"
+             style="
+               min-width: 38px;
+               padding: 5px 8px;
+               cursor: pointer;
+             "
+           >
+             ${symbol}
+           </button>`
+        : symbol
+    }
+  </td>
+`;
 
 }).join("");
 
@@ -2599,6 +2625,55 @@ container.innerHTML = `
 
   }
 }  
+
+// ========================================
+// CHANGE PLAYER AVAILABILITY
+// ========================================  
+async function changeAvailability(playDate, currentStatus) {
+
+  let newStatus;
+
+  if (!currentStatus) {
+    newStatus = "available";
+  } else if (currentStatus === "available") {
+    newStatus = "unavailable";
+  } else {
+    newStatus = "available";
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/availability/save",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          play_date: playDate,
+          status: newStatus
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to save availability"
+      );
+    }
+
+    await loadAvailabilityGrid();
+
+  } catch (error) {
+
+    alert("Unable to update your availability.");
+
+  }
+}
+  
 checkMembership();
 loadLeague();
 
