@@ -434,6 +434,88 @@ return Response.json({
 }   
 
 // ========================================
+// ADMIN - SAVE PLANNED GOLF DAY
+// ========================================
+if (
+  url.pathname === "/api/admin/planned-golf-day" &&
+  request.method === "POST"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const body = await request.json();
+
+    const playDate =
+      String(body.play_date || "").trim();
+
+    const courseId =
+      Number(body.course_id);
+
+    if (
+      !playDate ||
+      !Number.isInteger(courseId) ||
+      courseId <= 0
+    ) {
+      return Response.json(
+        { error: "Date and golf club are required." },
+        { status: 400 }
+      );
+    }
+
+    const course = await env.DB.prepare(`
+      SELECT id
+      FROM courses
+      WHERE id = ?
+        AND active = 1
+      LIMIT 1
+    `).bind(courseId).first();
+
+    if (!course) {
+      return Response.json(
+        { error: "Golf club not found." },
+        { status: 404 }
+      );
+    }
+
+    await env.DB.prepare(`
+      INSERT INTO planned_golf_days
+        (play_date, course_id, status, updated_at)
+      VALUES (?, ?, 'planned', CURRENT_TIMESTAMP)
+      ON CONFLICT(play_date)
+      DO UPDATE SET
+        course_id = excluded.course_id,
+        status = 'planned',
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      playDate,
+      courseId
+    ).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to save planned golf day.",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+
+    
+// ========================================
 // SAVE PLAYER AVAILABILITY
 // ========================================    
  if (
