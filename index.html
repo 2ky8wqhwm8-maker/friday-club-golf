@@ -2515,6 +2515,28 @@ for (let i = 0; i < 8; i++) {
 
 console.log("Next 8 Fridays:", fridays);
 
+const playerRows = data.players.map(player => {
+
+  const availabilityCells = fridays.map(() => `
+    <td style="text-align: center;">
+      ?
+    </td>
+  `).join("");
+
+  return `
+    <tr>
+      <td>
+        <strong>
+          ${player.first_name} ${player.last_name}
+        </strong>
+      </td>
+
+      ${availabilityCells}
+    </tr>
+  `;
+
+}).join("");
+    
 const dateHeadings = fridays.map(friday => {
 
   return `
@@ -2539,13 +2561,9 @@ container.innerHTML = `
         </tr>
       </thead>
 
-      <tbody>
-        <tr>
-          <td colspan="9">
-            Player availability will appear here.
-          </td>
-        </tr>
-      </tbody>
+<tbody>
+  ${playerRows}
+</tbody>
     </table>
   </div>
 `;
