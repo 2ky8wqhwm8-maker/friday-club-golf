@@ -2782,8 +2782,53 @@ async function loadAdminAvailabilityPlanning() {
       );
     }
 
-    container.innerHTML =
-      "<p>Availability planning data loaded successfully.</p>";
+    const fridays = [];
+
+const today = new Date();
+const firstFriday = new Date(today);
+
+const daysUntilFriday =
+  (5 - today.getDay() + 7) % 7;
+
+firstFriday.setDate(
+  today.getDate() + daysUntilFriday
+);
+
+for (let i = 0; i < 8; i++) {
+  const friday = new Date(firstFriday);
+  friday.setDate(firstFriday.getDate() + (i * 7));
+  fridays.push(friday);
+}
+
+const dateHeadings = fridays.map(friday => `
+  <th>
+    ${friday.toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short"
+    })}
+  </th>
+`).join("");
+
+container.innerHTML = `
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Golfer</th>
+          ${dateHeadings}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="9">
+            Availability planning grid
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+`;
 
   } catch (error) {
 
