@@ -2630,15 +2630,21 @@ if (entry?.status === "unavailable") {
 }
 
 return `
-  <td style="text-align: center;">
+  return `
+  <td style="
+    text-align: center;
+    padding: 3px 5px;
+    height: 24px;
+    font-size: 13px;
+  ">
     ${
       isMe
         ? `<button
              type="button"
              onclick="changeAvailability('${dateString}', '${entry?.status || ""}')"
              style="
-               min-width: 38px;
-               padding: 5px 8px;
+               min-width: 32px;
+padding: 3px 5px;
                cursor: pointer;
                 background: ${background};
              "
@@ -2647,8 +2653,9 @@ return `
            </button>`
         : `<span style="
      display: inline-block;
-     min-width: 38px;
-     padding: 5px 8px;
+     min-width: 32px;
+padding: 3px 5px;
+font-size: 13px;
      background: ${background};
    ">
      ${symbol}
@@ -2661,7 +2668,7 @@ return `
 
   return `
     <tr>
-      <td>
+      <td style="padding: 3px 6px; font-size: 13px;">
         <strong>
           ${player.first_name} ${player.last_name}
         </strong>
@@ -2702,7 +2709,18 @@ const golfDayCells = fridays.map(friday => {
       text-align: center;
       background: ${background};
     ">
-      ${golfDay.course_name || "Golf Planned"}
+      <div style="
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin: auto;
+  min-height: 75px;
+  padding: 3px 0;
+  font-size: 12px;
+">
+  ${(golfDay.course_name || "Golf Planned")
+    .replace(/ Golf Club$/i, "")
+    .replace(/ Golf Course$/i, "")}
+</div>
     </td>
   `;
 
@@ -2711,7 +2729,12 @@ const golfDayCells = fridays.map(friday => {
 const dateHeadings = fridays.map(friday => {
 
   return `
-    <th>
+    <th style="
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #ffffff;
+">
       ${friday.toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
@@ -2723,11 +2746,21 @@ const dateHeadings = fridays.map(friday => {
 }).join("");
 
 container.innerHTML = `
-  <div class="table-container">
+  <div class="table-container" style="
+    max-height: 500px;
+    overflow-y: auto;
+  ">
     <table>
       <thead>
         <tr>
-          <th>Golfer</th>
+          <th style="
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: #ffffff;
+">
+  Golfer
+</th>
           ${dateHeadings}
         </tr>
       </thead>
@@ -2737,6 +2770,9 @@ container.innerHTML = `
   background: #f0f2f4;
   font-weight: bold;
   border-bottom: 3px solid #999;
+  position: sticky;
+  top: 36px;
+  z-index: 2;
 ">
     <td><strong>Golf Club</strong></td>
     ${golfDayCells}
