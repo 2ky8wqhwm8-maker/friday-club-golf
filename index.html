@@ -2733,6 +2733,8 @@ const dateHeadings = fridays.map(friday => {
   top: 0;
   z-index: 3;
   background: #ffffff;
+  width: 80px;
+  min-width: 80px;
 ">
       ${friday.toLocaleDateString("en-GB", {
         weekday: "short",
@@ -2749,7 +2751,7 @@ container.innerHTML = `
     max-height: 500px;
     overflow-y: auto;
   ">
-    <table>
+    <table style="width: auto; min-width: 900px;">
       <thead>
         <tr>
           <th style="
