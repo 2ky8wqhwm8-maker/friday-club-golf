@@ -415,11 +415,19 @@ if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
     ON c.id = pgd.course_id
   ORDER BY pgd.play_date
 `).all();
+
+const settings = await env.DB.prepare(`
+  SELECT start_date, update_requested_at
+  FROM availability_settings
+  WHERE id = 1
+`).first();
     
 return Response.json({
   players,
   availability,
-  planned_golf_days: plannedGolfDays
+  planned_golf_days: plannedGolfDays,
+  start_date: settings?.start_date || null,
+  update_requested_at: settings?.update_requested_at || null
 });
 
   } catch (error) {
