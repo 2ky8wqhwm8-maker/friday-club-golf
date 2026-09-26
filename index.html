@@ -531,6 +531,7 @@
             <th>Player</th>
             <th class="number">H'cap</th>
             <th class="number">Played</th>
+            <th class="number">Total</th>
             <th class="number">Average</th>
             <th>Last 10 Scores</th>
             <th>Status</th>
@@ -2412,6 +2413,10 @@ if (score < 20) {
           ${player.played}
         </td>
 
+        <td class="number">
+  ${player.total_points}
+</td>
+  
         <td class="number average">
           ${average}
         </td>
