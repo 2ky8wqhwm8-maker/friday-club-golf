@@ -2926,14 +2926,14 @@ const playerRows = data.players.map(player => {
 
   }).join("");
 
-  return `
-    <tr>
-      <td>
-        <strong>${player.first_name} ${player.last_name}</strong>
-      <td style="padding: 3px 6px; font-size: 13px;">
-      ${availabilityCells}
-    </tr>
-  `;
+ return `
+  <tr>
+    <td style="padding: 3px 6px; font-size: 13px;">
+      <strong>${player.first_name} ${player.last_name}</strong>
+    </td>
+    ${availabilityCells}
+  </tr>
+`;
 
 }).join("");
 
@@ -2995,8 +2995,7 @@ const dateHeadings = fridays.map(friday => `
 `).join("");
 
 container.innerHTML = `
-  container.innerHTML = `
-  <div class="table-container" style="
+    <div class="table-container" style="
     max-height: 500px;
     overflow-y: auto;
   ">
