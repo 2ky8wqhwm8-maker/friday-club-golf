@@ -1979,6 +1979,119 @@ if (!member) {
       }
     }
 
+// ========================================
+// ADMIN FULL LEAGUE TABLE
+// ========================================
+
+if (url.pathname === "/api/admin-league") {
+  try {
+
+    const admin = await env.DB.prepare(`
+      SELECT id
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+        AND membership_status = 'approved'
+        AND role = 'admin'
+      LIMIT 1
+    `).bind(email).first();
+
+    if (!admin) {
+      return Response.json(
+        { error: "Administrator access required." },
+        { status: 403 }
+      );
+    }
+
+    const season = await env.DB.prepare(`
+      SELECT id, name, minimum_rounds
+      FROM seasons
+      WHERE status = 'current'
+      LIMIT 1
+    `).first();
+
+    if (!season) {
+      return Response.json(
+        { error: "No current season has been set." },
+        { status: 500 }
+      );
+    }
+
+    const golfDays = await env.DB.prepare(`
+      SELECT
+        gd.id,
+        gd.play_date,
+        c.name AS course_name
+      FROM golf_days gd
+      JOIN courses c
+        ON c.id = gd.course_id
+      WHERE gd.season_id = ?
+      ORDER BY gd.play_date ASC
+    `).bind(season.id).all();
+
+    const players = await env.DB.prepare(`
+      SELECT
+        p.id,
+        p.first_name,
+        p.last_name,
+        p.handicap,
+        COUNT(r.id) AS played,
+        ROUND(AVG(r.stableford_score), 2) AS average_score,
+        COALESCE(SUM(r.stableford_score), 0) AS total_points
+      FROM players p
+      LEFT JOIN results r
+        ON r.player_id = p.id
+        AND r.golf_day_id IN (
+          SELECT id
+          FROM golf_days
+          WHERE season_id = ?
+        )
+      WHERE p.active = 1
+      GROUP BY
+        p.id,
+        p.first_name,
+        p.last_name,
+        p.handicap
+      ORDER BY
+        average_score DESC,
+        p.last_name ASC,
+        p.first_name ASC
+    `).bind(season.id).all();
+
+    const scores = await env.DB.prepare(`
+      SELECT
+        r.player_id,
+        r.golf_day_id,
+        r.stableford_score
+      FROM results r
+      JOIN golf_days gd
+        ON gd.id = r.golf_day_id
+      WHERE gd.season_id = ?
+    `).bind(season.id).all();
+
+    return Response.json({
+      season: season.name,
+      minimum_rounds: season.minimum_rounds,
+      golf_days: golfDays.results,
+      players: players.results,
+      scores: scores.results
+    }, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to load admin league table",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
     return env.ASSETS.fetch(request);
   }
 };
