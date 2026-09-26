@@ -1693,7 +1693,12 @@ const matchingPlayers = await env.DB.prepare(`
   FROM players
   WHERE LOWER(first_name) = LOWER(?)
     AND LOWER(last_name) = LOWER(?)
-    AND (email IS NULL OR TRIM(email) = '')
+    AND (
+  email IS NULL
+  OR TRIM(email) = ''
+  OR LOWER(TRIM(email)) = 'not supplied'
+  OR LOWER(TRIM(email)) = 'unknown'
+)
 `).bind(
   firstName,
   lastName
