@@ -2964,6 +2964,15 @@ const golfDayCells = fridays.map(friday => {
       background: ${background};
       font-weight: bold;
     ">
+   <div style="
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin: auto;
+  min-height: 110px;
+  padding: 5px 0;
+">
+  ${golfDay.course_name || "Golf Planned"}
+</div> 
       ${golfDay.course_name || "Golf Planned"}
     </td>
   `;
