@@ -405,6 +405,7 @@ if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
   SELECT
     pgd.id,
     pgd.play_date,
+    pgd.course_id,
     pgd.status,
     pgd.notes,
     pgd.golf_day_id,
