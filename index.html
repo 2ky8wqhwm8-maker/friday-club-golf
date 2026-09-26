@@ -191,6 +191,7 @@
 <button type="button" onclick="showAdminSection('golf-days')">Golf Days</button>
 <button type="button" onclick="showAdminSection('planning')">Availability Planning</button>    
 <button type="button" onclick="showAdminSection('results')">Enter Results</button>
+<button type="button" onclick="showAdminSection('league')">League Table</button>    
 </div>
 
 <hr>
@@ -439,6 +440,17 @@
 
 </div>
 </div>
+
+<div id="admin-league" style="display: none;">
+
+  <h3>League Table</h3>
+
+  <div id="admin-league-table">
+    Loading league table...
+  </div>
+
+</div>
+  
 </div>
   
   <div id="registration-card" class="card hidden">
@@ -1851,6 +1863,7 @@ function showAdminSection(section) {
   document.getElementById("admin-golf-days").style.display = "none";
   document.getElementById("admin-planning").style.display = "none";
   document.getElementById("admin-results").style.display = "none";
+  document.getElementById("admin-league").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
 
@@ -1863,6 +1876,9 @@ function showAdminSection(section) {
   }
   if (section === "members") {
   loadPendingMembers();
+}
+  if (section === "league") {
+  loadAdminLeague();
 }
 }
 
