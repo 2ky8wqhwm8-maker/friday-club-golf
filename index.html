@@ -2912,14 +2912,17 @@ const playerRows = data.players.map(player => {
       background = "rgb(255, 200, 200)";
     }
 
-    return `
-      <td style="
-        text-align: center;
-        background: ${background};
-      ">
-        ${symbol}
-      </td>
-    `;
+   return `
+  <td style="
+    text-align: center;
+    background: ${background};
+    padding: 3px 5px;
+    height: 24px;
+    font-size: 13px;
+  ">
+    ${symbol}
+  </td>
+`;
 
   }).join("");
 
@@ -2927,7 +2930,7 @@ const playerRows = data.players.map(player => {
     <tr>
       <td>
         <strong>${player.first_name} ${player.last_name}</strong>
-      </td>
+      <td style="padding: 3px 6px; font-size: 13px;">
       ${availabilityCells}
     </tr>
   `;
@@ -2968,12 +2971,14 @@ const golfDayCells = fridays.map(friday => {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   margin: auto;
-  min-height: 110px;
-  padding: 5px 0;
+  min-height: 75px;
+padding: 3px 0;
+font-size: 12px;
 ">
-  ${golfDay.course_name || "Golf Planned"}
+  ${(golfDay.course_name || "Golf Planned")
+  .replace(/ Golf Club$/i, "")
+  .replace(/ Golf Course$/i, "")}
 </div> 
-      ${golfDay.course_name || "Golf Planned"}
     </td>
   `;
 
@@ -2990,7 +2995,11 @@ const dateHeadings = fridays.map(friday => `
 `).join("");
 
 container.innerHTML = `
-  <div class="table-container">
+  container.innerHTML = `
+  <div class="table-container" style="
+    max-height: 500px;
+    overflow-y: auto;
+  ">
     <table>
       <thead>
         <tr>
