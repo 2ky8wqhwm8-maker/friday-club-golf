@@ -443,6 +443,67 @@ return Response.json({
 }   
 
 // ========================================
+// ADMIN - MOVE AVAILABILITY WINDOW
+// ========================================
+
+if (
+  url.pathname === "/api/admin/move-availability-window" &&
+  request.method === "POST"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const settings = await env.DB.prepare(`
+      SELECT start_date
+      FROM availability_settings
+      WHERE id = 1
+    `).first();
+
+    if (!settings?.start_date) {
+      return Response.json(
+        { error: "Availability start date not found." },
+        { status: 404 }
+      );
+    }
+
+    await env.DB.prepare(`
+      UPDATE availability_settings
+      SET start_date = date(start_date, '+7 days'),
+          update_requested_at = CURRENT_TIMESTAMP
+      WHERE id = 1
+    `).run();
+
+    const updated = await env.DB.prepare(`
+      SELECT start_date
+      FROM availability_settings
+      WHERE id = 1
+    `).first();
+
+    return Response.json({
+      success: true,
+      start_date: updated.start_date
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to move availability window.",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
+// ========================================
 // ADMIN - SAVE PLANNED GOLF DAY
 // ========================================
 if (
