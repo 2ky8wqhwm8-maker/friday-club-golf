@@ -2892,6 +2892,24 @@ planningDate.innerHTML =
     `;
 
   }).join("");
+
+planningDate.onchange = () => {
+
+  const plannedDay =
+    data.planned_golf_days.find(item =>
+      item.play_date === planningDate.value
+    );
+
+  const planningCourse =
+    document.getElementById("planning-course");
+
+  if (plannedDay?.course_id) {
+    planningCourse.value =
+      String(plannedDay.course_id);
+  } else {
+    planningCourse.value = "";
+  }
+};
     
 const playerRows = data.players.map(player => {
 
