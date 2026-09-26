@@ -397,6 +397,14 @@
 >
   Confirm Booking
 </button>
+
+<button
+  type="button"
+  onclick="moveAvailabilityWindow()"
+  style="margin-left: 8px;"
+>
+  Move Forward 1 Week
+</button>
   
   <span
     id="planning-message"
@@ -3178,6 +3186,54 @@ async function confirmBookedGolfDay() {
 
     message.textContent =
       error.message || "Unable to confirm booking.";
+
+  }
+}
+
+// ========================================
+// ADMIN - MOVE AVAILABILITY WINDOW
+// ========================================
+
+async function moveAvailabilityWindow() {
+
+  const message =
+    document.getElementById("planning-message");
+
+  const confirmed = confirm(
+    "Move the availability window forward by one week?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/move-availability-window",
+      {
+        method: "POST"
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to move availability window"
+      );
+    }
+
+    message.textContent =
+      "Availability window moved forward one week.";
+
+    await loadAdminAvailabilityPlanning();
+
+  } catch (error) {
+
+    message.textContent =
+      error.message ||
+      "Unable to move availability window.";
 
   }
 }
