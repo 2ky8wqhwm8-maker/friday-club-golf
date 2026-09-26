@@ -473,6 +473,20 @@ if (
       );
     }
 
+    const today = new Date()
+  .toISOString()
+  .slice(0, 10);
+
+if (settings.start_date >= today) {
+  return Response.json(
+    {
+      error:
+        "The first Friday has not passed yet. The availability window cannot be moved forward."
+    },
+    { status: 400 }
+  );
+}
+    
     await env.DB.prepare(`
       UPDATE availability_settings
       SET start_date = date(start_date, '+7 days'),
