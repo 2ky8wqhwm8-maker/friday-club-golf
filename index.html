@@ -2582,14 +2582,13 @@ const myPlayerId =
 
 const fridays = [];
 
-const today = new Date();
-const firstFriday = new Date(today);
+const [startYear, startMonth, startDay] =
+  data.start_date.split("-");
 
-const daysUntilFriday =
-  (5 - today.getDay() + 7) % 7;
-
-firstFriday.setDate(
-  today.getDate() + daysUntilFriday
+const firstFriday = new Date(
+  Number(startYear),
+  Number(startMonth) - 1,
+  Number(startDay)
 );
 
 for (let i = 0; i < 8; i++) {
