@@ -1691,14 +1691,8 @@ if (url.pathname === "/api/admin/reject" && request.method === "POST") {
 const matchingPlayers = await env.DB.prepare(`
   SELECT id
   FROM players
-  WHERE LOWER(first_name) = LOWER(?)
-    AND LOWER(last_name) = LOWER(?)
-    AND (
-  email IS NULL
-  OR TRIM(email) = ''
-  OR LOWER(TRIM(email)) = 'not supplied'
-  OR LOWER(TRIM(email)) = 'unknown'
-)
+  WHERE LOWER(TRIM(first_name)) = LOWER(TRIM(?))
+    AND LOWER(TRIM(last_name)) = LOWER(TRIM(?))
 `).bind(
   firstName,
   lastName
