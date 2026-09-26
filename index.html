@@ -390,6 +390,14 @@
     Set Planned Golf Day
   </button>
 
+<button
+  type="button"
+  onclick="confirmBookedGolfDay()"
+  style="margin-left: 8px;"
+>
+  Confirm Booking
+</button>
+  
   <span
     id="planning-message"
     style="margin-left: 10px;"
@@ -3099,6 +3107,60 @@ async function savePlannedGolfDay() {
 
     message.textContent =
       "Unable to save planned golf day.";
+
+  }
+}
+
+// ========================================
+// ADMIN - CONFIRM BOOKED GOLF DAY
+// ========================================
+
+async function confirmBookedGolfDay() {
+
+  const playDate =
+    document.getElementById("planning-date").value;
+
+  const message =
+    document.getElementById("planning-message");
+
+  if (!playDate) {
+    message.textContent =
+      "Please select a Friday.";
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/book-planned-golf-day",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          play_date: playDate
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to confirm booking"
+      );
+    }
+
+    message.textContent =
+      "Golf day confirmed as booked.";
+
+    await loadAdminAvailabilityPlanning();
+
+  } catch (error) {
+
+    message.textContent =
+      error.message || "Unable to confirm booking.";
 
   }
 }
