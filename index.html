@@ -381,6 +381,20 @@
     <option value="">Select Golf Club</option>
   </select>
 </div>
+
+<div style="margin: 15px 0;">
+  <button
+    type="button"
+    onclick="savePlannedGolfDay()"
+  >
+    Set Planned Golf Day
+  </button>
+
+  <span
+    id="planning-message"
+    style="margin-left: 10px;"
+  ></span>
+</div>
   
   <div id="admin-availability-grid">
     Loading availability...
@@ -2995,6 +3009,64 @@ container.innerHTML = `
 
     container.innerHTML =
       "<p>Unable to load availability planning.</p>";
+
+  }
+}
+
+// ========================================
+// ADMIN - SAVE PLANNED GOLF DAY
+// ========================================
+
+async function savePlannedGolfDay() {
+
+  const playDate =
+    document.getElementById("planning-date").value;
+
+  const courseId =
+    document.getElementById("planning-course").value;
+
+  const message =
+    document.getElementById("planning-message");
+
+  if (!playDate || !courseId) {
+    message.textContent =
+      "Please select a Friday and Golf Club.";
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/planned-golf-day",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          play_date: playDate,
+          course_id: Number(courseId)
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to save planned golf day"
+      );
+    }
+
+    message.textContent =
+      "Planned golf day saved.";
+
+    await loadAdminAvailabilityPlanning();
+
+  } catch (error) {
+
+    message.textContent =
+      "Unable to save planned golf day.";
 
   }
 }
