@@ -514,6 +514,118 @@ if (
   }
 }
 
+// ========================================
+// ADMIN - CONFIRM BOOKED GOLF DAY
+// ========================================
+
+if (
+  url.pathname === "/api/admin/book-planned-golf-day" &&
+  request.method === "POST"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const body = await request.json();
+
+    const playDate =
+      String(body.play_date || "").trim();
+
+    if (!playDate) {
+      return Response.json(
+        { error: "Golf day date is required." },
+        { status: 400 }
+      );
+    }
+
+    const plannedDay = await env.DB.prepare(`
+      SELECT
+        id,
+        play_date,
+        course_id,
+        notes,
+        status,
+        golf_day_id
+      FROM planned_golf_days
+      WHERE play_date = ?
+      LIMIT 1
+    `).bind(playDate).first();
+
+    if (!plannedDay) {
+      return Response.json(
+        { error: "Planned golf day not found." },
+        { status: 404 }
+      );
+    }
+
+    if (plannedDay.status === "booked" && plannedDay.golf_day_id) {
+      return Response.json({
+        success: true,
+        golf_day_id: plannedDay.golf_day_id
+      });
+    }
+
+    const season = await env.DB.prepare(`
+      SELECT id
+      FROM seasons
+      WHERE status = 'current'
+      LIMIT 1
+    `).first();
+
+    if (!season) {
+      return Response.json(
+        { error: "Current season not found." },
+        { status: 400 }
+      );
+    }
+
+    const result = await env.DB.prepare(`
+      INSERT INTO golf_days
+        (season_id, course_id, play_date, notes)
+      VALUES (?, ?, ?, ?)
+    `).bind(
+      season.id,
+      plannedDay.course_id,
+      plannedDay.play_date,
+      plannedDay.notes || ""
+    ).run();
+
+    const golfDayId =
+      result.meta.last_row_id;
+
+    await env.DB.prepare(`
+      UPDATE planned_golf_days
+      SET status = 'booked',
+          golf_day_id = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(
+      golfDayId,
+      plannedDay.id
+    ).run();
+
+    return Response.json({
+      success: true,
+      golf_day_id: golfDayId
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to confirm booked golf day.",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}    
     
 // ========================================
 // SAVE PLAYER AVAILABILITY
