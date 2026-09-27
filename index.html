@@ -251,6 +251,61 @@
 .admin-league-full thead th:nth-child(-n+6) {
   z-index: 3;
 }
+
+/* Compact admin league table on phones */
+
+@media (max-width: 600px) {
+
+  .admin-league-full th:nth-child(-n+6),
+  .admin-league-full td:nth-child(-n+6) {
+    font-size: 11px;
+    padding: 3px 3px;
+  }
+
+  .admin-league-full th:nth-child(1),
+  .admin-league-full td:nth-child(1) {
+    left: 0;
+    min-width: 24px;
+    width: 24px;
+  }
+
+  .admin-league-full th:nth-child(2),
+  .admin-league-full td:nth-child(2) {
+    left: 30px;
+    min-width: 90px;
+    width: 90px;
+  }
+
+  .admin-league-full th:nth-child(3),
+  .admin-league-full td:nth-child(3) {
+    left: 126px;
+    min-width: 34px;
+    width: 34px;
+  }
+
+  .admin-league-full th:nth-child(4),
+  .admin-league-full td:nth-child(4) {
+    left: 166px;
+    min-width: 38px;
+    width: 38px;
+  }
+
+  .admin-league-full th:nth-child(5),
+  .admin-league-full td:nth-child(5) {
+    left: 210px;
+    min-width: 35px;
+    width: 35px;
+  }
+
+  .admin-league-full th:nth-child(6),
+  .admin-league-full td:nth-child(6) {
+    left: 251px;
+    min-width: 45px;
+    width: 45px;
+  }
+  
+}
+    
     
   </style>
 </head>
