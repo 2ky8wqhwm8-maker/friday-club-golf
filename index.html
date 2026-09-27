@@ -184,7 +184,7 @@
   height: 115px;
   padding: 2px;
   vertical-align: bottom;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: normal;
   text-align: center;
 }
@@ -201,6 +201,56 @@
   padding: 4px 2px;
   text-align: center;
 } 
+
+/* Keep league summary columns fixed while results scroll */
+
+.admin-league-full th:nth-child(-n+6),
+.admin-league-full td:nth-child(-n+6) {
+  position: sticky;
+  background: white;
+  z-index: 2;
+}
+
+.admin-league-full th:nth-child(1),
+.admin-league-full td:nth-child(1) {
+  left: 0;
+  min-width: 35px;
+}
+
+.admin-league-full th:nth-child(2),
+.admin-league-full td:nth-child(2) {
+  left: 47px;
+  min-width: 135px;
+}
+
+.admin-league-full th:nth-child(3),
+.admin-league-full td:nth-child(3) {
+  left: 194px;
+  min-width: 50px;
+}
+
+.admin-league-full th:nth-child(4),
+.admin-league-full td:nth-child(4) {
+  left: 256px;
+  min-width: 50px;
+}
+
+.admin-league-full th:nth-child(5),
+.admin-league-full td:nth-child(5) {
+  left: 318px;
+  min-width: 50px;
+}
+
+.admin-league-full th:nth-child(6),
+.admin-league-full td:nth-child(6) {
+  left: 380px;
+  min-width: 65px;
+  border-right: 2px solid #bbb;
+}
+
+.admin-league-full thead th:nth-child(-n+6) {
+  z-index: 3;
+}
     
   </style>
 </head>
@@ -2575,7 +2625,7 @@ async function loadAdminLeague() {
       html += `
         <th class="golf-day-heading">
           <div>
-            ${day.course_name} ${shortDate}
+            ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
           </div>
         </th>
       `;
