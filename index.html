@@ -156,6 +156,52 @@
       margin: 30px 0;
       font-size: 13px;
     }
+
+   /* Admin full season league table */
+
+.admin-league-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.admin-league-full {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+.admin-league-full th,
+.admin-league-full td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+}
+
+.admin-league-full .golf-day-heading {
+  width: 30px;
+  min-width: 30px;
+  height: 115px;
+  padding: 2px;
+  vertical-align: bottom;
+  font-size: 11px;
+  font-weight: normal;
+  text-align: center;
+}
+
+.admin-league-full .golf-day-heading div {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+.admin-league-full .admin-result-score {
+  width: 30px;
+  min-width: 30px;
+  padding: 4px 2px;
+  text-align: center;
+} 
+    
   </style>
 </head>
 
@@ -2483,6 +2529,136 @@ if (score < 20) {
 
 }
 
+async function loadAdminLeague() {
+
+  const container =
+    document.getElementById("admin-league-table");
+
+  container.innerHTML = "Loading league table...";
+
+  try {
+
+    const response = await fetch("/api/admin-league");
+
+    if (!response.ok) {
+      throw new Error("Unable to load admin league");
+    }
+
+    const data = await response.json();
+
+    const scoreMap = {};
+
+    data.scores.forEach(result => {
+      scoreMap[
+        result.player_id + "-" + result.golf_day_id
+      ] = result.stableford_score;
+    });
+
+    let html = `
+      <div class="admin-league-scroll">
+        <table class="admin-league-full">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Player</th>
+              <th>H'cap</th>
+              <th>Played</th>
+              <th>Total</th>
+              <th>Average</th>
+    `;
+
+    data.golf_days.forEach(day => {
+
+      const parts = day.play_date.split("-");
+      const shortDate = parts[2] + "." + parts[1];
+
+      html += `
+        <th class="golf-day-heading">
+          <div>
+            ${day.course_name} ${shortDate}
+          </div>
+        </th>
+      `;
+    });
+
+    html += `
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    let officialPosition = 0;
+
+    data.players.forEach(player => {
+
+      let position = "—";
+
+      if (player.played >= data.minimum_rounds) {
+        officialPosition++;
+        position = officialPosition;
+      }
+
+      const average =
+        player.average_score === null
+          ? "—"
+          : Number(player.average_score).toFixed(2);
+
+      html += `
+        <tr>
+          <td class="number">${position}</td>
+          <td>${player.first_name} ${player.last_name}</td>
+          <td class="number">${player.handicap ?? "—"}</td>
+          <td class="number">${player.played}</td>
+          <td class="number">${player.total_points}</td>
+          <td class="number">${average}</td>
+      `;
+
+      data.golf_days.forEach(day => {
+
+        const score =
+          scoreMap[player.id + "-" + day.id];
+
+        let background = "transparent";
+
+        if (score !== undefined) {
+          if (score < 20) {
+            background = "rgb(255, 200, 200)";
+          } else if (score >= 30 && score < 36) {
+            background = "rgb(255, 220, 170)";
+          } else if (score >= 36) {
+            background = "rgb(190, 235, 190)";
+          }
+        }
+
+        html += `
+          <td
+            class="number admin-result-score"
+            style="background:${background};"
+          >
+            ${score ?? ""}
+          </td>
+        `;
+      });
+
+      html += `</tr>`;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    container.innerHTML = html;
+
+  } catch (error) {
+
+    container.innerHTML =
+      "Unable to load the league table.";
+
+  }
+}
+  
 // ========================================
 // INDIVIDUAL PLAYER RESULTS
 // ========================================
