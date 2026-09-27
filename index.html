@@ -303,6 +303,20 @@
     min-width: 45px;
     width: 45px;
   }
+
+  .desktop-heading {
+    display: none;
+  }
+
+  .phone-heading {
+    display: inline;
+  }
+
+  .admin-league-full th:nth-child(-n+6),
+  .admin-league-full td:nth-child(-n+6) {
+    font-size: 10px;
+    padding: 2px 2px;
+  }
   
 }
     
@@ -2667,9 +2681,9 @@ async function loadAdminLeague() {
               <th>Pos</th>
               <th>Player</th>
               <th>H'cap</th>
-              <th>Played</th>
-              <th>Total</th>
-              <th>Average</th>
+<th><span class="desktop-heading">Played</span><span class="phone-heading">Pld</span></th>
+<th>Total</th>
+<th><span class="desktop-heading">Average</span><span class="phone-heading">Avg</span></th>
     `;
 
     data.golf_days.forEach(day => {
