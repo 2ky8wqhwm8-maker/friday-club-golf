@@ -2025,7 +2025,7 @@ if (url.pathname === "/api/admin-league") {
       JOIN courses c
         ON c.id = gd.course_id
       WHERE gd.season_id = ?
-      ORDER BY gd.play_date ASC
+      ORDER BY gd.play_date DESC
     `).bind(season.id).all();
 
     const players = await env.DB.prepare(`
