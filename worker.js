@@ -2145,6 +2145,70 @@ if (url.pathname === "/api/versions" && request.method === "GET") {
     );
   }
 }
+
+if (url.pathname === "/api/versions" && request.method === "POST") {
+  try {
+
+    const admin = await env.DB.prepare(`
+      SELECT id
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+        AND membership_status = 'approved'
+        AND role = 'admin'
+      LIMIT 1
+    `).bind(email).first();
+
+    if (!admin) {
+      return Response.json(
+        { error: "Administrator access required." },
+        { status: 403 }
+      );
+    }
+
+    const data = await request.json();
+
+    const versionNumber = data.version_number?.trim();
+    const versionDate = data.version_date;
+    const title = data.title?.trim();
+    const description = data.description?.trim();
+
+    if (!versionNumber || !versionDate || !title || !description) {
+      return Response.json(
+        { error: "All version fields are required." },
+        { status: 400 }
+      );
+    }
+
+    await env.DB.prepare(`
+      INSERT INTO versions (
+        version_number,
+        version_date,
+        title,
+        description
+      )
+      VALUES (?, ?, ?, ?)
+    `).bind(
+      versionNumber,
+      versionDate,
+      title,
+      description
+    ).run();
+
+    return Response.json({
+      success: true
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to save version",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
     return env.ASSETS.fetch(request);
   }
