@@ -2276,6 +2276,33 @@ if (url.pathname === "/api/versions" && request.method === "PUT") {
     );
   }
 }
+
+if (url.pathname === "/api/latest-version" && request.method === "GET") {
+  try {
+
+    const version = await env.DB.prepare(`
+      SELECT version_number
+      FROM versions
+      ORDER BY version_number DESC
+      LIMIT 1
+    `).first();
+
+    return Response.json({
+      version_number: version?.version_number || ""
+    }, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to load latest version" },
+      { status: 500 }
+    );
+  }
+}
     
     return env.ASSETS.fetch(request);
   }
