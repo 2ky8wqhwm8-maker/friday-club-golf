@@ -2941,6 +2941,29 @@ async function saveVersion() {
 
   await loadVersions();
 }
+
+async function editVersion(id) {
+
+  const response = await fetch("/api/versions");
+
+  if (!response.ok) {
+    alert("Unable to load version.");
+    return;
+  }
+
+  const data = await response.json();
+
+  const version = data.versions.find(
+    item => item.id === id
+  );
+
+  if (!version) {
+    alert("Version not found.");
+    return;
+  }
+
+  alert(version.description);
+}
   
 // ========================================
 // INDIVIDUAL PLAYER RESULTS
