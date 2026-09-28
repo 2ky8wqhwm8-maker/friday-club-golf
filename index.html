@@ -3263,13 +3263,14 @@ font-size: 13px;
     <tr>
       <td style="
   padding: 3px 6px;
-  font-size: 13px;
+  font-size: 14px;
   position: sticky;
   left: 0;
   z-index: 1;
   background: #ffffff;
   width: 120px;
   min-width: 120px;
+  max-width: 120px;
 ">
 
           ${player.first_name} ${player.last_name}
@@ -3315,7 +3316,7 @@ const golfDayCells = fridays.map(friday => {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   margin: auto;
-height: 55px;
+height: 70px;
 padding: 1px 0;
 font-size: 10px;
 white-space: nowrap;
@@ -3347,10 +3348,7 @@ min-width: 50px;
 }).join("");
 
 container.innerHTML = `
-  <div class="table-container" style="
-    max-height: 500px;
-    overflow-y: auto;
-  ">
+  <div class="table-container">
     <table style="width: 100%; min-width: 520px;">
       <thead>
         <tr>
@@ -3362,6 +3360,7 @@ container.innerHTML = `
   background: #ffffff;
   width: 120px;
 min-width: 120px;
+max-width: 120px;
 ">
   Golfer
 </th>
@@ -3386,6 +3385,7 @@ min-width: 120px;
   background: #f0f2f4;
   width: 120px;
   min-width: 120px;
+  max-width: 120px;
 ">
   <strong>Golf Club</strong>
 </td>
