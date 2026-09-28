@@ -336,6 +336,7 @@
 <body>
 
 <header>
+  <div id="latest-version" class="latest-version"></div>
   <h1>Friday Club Golf Society</h1>
   <div id="main-menu">
   <button type="button" onclick="showMainSection('home')">Home</button>
@@ -2808,6 +2809,31 @@ async function loadAdminLeague() {
   }
 }
 
+async function loadLatestVersion() {
+
+  try {
+
+    const response = await fetch("/api/latest-version");
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data = await response.json();
+
+    const container =
+      document.getElementById("latest-version");
+
+    if (container && data.version_number) {
+      container.textContent =
+        "Version " + data.version_number;
+    }
+
+  } catch (error) {
+    // Leave version blank if it cannot be loaded
+  }
+}
+  
 async function loadVersions() {
 
   const container = document.getElementById("version-list");
@@ -3875,7 +3901,8 @@ async function moveAvailabilityWindow() {
   
 checkMembership();
 loadLeague();
-
+loadLatestVersion();
+  
 </script>
 
 </body>
