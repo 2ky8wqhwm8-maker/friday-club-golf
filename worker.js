@@ -2091,6 +2091,60 @@ if (url.pathname === "/api/admin-league") {
     );
   }
 }
+
+// ========================================
+// VERSION CONTROL
+// ========================================
+
+if (url.pathname === "/api/versions" && request.method === "GET") {
+  try {
+
+    const admin = await env.DB.prepare(`
+      SELECT id
+      FROM players
+      WHERE LOWER(email) = LOWER(?)
+        AND membership_status = 'approved'
+        AND role = 'admin'
+      LIMIT 1
+    `).bind(email).first();
+
+    if (!admin) {
+      return Response.json(
+        { error: "Administrator access required." },
+        { status: 403 }
+      );
+    }
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        version_number,
+        version_date,
+        title,
+        description
+      FROM versions
+      ORDER BY version_number DESC
+    `).all();
+
+    return Response.json({
+      versions: results
+    }, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        error: "Unable to load versions",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
     return env.ASSETS.fetch(request);
   }
