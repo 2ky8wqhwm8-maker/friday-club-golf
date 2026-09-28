@@ -2899,6 +2899,48 @@ function newVersion() {
     </button>
   `;
 }
+
+async function saveVersion() {
+
+  const versionNumber =
+    document.getElementById("version-number").value.trim();
+
+  const versionDate =
+    document.getElementById("version-date").value;
+
+  const title =
+    document.getElementById("version-title").value.trim();
+
+  const description =
+    document.getElementById("version-description").value.trim();
+
+  if (!versionNumber || !versionDate || !title || !description) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  const response = await fetch("/api/versions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      version_number: versionNumber,
+      version_date: versionDate,
+      title: title,
+      description: description
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Unable to save version.");
+    return;
+  }
+
+  await loadVersions();
+}
   
 // ========================================
 // INDIVIDUAL PLAYER RESULTS
