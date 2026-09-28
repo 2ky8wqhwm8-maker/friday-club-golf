@@ -359,13 +359,14 @@
 
 <div id="admin-card" class="card" style="display: none;">
   <h2>Administrator</h2>
-  <div id="admin-menu">
+<div id="admin-menu">
 <button type="button" onclick="showAdminSection('members')">Members</button>
 <button type="button" onclick="showAdminSection('courses')">Golf Clubs</button>
 <button type="button" onclick="showAdminSection('golf-days')">Golf Days</button>
 <button type="button" onclick="showAdminSection('planning')">Availability Planning</button>    
 <button type="button" onclick="showAdminSection('results')">Enter Results</button>
-<button type="button" onclick="showAdminSection('league')">League Table</button>    
+<button type="button" onclick="showAdminSection('league')">League Table</button>
+<button type="button" onclick="showAdminSection('versions')">Version Control</button>    
 </div>
 
 <hr>
@@ -621,6 +622,20 @@
 
   <div id="admin-league-table">
     Loading league table...
+  </div>
+
+</div>
+
+<div id="admin-versions" style="display: none;">
+
+  <h3>Version Control</h3>
+
+  <button type="button" id="add-version-button">
+    + Change
+  </button>
+
+  <div id="version-list">
+    Loading versions...
   </div>
 
 </div>
@@ -2038,6 +2053,7 @@ function showAdminSection(section) {
   document.getElementById("admin-planning").style.display = "none";
   document.getElementById("admin-results").style.display = "none";
   document.getElementById("admin-league").style.display = "none";
+  document.getElementById("admin-versions").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
 
@@ -2054,6 +2070,11 @@ function showAdminSection(section) {
   if (section === "league") {
   loadAdminLeague();
 }
+ if (section === "versions") {
+  document.getElementById("admin-versions").style.display = "block";
+  loadVersions();
+}
+  
 }
 
 // ========================================
@@ -2783,6 +2804,31 @@ async function loadAdminLeague() {
 
     container.innerHTML =
       "Unable to load the league table.";
+
+  }
+}
+
+async function loadVersions() {
+
+  const container = document.getElementById("version-list");
+
+  container.innerHTML = "Loading versions...";
+
+  try {
+
+    const response = await fetch("/api/versions");
+
+    if (!response.ok) {
+      throw new Error("Unable to load versions");
+    }
+
+    const data = await response.json();
+
+    console.log("Versions:", data);
+
+  } catch (error) {
+
+    container.innerHTML = "Unable to load versions.";
 
   }
 }
