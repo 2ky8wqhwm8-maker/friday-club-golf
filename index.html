@@ -2869,15 +2869,32 @@ container.innerHTML = html;
   }
 }
 
-function newVersion() {
+async function newVersion() {
 
+    const response = await fetch("/api/versions");
+  const data = await response.json();
+
+  let nextVersion = "1.001";
+
+  if (data.versions && data.versions.length > 0) {
+
+    const latestVersion = data.versions[0].version_number;
+    const parts = latestVersion.split(".");
+
+    const major = parts[0];
+    const minor = parseInt(parts[1], 10) + 1;
+
+    nextVersion =
+      major + "." + String(minor).padStart(3, "0");
+  }
+  
   const container = document.getElementById("version-list");
 
   container.innerHTML = `
     <h4>Add Change</h4>
 
     <label>Version Number</label>
-    <input id="version-number" type="text" value="1.002">
+    <input id="version-number" type="text" value="${nextVersion}">
 
     <label>Date</label>
     <input id="version-date" type="date" value="${new Date().toISOString().split('T')[0]}">
