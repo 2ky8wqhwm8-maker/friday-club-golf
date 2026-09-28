@@ -11,7 +11,7 @@ const adminPlayer = await env.DB.prepare(`
     AND membership_status = 'approved'
   LIMIT 1
 `).bind(email).first();
-if (url.pathname === "/api/admin-league") {
+
 const isAdmin = !!adminPlayer;
     if (url.pathname === "/api/whoami") {
         return Response.json({ email });
