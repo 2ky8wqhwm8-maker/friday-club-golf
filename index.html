@@ -2962,7 +2962,78 @@ async function editVersion(id) {
     return;
   }
 
-  alert(version.description);
+  document.getElementById("version-list").innerHTML = `
+  <h4>Edit Version ${version.version_number}</h4>
+
+  <label>Version Number</label>
+  <input id="version-number" type="text"
+         value="${version.version_number}">
+
+  <label>Date</label>
+  <input id="version-date" type="date"
+         value="${version.version_date}">
+
+  <label>Title</label>
+  <input id="version-title" type="text"
+         value="${version.title}">
+
+  <label>Description</label>
+  <textarea id="version-description" rows="6"
+            style="width: 100%; box-sizing: border-box;">${version.description}</textarea>
+
+  <br><br>
+
+  <button type="button" onclick="updateVersion(${version.id})">
+    Save Changes
+  </button>
+
+  <button type="button" onclick="loadVersions()">
+    Cancel
+  </button>
+`;
+}
+
+async function updateVersion(id) {
+
+  const versionNumber =
+    document.getElementById("version-number").value.trim();
+
+  const versionDate =
+    document.getElementById("version-date").value;
+
+  const title =
+    document.getElementById("version-title").value.trim();
+
+  const description =
+    document.getElementById("version-description").value.trim();
+
+  if (!versionNumber || !versionDate || !title || !description) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  const response = await fetch("/api/versions", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: id,
+      version_number: versionNumber,
+      version_date: versionDate,
+      title: title,
+      description: description
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Unable to update version.");
+    return;
+  }
+
+  await loadVersions();
 }
   
 // ========================================
