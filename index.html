@@ -2680,7 +2680,7 @@ async function loadLiveLeague() {
   container.innerHTML = "Loading league table...";
     try {
 
-    const response = await fetch("/api/admin-league");
+    const response = await fetch("/api/full-league");
 
     if (!response.ok) {
       throw new Error("Unable to load league");
