@@ -380,7 +380,6 @@ header {
 <button type="button" onclick="showAdminSection('golf-days')">Golf Days</button>
 <button type="button" onclick="showAdminSection('planning')">Availability Planning</button>    
 <button type="button" onclick="showAdminSection('results')">Enter Results</button>
-<button type="button" onclick="showAdminSection('league')">League Table</button>
 <button type="button" onclick="showAdminSection('versions')">Version Control</button>    
 </div>
 
@@ -629,16 +628,6 @@ header {
   <div id="results-message"></div>
 
 </div>
-</div>
-
-<div id="admin-league" style="display: none;">
-
-  <h3>League Table</h3>
-
-  <div id="admin-league-table">
-    Loading league table...
-  </div>
-
 </div>
 
 <div id="admin-versions" style="display: none;">
@@ -2040,7 +2029,6 @@ function showAdminSection(section) {
   document.getElementById("admin-golf-days").style.display = "none";
   document.getElementById("admin-planning").style.display = "none";
   document.getElementById("admin-results").style.display = "none";
-  document.getElementById("admin-league").style.display = "none";
   document.getElementById("admin-versions").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
@@ -2055,9 +2043,7 @@ function showAdminSection(section) {
   if (section === "members") {
   loadPendingMembers();
 }
-  if (section === "league") {
-  loadAdminLeague();
-}
+ 
  if (section === "versions") {
   document.getElementById("admin-versions").style.display = "block";
   loadVersions();
@@ -2791,136 +2777,6 @@ async function loadLiveLeague() {
   }
 }
 
-  
-async function loadAdminLeague() {
-
-  const container =
-    document.getElementById("admin-league-table");
-
-  container.innerHTML = "Loading league table...";
-  
-  try {
-
-    const response = await fetch("/api/admin-league");
-
-    if (!response.ok) {
-      throw new Error("Unable to load admin league");
-    }
-
-    const data = await response.json();
-
-    const scoreMap = {};
-
-    data.scores.forEach(result => {
-      scoreMap[
-        result.player_id + "-" + result.golf_day_id
-      ] = result.stableford_score;
-    });
-
-    let html = `
-      <div class="admin-league-scroll">
-        <table class="admin-league-full">
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Player</th>
-              <th>H'cap</th>
-<th>Played</th>
-<th>Total</th>
-<th>Avg</th>
-    `;
-
-    data.golf_days.forEach(day => {
-
-      const parts = day.play_date.split("-");
-      const shortDate = parts[2] + "." + parts[1];
-
-      html += `
-        <th class="golf-day-heading">
-          <div>
-            ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
-          </div>
-        </th>
-      `;
-    });
-
-    html += `
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    let officialPosition = 0;
-
-    data.players.forEach(player => {
-
-      let position = "—";
-
-      if (player.played >= data.minimum_rounds) {
-        officialPosition++;
-        position = officialPosition;
-      }
-
-      const average =
-        player.average_score === null
-          ? "—"
-          : Number(player.average_score).toFixed(2);
-
-      html += `
-        <tr>
-          <td class="number">${position}</td>
-          <td>${player.first_name} ${player.last_name}</td>
-          <td class="number">${player.handicap ?? "—"}</td>
-          <td class="number">${player.played}</td>
-          <td class="number">${player.total_points}</td>
-          <td class="number">${average}</td>
-      `;
-
-      data.golf_days.forEach(day => {
-
-        const score =
-          scoreMap[player.id + "-" + day.id];
-
-        let background = "transparent";
-
-        if (score !== undefined) {
-          if (score < 20) {
-            background = "rgb(255, 200, 200)";
-          } else if (score >= 30 && score < 36) {
-            background = "rgb(255, 220, 170)";
-          } else if (score >= 36) {
-            background = "rgb(190, 235, 190)";
-          }
-        }
-
-        html += `
-          <td
-            class="number admin-result-score"
-            style="background:${background};"
-          >
-            ${score ?? ""}
-          </td>
-        `;
-      });
-
-      html += `</tr>`;
-    });
-
-    html += `
-          </tbody>
-        </table>
-      </div>
-    `;
-
-    container.innerHTML = html;
-
-  } catch (error) {
-
-    container.innerHTML =
-      "Unable to load the league table.";
-
-  }
-}
 
 async function loadLatestVersion() {
 
