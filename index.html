@@ -630,7 +630,7 @@
 
   <h3>Version Control</h3>
 
-  <button type="button" id="add-version-button">
+  <button type="button" id="add-version-button" onclick="newVersion()">
     + Change
   </button>
 
@@ -2867,6 +2867,37 @@ container.innerHTML = html;
     container.innerHTML = "Unable to load versions.";
 
   }
+}
+
+function newVersion() {
+
+  const container = document.getElementById("version-list");
+
+  container.innerHTML = `
+    <h4>Add Change</h4>
+
+    <label>Version Number</label>
+    <input id="version-number" type="text">
+
+    <label>Date</label>
+    <input id="version-date" type="date">
+
+    <label>Title</label>
+    <input id="version-title" type="text">
+
+    <label>Description</label>
+    <textarea id="version-description" rows="6"></textarea>
+
+    <br><br>
+
+    <button type="button" onclick="saveVersion()">
+      Save
+    </button>
+
+    <button type="button" onclick="loadVersions()">
+      Cancel
+    </button>
+  `;
 }
   
 // ========================================
