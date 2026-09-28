@@ -2877,10 +2877,10 @@ function newVersion() {
     <h4>Add Change</h4>
 
     <label>Version Number</label>
-    <input id="version-number" type="text">
+    <input id="version-number" type="text" value="1.002">
 
     <label>Date</label>
-    <input id="version-date" type="date">
+    <input id="version-date" type="date" value="${new Date().toISOString().split('T')[0]}">
 
     <label>Title</label>
     <input id="version-title" type="text">
