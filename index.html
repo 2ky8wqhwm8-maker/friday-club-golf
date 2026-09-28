@@ -3330,11 +3330,7 @@ const dateHeadings = fridays.map(friday => {
   width: 80px;
   min-width: 80px;
 ">
-      ${friday.toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short"
-      })}
+      ${String(friday.getDate()).padStart(2, "0")}.${String(friday.getMonth() + 1).padStart(2, "0")}
     </th>
   `;
 
