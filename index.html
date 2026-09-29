@@ -373,10 +373,21 @@ header {
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
-  header h1 {
-    font-size: 30px;
+  .header-golf-notice {
+    width: 210px;
+    font-size: 11px;
   }
-}    
+
+  .header-golf-notice h2,
+  .header-golf-notice p {
+    font-size: 11px;
+  }
+
+  .header-golf-notice p:first-of-type {
+    max-width: 210px;
+    white-space: normal;
+  }
+} 
     
   </style>
 </head>
