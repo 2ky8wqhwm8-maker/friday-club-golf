@@ -1836,16 +1836,20 @@ if (url.pathname === "/api/golf-day-notice") {
 
     const notice = await env.DB.prepare(`
       SELECT
-        n.golf_day_id,
-        n.first_tee_time,
-        n.message,
-        n.updated_at,
+        gd.id AS golf_day_id,
         gd.play_date,
         c.name AS course_name,
-        c.location AS course_location
-      FROM golf_day_notice n
-      JOIN golf_days gd ON gd.id = n.golf_day_id
-      JOIN courses c ON c.id = gd.course_id
+        c.location AS course_location,
+        n.first_tee_time,
+        n.message,
+        n.updated_at
+      FROM golf_days gd
+      JOIN courses c
+        ON c.id = gd.course_id
+      LEFT JOIN golf_day_notice n
+        ON n.golf_day_id = gd.id
+      WHERE gd.play_date >= date('now')
+      ORDER BY gd.play_date ASC
       LIMIT 1
     `).first();
 
