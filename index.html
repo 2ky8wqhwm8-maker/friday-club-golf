@@ -1971,9 +1971,9 @@ async function loadNextGolfDayNotice() {
           : ""}
       </p>
 
-      <p>
-        First tee: <strong>${notice.first_tee_time}</strong>
-      </p>
+      ${notice.first_tee_time
+  ? `<p>First tee: <strong>${notice.first_tee_time}</strong></p>`
+  : ""}
 
       ${notice.message
         ? `<p>${notice.message}</p>`
