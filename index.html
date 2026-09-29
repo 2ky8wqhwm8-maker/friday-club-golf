@@ -2006,8 +2006,11 @@ async function loadNextGolfDayNotice() {
 
     content.innerHTML = `
   <p>
-    <strong>${formatUKDate(notice.play_date)} — ${notice.course_name.replace(/golf club/gi, "").trim()}</strong>
-  </p>
+  <strong>${formatUKDate(notice.play_date)}</strong>
+</p>
+<p>
+  <strong>${notice.course_name.replace(/golf club/gi, "").trim()}</strong>
+</p>
 
   ${notice.first_tee_time
     ? `<p>First tee: <strong>${notice.first_tee_time}</strong></p>`
