@@ -447,7 +447,13 @@ header {
   </div>
   <hr>
 
-<h3>Existing members</h3>
+<div class="section-heading">
+  <h3>Members</h3>
+
+  <button type="button" onclick="showNewMemberPage()">
+    + Member
+  </button>
+</div>
 
 <div id="existing-members">
   Loading members...
@@ -455,9 +461,9 @@ header {
 
  <hr>
 
-<h3>Add Member</h3>
+<h3 id="add-member-heading" style="display: none;">Add Member</h3>
 
-<div id="add-member-form">
+<div id="add-member-form" style="display: none;">
 
   <label for="new-member-first-name">First name</label>
   <input type="text" id="new-member-first-name">
@@ -481,6 +487,10 @@ header {
   <button type="button" onclick="addMember()">
     Add Member
   </button>
+
+  <button type="button" onclick="showMemberList()">
+  Cancel
+</button>
 
   <div id="add-member-message"></div>
 
@@ -2085,6 +2095,7 @@ function showAdminSection(section) {
   }
   if (section === "members") {
   loadPendingMembers();
+  loadExistingMembers();
 }
  
  if (section === "versions") {
@@ -2094,6 +2105,26 @@ function showAdminSection(section) {
   
 }
 
+function showNewMemberPage() {
+
+  document.getElementById("pending-members").style.display = "none";
+  document.getElementById("existing-members").style.display = "none";
+
+  document.getElementById("add-member-heading").style.display = "block";
+  document.getElementById("add-member-form").style.display = "block";
+}
+
+function showMemberList() {
+
+  document.getElementById("add-member-heading").style.display = "none";
+  document.getElementById("add-member-form").style.display = "none";
+
+  document.getElementById("pending-members").style.display = "block";
+  document.getElementById("existing-members").style.display = "block";
+
+  loadPendingMembers();
+}
+  
 // ========================================
 // MEMBERS _ MANAGE PENDING
 // ========================================
@@ -2187,43 +2218,67 @@ async function loadExistingMembers() {
       return;
     }
 
-    container.innerHTML = "";
+    container.innerHTML = `
+  <div class="table-container">
+    <table id="members-table">
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>H'cap</th>
+          <th>Status</th>
+          <th>Role</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="members-table-body"></tbody>
+    </table>
+  </div>
+`;
 
     data.members.forEach(member => {
 
-      const item = document.createElement("div");
+      const item = document.createElement("tr");
 
       item.innerHTML = `
-  <p>
-    <strong>
-      ${member.first_name} ${member.last_name}
-    </strong><br>
-    Email: ${member.email || "Not supplied"}<br>
-    Phone: ${member.phone || "Not supplied"}<br>
-    Handicap: ${member.handicap ?? "Not supplied"}<br>
-    Role: ${member.role}<br>
+  <td>
+    <strong>${member.first_name} ${member.last_name}</strong>
+  </td>
 
+  <td>${member.email || "—"}</td>
+
+  <td>${member.phone || "—"}</td>
+
+  <td>${member.handicap ?? "—"}</td>
+
+  <td>
+    ${member.active ? "Active" : "Inactive"}
+  </td>
+
+  <td>
     <button
       type="button"
+      class="role-button"
       onclick="changeMemberRole(${member.id}, '${member.role}')"
     >
-      ${member.role === "admin"
-        ? "Remove Administrator"
-        : "Make Administrator"}
+      ${member.role === "admin" ? "Admin" : "Member"}
     </button>
+  </td>
 
-    <br>
-    Status: ${member.active ? "Active" : "Inactive"}
-    <br>
-
-    <button onclick="editMember(${member.id})">
+  <td>
+    <button
+      type="button"
+      onclick="editMember(${member.id})"
+    >
       Edit
     </button>
-  </p>
-  <hr>
+  </td>
 `;
 
-      container.appendChild(item);
+      document
+  .getElementById("members-table-body")
+  .appendChild(item);
 
     });
 
