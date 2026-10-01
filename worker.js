@@ -238,6 +238,9 @@ if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
     const playerId = Number(body.player_id);
     const firstName = String(body.first_name || "").trim();
     const lastName = String(body.last_name || "").trim();
+    const email = String(body.email || "").trim();
+    const whsMembershipNo =
+        String(body.whs_membership_no || "").trim();
     const phone = String(body.phone || "").trim();
     const handicap = Number(body.handicap);
     const active = body.active ? 1 : 0;
@@ -256,6 +259,28 @@ if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
       );
     }
 
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  return Response.json(
+    { error: "A valid email address is required." },
+    { status: 400 }
+  );
+}
+
+    const duplicateEmail = await env.DB.prepare(`
+  SELECT id
+  FROM players
+  WHERE LOWER(email) = LOWER(?)
+    AND id != ?
+  LIMIT 1
+`).bind(email, playerId).first();
+
+if (duplicateEmail) {
+  return Response.json(
+    { error: "This email address is already used by another member." },
+    { status: 400 }
+  );
+}
+
     if (!Number.isFinite(handicap)) {
       return Response.json(
         { error: "A valid handicap is required." },
@@ -263,24 +288,28 @@ if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
       );
     }
 
-    await env.DB.prepare(`
-      UPDATE players
-      SET
-        first_name = ?,
-        last_name = ?,
-        phone = ?,
-        handicap = ?,
-        active = ?
-      WHERE id = ?
-        AND membership_status = 'approved'
-    `).bind(
-      firstName,
-      lastName,
-      phone,
-      handicap,
-      active,
-      playerId
-    ).run();
+   await env.DB.prepare(`
+  UPDATE players
+  SET
+    first_name = ?,
+    last_name = ?,
+    email = ?,
+    phone = ?,
+    whs_membership_no = ?,
+    handicap = ?,
+    active = ?
+  WHERE id = ?
+    AND membership_status = 'approved'
+`).bind(
+  firstName,
+  lastName,
+  email,
+  phone,
+  whsMembershipNo,
+  handicap,
+  active,
+  playerId
+).run();
 
     return Response.json({
       success: true
