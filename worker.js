@@ -421,8 +421,8 @@ if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
     }
 
     const player = await env.DB.prepare(`
-      SELECT id, role
-      FROM players
+      SELECT id, role, active
+FROM players
       WHERE id = ?
         AND membership_status = 'approved'
       LIMIT 1
@@ -435,7 +435,11 @@ if (url.pathname === "/api/admin/update-role" && request.method === "POST") {
       );
     }
 
-    if (player.role === "admin" && newRole === "member") {
+    if (
+  player.role === "admin" &&
+  player.active === 1 &&
+  newRole === "member"
+) {
 
       const adminCount = await env.DB.prepare(`
         SELECT COUNT(*) AS count
