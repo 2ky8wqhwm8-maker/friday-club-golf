@@ -379,7 +379,6 @@ if (
   role,
   playerId
 ).run();
-).run();
 
     return Response.json({
       success: true
