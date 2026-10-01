@@ -410,6 +410,14 @@ header {
   min-height: 0;
 }
 
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+    
 .section-heading h3 {
   margin: 0;
 }
@@ -2324,8 +2332,9 @@ async function loadExistingMembers() {
           <th>Member</th>
           <th>Email</th>
           <th>Phone</th>
-          <th>H'cap</th>
-          <th>Status</th>
+<th>WHS No.</th>
+<th>H'cap</th>
+<th>Status</th>
           <th>Role</th>
           <th></th>
         </tr>
@@ -2350,7 +2359,9 @@ async function loadExistingMembers() {
 
   <td>${member.phone || "—"}</td>
 
-  <td>${member.handicap ?? "—"}</td>
+<td>${member.whs_membership_no || "—"}</td>
+
+<td>${member.handicap ?? "—"}</td>
 
   <td>
     ${member.active ? "Active" : "Inactive"}
