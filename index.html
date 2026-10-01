@@ -466,6 +466,59 @@ header {
 
 <hr>
   <div id="admin-members">
+
+  <div id="edit-member-page" style="display: none;">
+  <h3>Edit Member</h3>
+
+  <input type="hidden" id="edit-member-id">
+
+  <label for="edit-first-name">First name</label>
+  <input type="text" id="edit-first-name">
+
+  <label for="edit-last-name">Last name</label>
+  <input type="text" id="edit-last-name">
+
+  <label for="edit-email">Email address</label>
+  <input type="email" id="edit-email">
+
+  <label for="edit-phone">Phone number</label>
+  <input type="tel" id="edit-phone">
+
+  <label for="edit-whs">WHS Membership No.</label>
+  <input type="text" id="edit-whs">
+
+  <label for="edit-handicap">Handicap Index</label>
+  <input type="number" step="0.1" id="edit-handicap">
+
+  <label for="edit-status">Membership status</label>
+  <select id="edit-status">
+    <option value="approved">Approved</option>
+    <option value="pending">Pending</option>
+  </select>
+
+  <label for="edit-active">Active</label>
+  <select id="edit-active">
+    <option value="1">Active</option>
+    <option value="0">Inactive</option>
+  </select>
+
+  <label for="edit-role">Role</label>
+  <select id="edit-role">
+    <option value="member">Member</option>
+    <option value="admin">Admin</option>
+  </select>
+
+  <button type="button" onclick="saveEditedMember()">
+    Save Changes
+  </button>
+
+  <button type="button" onclick="cancelEditMember()">
+    Cancel
+  </button>
+
+  <div id="edit-member-message"></div>
+</div>  
+    
   <h3>Pending member registrations</h3>
 
   <div id="pending-members">
@@ -2443,79 +2496,102 @@ if (selectedGolfDay) {
   
 async function editMember(playerId) {
 
-  const response =
-    await fetch("/api/admin/members");
-
+  const response = await fetch("/api/admin/members");
   const data = await response.json();
 
-  const member =
-    data.members.find(
-      m => m.id === playerId
-    );
+  if (!response.ok) {
+    alert(data.error || "Unable to load members.");
+    return;
+  }
+
+  const member = data.members.find(
+    m => m.id === playerId
+  );
 
   if (!member) {
     alert("Member not found.");
     return;
   }
 
-  const firstName =
-    prompt("First name:", member.first_name);
+  document.getElementById("edit-member-id").value = member.id;
+  document.getElementById("edit-first-name").value = member.first_name || "";
+  document.getElementById("edit-last-name").value = member.last_name || "";
+  document.getElementById("edit-email").value = member.email || "";
+  document.getElementById("edit-phone").value = member.phone || "";
+  document.getElementById("edit-whs").value = member.whs_membership_no || "";
+  document.getElementById("edit-handicap").value = member.handicap ?? "";
+  document.getElementById("edit-status").value = member.membership_status;
+  document.getElementById("edit-active").value = member.active ? "1" : "0";
+  document.getElementById("edit-role").value = member.role || "member";
 
-  if (firstName === null) return;
-
-  const lastName =
-    prompt("Last name:", member.last_name);
-
-  if (lastName === null) return;
-
-  const phone =
-    prompt("Phone number:", member.phone || "");
-
-  if (phone === null) return;
-
-  const handicap =
-    prompt("Handicap:", member.handicap);
-
-  if (handicap === null) return;
-
-  const active =
-    confirm(
-      "Click OK for Active or Cancel for Inactive."
-    );
-
-  const updateResponse =
-    await fetch(
-      "/api/admin/update-member",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          player_id: playerId,
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-          handicap: handicap,
-          active: active
-        })
-      }
-    );
-
-  const result =
-    await updateResponse.json();
-
-  if (!updateResponse.ok) {
-    alert(
-      result.error || "Unable to update member."
-    );
-    return;
-  }
-
-  await loadExistingMembers();
-  await loadLeague();
+  document.getElementById("edit-member-message").textContent = "";
+document.querySelector("#admin-members .section-heading").style.display = "none";
+document.getElementById("pending-members").style.display = "none";
+document.getElementById("existing-members").style.display = "none";
+document.getElementById("add-member-heading").style.display = "none";
+document.getElementById("add-member-form").style.display = "none";
+  document.getElementById("edit-member-page").style.display = "block";
 }
 
+function cancelEditMember() {
+
+  document.getElementById("edit-member-page").style.display = "none";
+
+  document.querySelector(
+    "#admin-members .section-heading"
+  ).style.display = "flex";
+
+  document.getElementById("pending-members").style.display = "block";
+  document.getElementById("existing-members").style.display = "block";
+
+  loadPendingMembers();
+  loadExistingMembers();
+}
+
+async function saveEditedMember() {
+
+  const message =
+    document.getElementById("edit-member-message");
+
+  const body = {
+    player_id: Number(document.getElementById("edit-member-id").value),
+    first_name: document.getElementById("edit-first-name").value.trim(),
+    last_name: document.getElementById("edit-last-name").value.trim(),
+    email: document.getElementById("edit-email").value.trim(),
+    phone: document.getElementById("edit-phone").value.trim(),
+    whs_membership_no: document.getElementById("edit-whs").value.trim(),
+    handicap: document.getElementById("edit-handicap").value,
+    membership_status: document.getElementById("edit-status").value,
+    active: document.getElementById("edit-active").value === "1",
+    role: document.getElementById("edit-role").value
+  };
+
+  message.textContent = "Saving...";
+
+  try {
+
+    const response = await fetch("/api/admin/update-member", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Unable to save member.");
+    }
+
+    cancelEditMember();
+
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+  
+  
 // ========================================
 // MEMBERS - APPROVE
 // ========================================
