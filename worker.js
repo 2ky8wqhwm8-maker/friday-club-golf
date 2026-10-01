@@ -115,15 +115,15 @@ if (url.pathname === "/api/admin/members") {
         id,
         first_name,
         last_name,
-        email,
+               email,
         phone,
+        whs_membership_no,
         handicap,
         membership_status,
         role,
         active
       FROM players
-      WHERE membership_status = 'approved'
-      ORDER BY last_name, first_name
+ORDER BY last_name, first_name
     `).all();
 
     return Response.json({
@@ -244,7 +244,12 @@ if (url.pathname === "/api/admin/update-member" && request.method === "POST") {
     const phone = String(body.phone || "").trim();
     const handicap = Number(body.handicap);
     const active = body.active ? 1 : 0;
+const membershipStatus =
+  String(body.membership_status || "").trim();
 
+const role =
+  String(body.role || "").trim();
+    
     if (!Number.isInteger(playerId)) {
       return Response.json(
         { error: "Invalid player ID." },
@@ -288,6 +293,63 @@ if (duplicateEmail) {
       );
     }
 
+if (!["approved", "pending"].includes(membershipStatus)) {
+  return Response.json(
+    { error: "Invalid membership status." },
+    { status: 400 }
+  );
+}
+
+if (!["admin", "member"].includes(role)) {
+  return Response.json(
+    { error: "Invalid member role." },
+    { status: 400 }
+  );
+}
+
+const currentMember = await env.DB.prepare(`
+  SELECT role, active, membership_status
+  FROM players
+  WHERE id = ?
+`).bind(playerId).first();
+
+if (!currentMember) {
+  return Response.json(
+    { error: "Member not found." },
+    { status: 404 }
+  );
+}
+
+if (
+  currentMember.role === "admin" &&
+  currentMember.active === 1 &&
+  currentMember.membership_status === "approved" &&
+  (
+    role !== "admin" ||
+    active !== 1 ||
+    membershipStatus !== "approved"
+  )
+) {
+  const otherAdmin = await env.DB.prepare(`
+    SELECT id
+    FROM players
+    WHERE role = 'admin'
+      AND active = 1
+      AND membership_status = 'approved'
+      AND id != ?
+    LIMIT 1
+  `).bind(playerId).first();
+
+  if (!otherAdmin) {
+    return Response.json(
+      {
+        error: "You cannot remove or deactivate the last administrator."
+      },
+      { status: 400 }
+    );
+  }
+}
+    
    await env.DB.prepare(`
   UPDATE players
   SET
@@ -297,9 +359,10 @@ if (duplicateEmail) {
     phone = ?,
     whs_membership_no = ?,
     handicap = ?,
-    active = ?
+    active = ?,
+    membership_status = ?,
+    role = ?
   WHERE id = ?
-    AND membership_status = 'approved'
 `).bind(
   firstName,
   lastName,
@@ -308,7 +371,10 @@ if (duplicateEmail) {
   whsMembershipNo,
   handicap,
   active,
+  membershipStatus,
+  role,
   playerId
+).run();
 ).run();
 
     return Response.json({
