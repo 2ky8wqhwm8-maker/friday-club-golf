@@ -519,12 +519,17 @@ header {
   <div id="edit-member-message"></div>
 </div>  
     
+  <div id="pending-members-section">
+
   <h3>Pending member registrations</h3>
 
   <div id="pending-members">
     Loading pending registrations...
   </div>
+
   <hr>
+
+</div>
 
 <div class="section-heading">
   <h3>Members</h3>
@@ -555,6 +560,9 @@ header {
 
   <label for="new-member-phone">Phone</label>
   <input type="text" id="new-member-phone">
+
+  <label for="new-member-whs">WHS Membership No.</label>
+<input type="text" id="new-member-whs">
 
   <label for="new-member-handicap">Handicap</label>
   <input
@@ -2173,7 +2181,8 @@ function showAdminSection(section) {
     loadNoticeGolfDays();
   }
   if (section === "members") {
-  loadPendingMembers();
+  cancelEditMember();
+  showMemberList();
   loadExistingMembers();
 }
  
@@ -2186,7 +2195,11 @@ function showAdminSection(section) {
 
 function showNewMemberPage() {
 
-  document.getElementById("pending-members").style.display = "none";
+  document.querySelector(
+  "#admin-members .section-heading"
+).style.display = "none";
+
+  document.getElementById("pending-members-section").style.display = "none";
   document.getElementById("existing-members").style.display = "none";
 
   document.getElementById("add-member-heading").style.display = "block";
@@ -2195,10 +2208,14 @@ function showNewMemberPage() {
 
 function showMemberList() {
 
+  document.querySelector(
+  "#admin-members .section-heading"
+).style.display = "flex";
+  
   document.getElementById("add-member-heading").style.display = "none";
   document.getElementById("add-member-form").style.display = "none";
 
-  document.getElementById("pending-members").style.display = "block";
+  document.getElementById("pending-members-section").style.display = "block";
   document.getElementById("existing-members").style.display = "block";
 
   loadPendingMembers();
@@ -2316,7 +2333,9 @@ async function loadExistingMembers() {
   </div>
 `;
 
-    data.members.forEach(member => {
+    data.members
+  .filter(member => member.membership_status === "approved")
+  .forEach(member => {
 
       const item = document.createElement("tr");
 
@@ -2439,6 +2458,9 @@ async function addMember() {
   const phone =
     document.getElementById("new-member-phone").value.trim();
 
+  const whsMembershipNo =
+  document.getElementById("new-member-whs").value.trim();
+
   const handicap =
     document.getElementById("new-member-handicap").value;
 
@@ -2458,6 +2480,7 @@ if (!firstName || !lastName || handicap === "") {
         last_name: lastName,
         email: email,
         phone: phone,
+        whs_membership_no: whsMembershipNo,
         handicap: Number(handicap)
       })
     });
@@ -2478,6 +2501,7 @@ if (!firstName || !lastName || handicap === "") {
     document.getElementById("new-member-handicap").value = "";
 
     loadExistingMembers();
+    showMemberList();
     loadLeague();
 const selectedGolfDay =
   document.getElementById("results-golf-day").value;
@@ -2526,7 +2550,7 @@ async function editMember(playerId) {
 
   document.getElementById("edit-member-message").textContent = "";
 document.querySelector("#admin-members .section-heading").style.display = "none";
-document.getElementById("pending-members").style.display = "none";
+document.getElementById("pending-members-section").style.display = "none";
 document.getElementById("existing-members").style.display = "none";
 document.getElementById("add-member-heading").style.display = "none";
 document.getElementById("add-member-form").style.display = "none";
@@ -2541,7 +2565,7 @@ function cancelEditMember() {
     "#admin-members .section-heading"
   ).style.display = "flex";
 
-  document.getElementById("pending-members").style.display = "block";
+  document.getElementById("pending-members-section").style.display = "block";
   document.getElementById("existing-members").style.display = "block";
 
   loadPendingMembers();
