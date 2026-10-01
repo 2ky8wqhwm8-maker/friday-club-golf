@@ -2208,6 +2208,8 @@ function showNewMemberPage() {
 
 function showMemberList() {
 
+  document.getElementById("edit-member-page").style.display = "none";
+
   document.querySelector(
   "#admin-members .section-heading"
 ).style.display = "flex";
@@ -2498,7 +2500,8 @@ if (!firstName || !lastName || handicap === "") {
     document.getElementById("new-member-last-name").value = "";
     document.getElementById("new-member-email").value = "";
     document.getElementById("new-member-phone").value = "";
-    document.getElementById("new-member-handicap").value = "";
+document.getElementById("new-member-whs").value = "";
+document.getElementById("new-member-handicap").value = "";
 
     loadExistingMembers();
     showMemberList();
