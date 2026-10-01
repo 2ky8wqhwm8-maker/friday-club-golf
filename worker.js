@@ -158,7 +158,9 @@ if (url.pathname === "/api/admin/add-member" && request.method === "POST") {
     const lastName = String(body.last_name || "").trim();
     const memberEmail = String(body.email || "").trim();
     const phone = String(body.phone || "").trim();
-    const handicap = Number(body.handicap);
+const whsMembershipNo =
+  String(body.whs_membership_no || "").trim();
+const handicap = Number(body.handicap);
 
     if (
       !firstName ||
@@ -187,24 +189,26 @@ if (memberEmail) {
   }
 }
 
-    await env.DB.prepare(`
+        await env.DB.prepare(`
       INSERT INTO players
         (
           first_name,
           last_name,
           email,
           phone,
+          whs_membership_no,
           handicap,
           membership_status,
           role,
           active
         )
-      VALUES (?, ?, ?, ?, ?, 'approved', 'member', 1)
+      VALUES (?, ?, ?, ?, ?, ?, 'approved', 'member', 1)
     `).bind(
       firstName,
       lastName,
       memberEmail,
       phone,
+      whsMembershipNo,
       handicap
     ).run();
 
