@@ -454,6 +454,14 @@ header {
   
   <div id="latest-version" class="latest-version"></div>
   <h1>Friday Club Golf Society</h1>
+
+<div id="member-view-banner" style="display:none;">
+  <strong id="member-view-name"></strong>
+  <button type="button" onclick="returnToAdmin()">
+    Return to Administrator
+  </button>
+</div>
+  
   <div id="main-menu">
   <button type="button" onclick="showMainSection('home')">Home</button>
   <button type="button" onclick="showMainSection('availability')">Availability</button>  
@@ -942,6 +950,8 @@ header {
 
 <script>
 
+let viewingAsMemberId = null;
+  
 function formatUKDate(dateString) {
   const [year, month, day] = dateString.split("-");
 
@@ -2151,6 +2161,10 @@ async function loadNextGolfDayNotice() {
 // MAIN PAGE NAVIGATION  
 function showMainSection(section) {
 
+if (viewingAsMemberId !== null && section === "admin") {
+  return;
+}
+
 document.getElementById("main-home").style.display = "none";
 document.getElementById("main-availability").style.display = "none";
 document.getElementById("main-results").style.display = "none";
@@ -2390,14 +2404,20 @@ async function loadExistingMembers() {
     </button>
   </td>
 
-  <td>
-    <button
-      type="button"
-      onclick="editMember(${member.id})"
-    >
-      Edit
-    </button>
-  </td>
+ <td>
+  <button
+    type="button"
+    onclick="editMember(${member.id})"
+  >
+    Edit
+  </button>
+  <button
+    type="button"
+    onclick="viewAsMember(${member.id})"
+  >
+    View as
+  </button>
+</td>
 `;
 
       document
@@ -2414,6 +2434,50 @@ async function loadExistingMembers() {
   }
 }  
 
+async function viewAsMember(playerId) {
+  const response = await fetch("/api/admin/members");
+
+  if (!response.ok) {
+    alert("Unable to retrieve member details.");
+    return;
+  }
+
+  const data = await response.json();
+  const member = data.members.find(
+  m => Number(m.id) === Number(playerId)
+);
+
+  if (!member) {
+    alert("Member not found.");
+    return;
+  if (!member.active || member.membership_status !== "approved") {
+  alert("You can only view approved, active members.");
+  return;
+}
+  }
+
+  viewingAsMemberId = playerId;
+
+  document.getElementById("member-view-name").textContent =
+    `Viewing as ${member.first_name} ${member.last_name}`;
+
+  document.getElementById("member-view-banner").style.display = "block";
+  document.getElementById("main-admin-button").style.display = "none";
+  document.getElementById("main-menu").style.display = "none";
+
+  showMainSection("availability");
+}
+
+function returnToAdmin() {
+  viewingAsMemberId = null;
+
+  document.getElementById("member-view-banner").style.display = "none";
+  document.getElementById("main-admin-button").style.display = "inline-block";
+  document.getElementById("main-menu").style.display = "";
+
+  showMainSection("admin");
+}  
+  
 // ========================================
 // MEMBERS - CHANGE ROLE
 // ========================================
@@ -3407,7 +3471,10 @@ const meData =
   await meResponse.json();
 
 const myPlayerId =
-  meData.player?.id || null;
+  viewingAsMemberId ?? meData.player?.id ?? null;
+
+const isViewingAsMember =
+  viewingAsMemberId !== null;
     
     if (!response.ok) {
       throw new Error(
@@ -3475,8 +3542,8 @@ font-size: 13px;
 vertical-align: middle;
   ">
     ${
-      isMe
-        ? `<button
+      isMe && !isViewingAsMember
+  ? `<button
              type="button"
              onclick="changeAvailability('${dateString}', '${entry?.status || ""}')"
             style="
