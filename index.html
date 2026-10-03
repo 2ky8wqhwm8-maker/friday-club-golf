@@ -488,6 +488,7 @@ header {
 <button type="button" onclick="showAdminSection('members')">Members</button>
 <button type="button" onclick="showAdminSection('courses')">Golf Clubs</button>
 <button type="button" onclick="showAdminSection('golf-days')">Golf Days</button>
+<button type="button" onclick="showAdminSection('notice')">Golf Day Notice</button>
 <button type="button" onclick="showAdminSection('planning')">Availability Planning</button>    
 <button type="button" onclick="showAdminSection('results')">Enter Results</button>
 <button type="button" onclick="showAdminSection('versions')">Version Control</button>    
@@ -672,10 +673,22 @@ header {
 
   <hr>
 
+<h3>Existing Golf Days</h3>
+
+<div id="existing-golf-days">
+  Loading golf days...
+</div>
+
+<hr>
+  
 <!-- ========================================
      NEXT GOLF DAY NOTICE
 ========================================= -->
 
+</div>
+
+<div id="admin-notice" style="display: none;">
+  
 <h3>Next Golf Day Notice</h3>
 
 <p>
@@ -708,16 +721,6 @@ header {
 </button>
 
 <div id="notice-message-result"></div>
-
-<hr>
-  
-<h3>Existing Golf Days</h3>
-
-<div id="existing-golf-days">
-  Loading golf days...
-</div>
-  
-  <hr>
 
 </div>
 
@@ -2202,6 +2205,7 @@ function showAdminSection(section) {
   document.getElementById("admin-members").style.display = "none";
   document.getElementById("admin-courses").style.display = "none";
   document.getElementById("admin-golf-days").style.display = "none";
+  document.getElementById("admin-notice").style.display = "none";
   document.getElementById("admin-planning").style.display = "none";
   document.getElementById("admin-results").style.display = "none";
   document.getElementById("admin-versions").style.display = "none";
@@ -2212,9 +2216,10 @@ function showAdminSection(section) {
   loadAdminAvailabilityPlanning();
 }
 
-  if (section === "golf-days") {
-    loadNoticeGolfDays();
-  }
+  if (section === "notice") {
+  loadNoticeGolfDays();
+}
+  
   if (section === "members") {
   cancelEditMember();
   showMemberList();
