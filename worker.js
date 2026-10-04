@@ -1358,10 +1358,10 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
     }
 
     const golfDay = await env.DB.prepare(`
-      SELECT id
-      FROM golf_days
-      WHERE id = ?
-      LIMIT 1
+      SELECT id, date
+FROM golf_days
+WHERE id = ?
+LIMIT 1
     `).bind(golfDayId).first();
 
     if (!golfDay) {
@@ -1422,7 +1422,26 @@ if (existingResult) {
     score,
     handicap
   ).run();
+  
 }
+
+   const newerResult = await env.DB.prepare(`
+  SELECT r.id
+  FROM results r
+  JOIN golf_days g ON g.id = r.golf_day_id
+  WHERE r.player_id = ?
+    AND g.date > ?
+  LIMIT 1
+`).bind(playerId, golfDay.date).first();
+
+if (!newerResult) {
+  await env.DB.prepare(`
+    UPDATE players
+    SET handicap = ?
+    WHERE id = ?
+  `).bind(handicap, playerId).run();
+}   
+      
     }
 
     return Response.json({
