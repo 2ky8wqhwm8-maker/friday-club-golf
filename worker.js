@@ -13,6 +13,18 @@ const adminPlayer = await env.DB.prepare(`
 `).bind(email).first();
 
 const isAdmin = !!adminPlayer;
+    if (email) {
+  await env.DB.prepare(`
+    UPDATE players
+    SET last_logged_on = CURRENT_TIMESTAMP
+    WHERE LOWER(email) = LOWER(?)
+      AND membership_status = 'approved'
+      AND (
+        last_logged_on IS NULL
+        OR DATE(last_logged_on) < DATE('now')
+      )
+  `).bind(email).run();
+}
     if (url.pathname === "/api/whoami") {
         return Response.json({ email });
 }
@@ -120,8 +132,9 @@ if (url.pathname === "/api/admin/members") {
         whs_membership_no,
         handicap,
         membership_status,
-        role,
-        active
+role,
+active,
+last_logged_on
       FROM players
 ORDER BY last_name, first_name
     `).all();
