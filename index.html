@@ -2368,7 +2368,8 @@ async function loadExistingMembers() {
 <th>H'cap</th>
 <th>Status</th>
           <th>Role</th>
-          <th></th>
+<th>Last Logged On</th>
+<th></th>
         </tr>
       </thead>
       <tbody id="members-table-body"></tbody>
@@ -2408,6 +2409,18 @@ async function loadExistingMembers() {
       ${member.role === "admin" ? "Admin" : "Member"}
     </button>
   </td>
+
+<td>
+  ${member.last_logged_on
+    ? new Date(member.last_logged_on + "Z").toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      })
+    : "Never"}
+</td>
 
  <td>
   <button
