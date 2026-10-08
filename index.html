@@ -13,7 +13,7 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      background: #f4f6f5;
+      background: #f4f6f5;FV
       color: #222;
     }
 
@@ -2845,6 +2845,7 @@ let leagueData = null;
     const data =
       await response.json();
     leagueData = data;
+    console.log("LEAGUE DATA:", data.season, data.players.find(p => p.last_name === "Piggott"));
     document.getElementById(
       "season-title"
     ).textContent =
