@@ -2148,12 +2148,21 @@ if (!member) {
   );
 }
 
-    const season = await env.DB.prepare(`
-      SELECT id, name, minimum_rounds
-      FROM seasons
-      WHERE status = 'current'
-      LIMIT 1
-    `).first();
+    const requestedSeason = url.searchParams.get("season");
+
+const season = await env.DB.prepare(`
+  SELECT id, name, minimum_rounds
+  FROM seasons
+  WHERE
+    (? IS NULL AND status = 'current')
+    OR
+    (? IS NOT NULL AND id = ?)
+  LIMIT 1
+`).bind(
+  requestedSeason,
+  requestedSeason,
+  requestedSeason
+).first();
 
     if (!season) {
       return Response.json(
