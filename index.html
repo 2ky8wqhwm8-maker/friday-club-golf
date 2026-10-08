@@ -478,6 +478,10 @@ header {
 
 <hr>
   <p id="season-title">League Table</p>
+  <select id="season-selector" onchange="loadLeague()">
+  <option value="">2026 Season</option>
+  <option value="2">2025 Season</option>
+</select>
 </header>
 
 <main>
@@ -2823,8 +2827,14 @@ let leagueData = null;
 
   try {
 
+    const selectedSeason =
+      document.getElementById("season-selector").value;
+
     const response =
-      await fetch("/api/league");
+      await fetch(
+        "/api/league" +
+        (selectedSeason ? "?season=" + selectedSeason : "")
+      );
 
     if (!response.ok) {
       throw new Error(
