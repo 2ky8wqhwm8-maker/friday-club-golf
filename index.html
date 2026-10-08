@@ -478,7 +478,7 @@ header {
 
 <hr>
   <p id="season-title">League Table</p>
-  <select id="season-selector" onchange="loadLeague()">
+ <select id="season-selector" onchange="loadLiveLeague()">
   <option value="">2026 Season</option>
   <option value="2">2025 Season</option>
 </select>
@@ -3006,7 +3006,13 @@ async function loadLiveLeague() {
   container.innerHTML = "Loading league table...";
     try {
 
-    const response = await fetch("/api/full-league");
+    const selectedSeason =
+  document.getElementById("season-selector").value;
+
+const response = await fetch(
+  "/api/full-league" +
+  (selectedSeason ? "?season=" + selectedSeason : "")
+);
 
     if (!response.ok) {
       throw new Error("Unable to load league");
