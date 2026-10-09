@@ -477,13 +477,7 @@ header {
 </div>
 
 <hr>
-  <p id="season-title">League Table</p>
- <select id="season-selector" onchange="loadLiveLeague()">
-  <option value="">2026 Season</option>
-  <option value="2">2025 Season</option>
-  <option value="3">2024 Season</option>
-  <option value="4">2023 Season</option>
-</select>
+  
   
 </header>
 
@@ -901,12 +895,20 @@ header {
   <div id="league-section">
 
 <div id="main-home">
-<!-- ========================================
-     NEXT GOLF DAY - MEMBER NOTICE
-========================================= -->
 
+  <p id="season-title">League Table</p>
 
-  
+  <select id="season-selector" onchange="loadLiveLeague()">
+    <option value="">2026 Season</option>
+    <option value="2">2025 Season</option>
+    <option value="3">2024 Season</option>
+    <option value="4">2023 Season</option>
+  </select>
+
+  <!-- ========================================
+       NEXT GOLF DAY - MEMBER NOTICE
+  ========================================= -->
+
   <div class="table-container">
      <div id="live-league-table">
   Loading league table...
