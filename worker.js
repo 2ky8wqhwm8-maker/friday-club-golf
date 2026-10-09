@@ -1980,9 +1980,9 @@ if (url.pathname === "/api/golf-day-notice") {
       FROM golf_days gd
       JOIN courses c
         ON c.id = gd.course_id
-      LEFT JOIN golf_day_notice n
-        ON n.golf_day_id = gd.id
-      WHERE gd.play_date >= date('now')
+      JOIN golf_day_notice n
+  ON n.golf_day_id = gd.id
+WHERE gd.play_date >= date('now')
       ORDER BY gd.play_date ASC
       LIMIT 1
     `).first();
