@@ -435,6 +435,25 @@ header {
   box-sizing: border-box;
   margin: 0;
 }    
+
+.league-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.league-heading-row #season-title {
+  margin: 0;
+}
+
+.league-heading-row #season-selector {
+  width: auto;
+  max-width: 160px;
+  margin: 0;
+  flex-shrink: 0;
+}
     
   </style>
 </head>
@@ -898,12 +917,18 @@ header {
 
   <p id="season-title">League Table</p>
 
+  <div class="league-heading-row">
+
+  <p id="season-title">League Table</p>
+
   <select id="season-selector" onchange="loadLiveLeague()">
     <option value="">2026 Season</option>
     <option value="2">2025 Season</option>
     <option value="3">2024 Season</option>
     <option value="4">2023 Season</option>
   </select>
+
+</div>
 
   <!-- ========================================
        NEXT GOLF DAY - MEMBER NOTICE
