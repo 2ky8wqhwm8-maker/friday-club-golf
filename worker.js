@@ -1173,9 +1173,10 @@ ORDER BY gd.play_date DESC
 `).bind(playerId, season.id).all();
 
     return Response.json({
-      player: player,
-      results: results
-    });
+  player: player,
+  season: season.name,
+  results: results
+});
 
   } catch (error) {
     return Response.json(
