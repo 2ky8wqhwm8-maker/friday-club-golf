@@ -3238,11 +3238,12 @@ async function loadFormTable() {
           : Number(player.average_score);
 
       return {
-        ...player,
-        formAverage,
-        seasonAverage,
-        qualified: scores.length === 5
-      };
+  ...player,
+  scores,
+  formAverage,
+  seasonAverage,
+  qualified: scores.length === 5
+};
 
     }).sort((a, b) =>
       (b.qualified - a.qualified) ||
@@ -3259,6 +3260,7 @@ async function loadFormTable() {
       <th class="number">Pos</th>
       <th>Player</th>
       <th class="number">Played</th>
+      <th>Last 5 Scores</th>
       <th class="number">Last 5 Avg</th>
       <th class="number">Season Avg</th>
       <th class="number">Form</th>
@@ -3282,6 +3284,27 @@ async function loadFormTable() {
                   <td class="number">${rank}</td>
                   <td>${player.first_name} ${player.last_name}</td>
                   <td class="number">${player.played}</td>
+                  <td>
+  ${player.scores.map(score => {
+    let background = "transparent";
+
+    if (score < 20) {
+      background = "rgb(255, 200, 200)";
+    } else if (score >= 30 && score < 36) {
+      background = "rgb(255, 220, 170)";
+    } else if (score >= 36) {
+      background = "rgb(190, 235, 190)";
+    }
+
+    return `<span style="
+      display:inline-block;
+      background:${background};
+      padding:2px 4px;
+      margin-right:2px;
+      border-radius:3px;
+    ">${score}</span>`;
+  }).join("") || "—"}
+</td>
                   <td class="number">
                     ${player.formAverage?.toFixed(2) ?? "—"}
                   </td>
