@@ -1108,7 +1108,7 @@ if (url.pathname === "/api/player-results") {
     const playerId =
       Number(url.searchParams.get("player_id"));
 
-    const requestedSeason = url.searchParams.get("season");
+    const requestedSeason = url.searchParams.get("season") || null;
 
     if (!Number.isInteger(playerId) || playerId <= 0) {
       return Response.json(
