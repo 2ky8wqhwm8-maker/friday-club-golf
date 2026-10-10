@@ -2208,6 +2208,75 @@ const season = await env.DB.prepare(`
       ORDER BY gd.play_date DESC
     `).bind(season.id).all();
 
+const latestPlayedDay = await env.DB.prepare(`
+  SELECT gd.id, gd.play_date
+  FROM golf_days gd
+  JOIN results r
+    ON r.golf_day_id = gd.id
+  WHERE gd.season_id = ?
+  GROUP BY gd.id, gd.play_date
+  ORDER BY gd.play_date DESC, gd.id DESC
+  LIMIT 1
+`).bind(season.id).first();
+
+    const previousStandings = latestPlayedDay
+  ? await env.DB.prepare(`
+      SELECT
+        p.id,
+        COUNT(r.id) AS played,
+        ROUND(AVG(r.stableford_score), 2) AS average_score
+      FROM players p
+      LEFT JOIN results r
+        ON r.player_id = p.id
+        AND r.golf_day_id IN (
+          SELECT id
+          FROM golf_days
+          WHERE season_id = ?
+            AND (
+              play_date < ?
+              OR (play_date = ? AND id < ?)
+            )
+        )
+      WHERE p.active = 1
+      GROUP BY p.id
+      HAVING COUNT(r.id) >= ?
+      ORDER BY
+        average_score DESC,
+        p.last_name ASC,
+        p.first_name ASC
+    `).bind(
+      season.id,
+      latestPlayedDay.play_date,
+      latestPlayedDay.play_date,
+      latestPlayedDay.id,
+      season.minimum_rounds
+    ).all()
+  : { results: [] };
+
+    const previousPositions = new Map();
+
+previousStandings.results.forEach((player, index) => {
+  previousPositions.set(player.id, index + 1);
+});
+
+    let currentPosition = 0;
+
+players.results.forEach(player => {
+  if (player.played < season.minimum_rounds) {
+    player.position_change = null;
+    return;
+  }
+
+  currentPosition++;
+
+  const previousPosition = previousPositions.get(player.id);
+
+  player.position_change =
+    previousPosition === undefined
+      ? "NEW"
+      : previousPosition - currentPosition;
+});
+    
     const players = await env.DB.prepare(`
       SELECT
         p.id,
