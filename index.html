@@ -3261,6 +3261,19 @@ async function loadFormTable() {
       ((b.formAverage ?? -1) - (a.formAverage ?? -1))
     );
 
+    const previousPositions = new Map();
+
+data.players
+  .filter(player => player.previous_form_average !== null)
+  .sort((a, b) =>
+    b.previous_form_average - a.previous_form_average ||
+    a.last_name.localeCompare(b.last_name) ||
+    a.first_name.localeCompare(b.first_name)
+  )
+  .forEach((player, index) => {
+    previousPositions.set(player.id, index + 1);
+  });
+    
     let position = 0;
 
     container.innerHTML = `
@@ -3284,6 +3297,14 @@ async function loadFormTable() {
                 ? ++position
                 : "—";
 
+              const previousPosition = previousPositions.get(player.id);
+
+const positionChange = !player.qualified
+  ? null
+  : previousPosition === undefined
+    ? "NEW"
+    : previousPosition - rank;
+
               const difference =
                 player.formAverage !== null &&
                 player.seasonAverage !== null
@@ -3292,7 +3313,18 @@ async function loadFormTable() {
 
               return `
                 <tr>
-                  <td class="number">${rank}</td>
+                  <td class="number">
+  ${rank}
+  ${positionChange === "NEW"
+    ? '<span style="color:blue;">NEW</span>'
+    : typeof positionChange === "number"
+      ? positionChange > 0
+        ? `<span style="color:green;">▲ ${positionChange}</span>`
+        : positionChange < 0
+          ? `<span style="color:red;">▼ ${Math.abs(positionChange)}</span>`
+          : '<span style="color:gray;">—</span>'
+      : ""}
+</td>
                   <td>${player.first_name} ${player.last_name}</td>
                   <td class="number">${player.played}</td>
                   <td>
