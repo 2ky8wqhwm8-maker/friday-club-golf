@@ -3471,7 +3471,12 @@ async function showPlayerResults(playerId) {
       <h2>
         Results — ${data.player.first_name} ${data.player.last_name}
       </h2>
-
+<div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 15px 0;">
+  <div><strong>Rounds:</strong> ${roundsPlayed}</div>
+  <div><strong>Average:</strong> ${averageScore}</div>
+  <div><strong>Best:</strong> ${bestScore}</div>
+  <div><strong>Last 5 Avg:</strong> ${lastFiveAverage}</div>
+</div>
       <div class="table-container">
         <table>
           <thead>
