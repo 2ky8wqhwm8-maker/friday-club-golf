@@ -3481,8 +3481,12 @@ const response = await fetch(
 
     resultsSection.innerHTML = `
       <h2>
-        Results — ${data.player.first_name} ${data.player.last_name}
-      </h2>
+  ${data.player.first_name} ${data.player.last_name}
+</h2>
+
+<h3 style="margin: 5px 0 15px; color: #555;">
+  ${data.season} — Player Statistics
+</h3>
 <div style="
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
