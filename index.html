@@ -3104,7 +3104,12 @@ const response = await fetch(
       html += `
         <tr>
           <td class="number">${position}</td>
-          <td>${player.first_name} ${player.last_name}</td>
+          <td>
+  <a href="#"
+     onclick="showPlayerResults(${player.id}); return false;">
+    ${player.first_name} ${player.last_name}
+  </a>
+</td>
           <td class="number">${player.handicap ?? "—"}</td>
           <td class="number">${player.played}</td>
           <td class="number">${player.total_points}</td>
