@@ -2259,23 +2259,7 @@ previousStandings.results.forEach((player, index) => {
   previousPositions.set(player.id, index + 1);
 });
 
-    let currentPosition = 0;
-
-players.results.forEach(player => {
-  if (player.played < season.minimum_rounds) {
-    player.position_change = null;
-    return;
-  }
-
-  currentPosition++;
-
-  const previousPosition = previousPositions.get(player.id);
-
-  player.position_change =
-    previousPosition === undefined
-      ? "NEW"
-      : previousPosition - currentPosition;
-});
+    
     
     const players = await env.DB.prepare(`
       SELECT
@@ -2305,6 +2289,24 @@ players.results.forEach(player => {
         p.last_name ASC,
         p.first_name ASC
     `).bind(season.id).all();
+
+    let currentPosition = 0;
+
+players.results.forEach(player => {
+  if (player.played < season.minimum_rounds) {
+    player.position_change = null;
+    return;
+  }
+
+  currentPosition++;
+
+  const previousPosition = previousPositions.get(player.id);
+
+  player.position_change =
+    previousPosition === undefined
+      ? "NEW"
+      : previousPosition - currentPosition;
+});
 
     const scores = await env.DB.prepare(`
       SELECT
