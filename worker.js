@@ -1108,6 +1108,8 @@ if (url.pathname === "/api/player-results") {
     const playerId =
       Number(url.searchParams.get("player_id"));
 
+    const requestedSeason = url.searchParams.get("season");
+
     if (!Number.isInteger(playerId) || playerId <= 0) {
       return Response.json(
         { error: "Invalid player." },
@@ -1115,6 +1117,27 @@ if (url.pathname === "/api/player-results") {
       );
     }
 
+const season = await env.DB.prepare(`
+  SELECT id, name
+  FROM seasons
+  WHERE
+    (? IS NULL AND status = 'current')
+    OR
+    (? IS NOT NULL AND id = ?)
+  LIMIT 1
+`).bind(
+  requestedSeason,
+  requestedSeason,
+  requestedSeason
+).first();
+
+if (!season) {
+  return Response.json(
+    { error: "Season not found." },
+    { status: 404 }
+  );
+}
+    
     const player = await env.DB.prepare(`
       SELECT
         id,
@@ -1145,8 +1168,9 @@ if (url.pathname === "/api/player-results") {
       JOIN courses c
         ON c.id = gd.course_id
       WHERE r.player_id = ?
-      ORDER BY gd.play_date DESC
-    `).bind(playerId).all();
+  AND gd.season_id = ?
+ORDER BY gd.play_date DESC
+`).bind(playerId, season.id).all();
 
     return Response.json({
       player: player,
