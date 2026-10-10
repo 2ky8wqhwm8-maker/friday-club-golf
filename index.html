@@ -3144,7 +3144,18 @@ const response = await fetch(
 
       html += `
         <tr>
-          <td class="number">${position}</td>
+          <td class="number">
+  ${position}
+  ${player.position_change === "NEW"
+    ? '<span style="color:blue;">NEW</span>'
+    : typeof player.position_change === "number"
+      ? player.position_change > 0
+        ? `<span style="color:green;">▲ ${player.position_change}</span>`
+        : player.position_change < 0
+          ? `<span style="color:red;">▼ ${Math.abs(player.position_change)}</span>`
+          : '<span style="color:gray;">—</span>'
+      : ""}
+</td>
           <td>
   <a href="#"
      onclick="showPlayerResults(${player.id}); return false;">
