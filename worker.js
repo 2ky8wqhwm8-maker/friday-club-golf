@@ -2123,6 +2123,36 @@ const season = await env.DB.prepare(`
             row => row.stableford_score
           );
 
+          const previousRecent = await env.DB.prepare(`
+  SELECT r.stableford_score
+  FROM results r
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  WHERE r.player_id = ?
+    AND gd.season_id = ?
+    AND gd.id <> (
+      SELECT gd2.id
+      FROM golf_days gd2
+      JOIN results r2 ON r2.golf_day_id = gd2.id
+      WHERE gd2.season_id = ?
+      ORDER BY gd2.play_date DESC, gd2.id DESC
+      LIMIT 1
+    )
+  ORDER BY gd.play_date DESC, gd.id DESC
+  LIMIT 5
+`).bind(player.id, season.id, season.id).all();
+
+player.previous_5 = previousRecent.results.map(
+  row => row.stableford_score
+);
+
+          player.previous_form_average =
+  player.previous_5.length === 5
+    ? player.previous_5.reduce(
+        (total, score) => total + Number(score), 0
+      ) / 5
+    : null;
+          
           player.minimum_rounds = season.minimum_rounds;
 
           player.eligible =
