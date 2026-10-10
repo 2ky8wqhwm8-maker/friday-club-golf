@@ -3444,6 +3444,26 @@ async function showPlayerResults(playerId) {
       return;
     }
 
+    const scores = data.results
+      .map(result => Number(result.stableford_score))
+      .filter(score => Number.isFinite(score));
+
+    const roundsPlayed = scores.length;
+
+    const averageScore = roundsPlayed
+      ? (scores.reduce((a, b) => a + b, 0) / roundsPlayed).toFixed(2)
+      : "—";
+
+    const bestScore = roundsPlayed
+      ? Math.max(...scores)
+      : "—";
+
+    const lastFive = scores.slice(0, 5);
+
+    const lastFiveAverage = lastFive.length
+      ? (lastFive.reduce((a, b) => a + b, 0) / lastFive.length).toFixed(2)
+      : "—";
+    
     const resultsSection =
       document.getElementById("player-results-view");
 
