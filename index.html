@@ -483,6 +483,7 @@ header {
   
   <div id="main-menu">
   <button type="button" onclick="showMainSection('home')">Home</button>
+  <button type="button" onclick="showMainSection('form')">Form Table</button>
   <button type="button" onclick="showMainSection('availability')">Availability</button>  
   <button type="button" onclick="showMainSection('results')">Results</button>
   <button
@@ -928,6 +929,22 @@ header {
 
 </div>
 
+<!-- ========================================
+     FORM TABLE
+======================================== -->
+
+<div id="main-form" style="display: none;">
+
+  <h2>Current Form — Last 5 Rounds</h2>
+
+  <div class="table-container">
+    <div id="form-league-table">
+      Loading form table...
+    </div>
+  </div>
+
+</div>  
+
   <!-- ========================================
        NEXT GOLF DAY - MEMBER NOTICE
   ========================================= -->
@@ -937,6 +954,16 @@ header {
   Loading league table...
 </div>
 
+    <h3 style="margin-top: 25px;">
+  Current Form — Last 5 Rounds
+</h3>
+
+<div class="table-container">
+  <div id="form-league-table">
+    Loading form table...
+  </div>
+</div>
+    
     </div>
 
   </div>
@@ -2201,6 +2228,7 @@ if (viewingAsMemberId !== null && section === "admin") {
 }
 
 document.getElementById("main-home").style.display = "none";
+document.getElementById("main-form").style.display = "none";
 document.getElementById("main-availability").style.display = "none";
 document.getElementById("main-results").style.display = "none";
   document.getElementById("admin-card").style.display = "none";
@@ -2209,6 +2237,11 @@ document.getElementById("main-results").style.display = "none";
     document.getElementById("main-home").style.display = "block";
       }
 
+  if (section === "form") {
+  document.getElementById("main-form").style.display = "block";
+  loadFormTable();
+}
+  
   if (section === "availability") {
   document.getElementById("main-availability").style.display = "block";
   loadAvailabilityGrid();
@@ -3160,7 +3193,116 @@ const response = await fetch(
   }
 }
 
+// ========================================
+// CURRENT SEASON FORM TABLE
+// ========================================
 
+async function loadFormTable() {
+
+  const container =
+    document.getElementById("form-league-table");
+
+  container.innerHTML = "Loading form table...";
+
+  try {
+
+    const response = await fetch("/api/league");
+
+    if (!response.ok) {
+      throw new Error("Unable to load form table");
+    }
+
+    const data = await response.json();
+
+    const players = data.players.map(player => {
+
+      const scores = (player.last_10 || [])
+        .slice(0, 5)
+        .map(Number);
+
+      const formAverage = scores.length
+        ? scores.reduce((a, b) => a + b, 0) / scores.length
+        : null;
+
+      const seasonAverage =
+        player.average_score === null
+          ? null
+          : Number(player.average_score);
+
+      return {
+        ...player,
+        formAverage,
+        seasonAverage,
+        qualified: scores.length === 5
+      };
+
+    }).sort((a, b) =>
+      (b.qualified - a.qualified) ||
+      ((b.formAverage ?? -1) - (a.formAverage ?? -1))
+    );
+
+    let position = 0;
+
+    container.innerHTML = `
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Player</th>
+              <th>Played</th>
+              <th>Last 5 Avg</th>
+              <th>Season Avg</th>
+              <th>Form</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${players.map(player => {
+
+              const rank = player.qualified
+                ? ++position
+                : "—";
+
+              const difference =
+                player.formAverage !== null &&
+                player.seasonAverage !== null
+                  ? player.formAverage - player.seasonAverage
+                  : null;
+
+              return `
+                <tr>
+                  <td class="number">${rank}</td>
+                  <td>${player.first_name} ${player.last_name}</td>
+                  <td class="number">${player.played}</td>
+                  <td class="number">
+                    ${player.formAverage?.toFixed(2) ?? "—"}
+                  </td>
+                  <td class="number">
+                    ${player.seasonAverage?.toFixed(2) ?? "—"}
+                  </td>
+                  <td class="number">
+                    ${difference === null
+                      ? "—"
+                      : (difference > 0 ? "+" : "") + difference.toFixed(2)}
+                  </td>
+                </tr>
+              `;
+
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+  } catch (error) {
+
+    container.innerHTML =
+      "Unable to load the form table.";
+
+  }
+}
+
+  
 async function loadLatestVersion() {
 
   try {
