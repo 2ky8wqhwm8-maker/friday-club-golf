@@ -3438,9 +3438,12 @@ async function updateVersion(id) {
 async function showPlayerResults(playerId) {
 
   try {
-    const response = await fetch(
-      `/api/player-results?player_id=${playerId}`
-    );
+    const selectedSeason =
+  document.getElementById("season-selector").value;
+
+const response = await fetch(
+  `/api/player-results?player_id=${playerId}&season=${encodeURIComponent(selectedSeason)}`
+);
 
     const data = await response.json();
 
@@ -3463,6 +3466,10 @@ async function showPlayerResults(playerId) {
       ? Math.max(...scores)
       : "—";
 
+    const worstScore = roundsPlayed
+  ? Math.min(...scores)
+  : "—";
+    
     const lastFive = scores.slice(0, 5);
 
     const lastFiveAverage = lastFive.length
@@ -3483,11 +3490,12 @@ async function showPlayerResults(playerId) {
   margin: 15px 0 20px;
 ">
   ${[
-    ["Rounds Played", roundsPlayed],
-    ["Season Average", averageScore],
-    ["Best Score", bestScore],
-    ["Last 5 Average", lastFiveAverage]
-  ].map(([label, value]) => `
+  ["Rounds Played", roundsPlayed],
+  ["Season Average", averageScore],
+  ["Best Round", bestScore],
+  ["Worst Round", worstScore],
+  ["Last 5 Average", lastFiveAverage]
+].map(([label, value]) => ``
     <div style="
       background: #f0f4f0;
       border: 1px solid #d5e2d5;
