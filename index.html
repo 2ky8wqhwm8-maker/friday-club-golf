@@ -3476,11 +3476,33 @@ async function showPlayerResults(playerId) {
       <h2>
         Results — ${data.player.first_name} ${data.player.last_name}
       </h2>
-<div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 15px 0;">
-  <div><strong>Rounds:</strong> ${roundsPlayed}</div>
-  <div><strong>Average:</strong> ${averageScore}</div>
-  <div><strong>Best:</strong> ${bestScore}</div>
-  <div><strong>Last 5 Avg:</strong> ${lastFiveAverage}</div>
+<div style="
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 15px 0 20px;
+">
+  ${[
+    ["Rounds Played", roundsPlayed],
+    ["Season Average", averageScore],
+    ["Best Score", bestScore],
+    ["Last 5 Average", lastFiveAverage]
+  ].map(([label, value]) => `
+    <div style="
+      background: #f0f4f0;
+      border: 1px solid #d5e2d5;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    ">
+      <div style="font-size: 22px; font-weight: bold;">
+        ${value}
+      </div>
+      <div style="font-size: 12px; margin-top: 5px;">
+        ${label}
+      </div>
+    </div>
+  `).join("")}
 </div>
       <div class="table-container">
         <table>
