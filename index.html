@@ -454,6 +454,22 @@ header {
   margin: 0;
   flex-shrink: 0;
 }
+
+/* Compact Form Table */
+#form-table th,
+#form-table td {
+  padding: 4px 6px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+#form-table th {
+  white-space: nowrap;
+}
+
+#form-table td {
+  height: 22px;
+}
     
   </style>
 </head>
@@ -3237,17 +3253,17 @@ async function loadFormTable() {
 
     container.innerHTML = `
       <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Player</th>
-              <th>Played</th>
-              <th>Last 5 Avg</th>
-              <th>Season Avg</th>
-              <th>Form</th>
-            </tr>
-          </thead>
+        <table id="form-table">
+  <thead>
+    <tr>
+      <th class="number">Pos</th>
+      <th>Player</th>
+      <th class="number">Played</th>
+      <th class="number">Last 5 Avg</th>
+      <th class="number">Season Avg</th>
+      <th class="number">Form</th>
+    </tr>
+  </thead>
           <tbody>
             ${players.map(player => {
 
