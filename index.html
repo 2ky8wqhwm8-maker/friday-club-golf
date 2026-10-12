@@ -3864,6 +3864,62 @@ console.log("Chart data:", chartData);
 container.innerHTML = '<canvas id="player-course-canvas"></canvas>';
 
 const canvas = document.getElementById("player-course-canvas");
+
+new Chart(canvas, {
+  type: "bar",
+
+  data: {
+    labels: courses,
+
+    datasets: seasons.map((season, index) => ({
+      label: season,
+      data: chartData.map(row => row[season]),
+      backgroundColor: [
+        "#9CA3AF",
+        "#60A5FA",
+        "#F59E0B",
+        "#166534"
+      ][index % 4],
+      borderWidth: 0
+    }))
+  },
+
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+
+    plugins: {
+      legend: {
+        position: "top"
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label +
+              ": " + context.parsed.y +
+              " Stableford points";
+          }
+        }
+      }
+    },
+
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Average Stableford Points"
+        }
+      },
+      x: {
+        ticks: {
+          maxRotation: 65,
+          minRotation: 45
+        }
+      }
+    }
+  }
+});
     
   } catch (error) {
     container.textContent = "Unable to load course averages.";
