@@ -3918,11 +3918,15 @@ new Chart(canvas, {
         }
       },
       x: {
-        ticks: {
-          maxRotation: 65,
-          minRotation: 45
-        }
-      }
+  ticks: {
+    maxRotation: 90,
+    minRotation: 90,
+    autoSkip: false,
+    font: {
+      size: 11
+    }
+  }
+}
     }
   }
 });
