@@ -3861,7 +3861,13 @@ const chartData = courses.map(course => {
 });
 
 console.log("Chart data:", chartData);
-container.innerHTML = '<canvas id="player-course-canvas"></canvas>';
+container.innerHTML = `
+  <div style="width:100%; overflow-x:auto;">
+    <div style="width:1800px; height:450px;">
+      <canvas id="player-course-canvas"></canvas>
+    </div>
+  </div>
+`;
 
 const canvas = document.getElementById("player-course-canvas");
 
