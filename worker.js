@@ -1447,7 +1447,7 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
     }
 
     const golfDay = await env.DB.prepare(`
-  SELECT id, play_date
+  SELECT id, play_date, results_submitted
   FROM golf_days
   WHERE id = ?
   LIMIT 1
@@ -1458,6 +1458,14 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
         { error: "Golf day not found." },
         { status: 404 }
       );
+      if (golfDay.results_submitted === 1) {
+  return Response.json(
+    {
+      error: "Results for this Golf Day have already been submitted."
+    },
+    { status: 409 }
+  );
+}
     }
 
     for (const result of results) {
@@ -1582,10 +1590,10 @@ if (
     }
 
     const golfDay = await env.DB.prepare(`
-      SELECT id
-      FROM golf_days
-      WHERE id = ?
-    `).bind(golfDayId).first();
+  SELECT id, results_submitted
+  FROM golf_days
+  WHERE id = ?
+`).bind(golfDayId).first();
 
     if (!golfDay) {
       return Response.json(
@@ -1593,6 +1601,14 @@ if (
         { status: 404 }
       );
     }
+    if (golfDay.results_submitted === 1) {
+  return Response.json(
+    {
+      error: "Cannot change handicaps. Golf Day results have already been submitted."
+    },
+    { status: 409 }
+  );
+}
 
     const statements = [];
 
