@@ -3855,6 +3855,9 @@ const chartData = courses.map(course => {
     row[season] = result
       ? Number(result.average_score)
       : null;
+    row[season + "_rounds"] = result
+  ? Number(result.rounds_played)
+  : 0;
   });
 
   return row;
@@ -3909,10 +3912,16 @@ new Chart(canvas, {
       tooltip: {
         callbacks: {
           label: function(context) {
-            return context.dataset.label +
-              ": " + context.parsed.y +
-              " Stableford points";
-          }
+  const season = context.dataset.label;
+  const courseIndex = context.dataIndex;
+
+  const rounds = chartData[courseIndex][season + "_rounds"];
+
+  return season + ": " +
+    context.parsed.y + " Stableford points" +
+    " (" + rounds + " " +
+    (rounds === 1 ? "round" : "rounds") + ")";
+}
         }
       }
     },
