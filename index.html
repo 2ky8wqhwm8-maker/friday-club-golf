@@ -3829,7 +3829,16 @@ async function loadPlayerCourseChart(playerId) {
       return;
     }
 
-    console.log("Player course averages:", data.results);
+    const seasons = [...new Set(
+  data.results.map(row => row.season_name)
+)].sort();
+
+const courses = [...new Set(
+  data.results.map(row => row.course_name)
+)].sort();
+
+console.log("Chart seasons:", seasons);
+console.log("Chart courses:", courses);
 
   } catch (error) {
     container.textContent = "Unable to load course averages.";
