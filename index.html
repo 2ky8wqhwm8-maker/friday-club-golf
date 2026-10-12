@@ -3863,7 +3863,7 @@ const chartData = courses.map(course => {
 console.log("Chart data:", chartData);
 container.innerHTML = `
   <div style="width:100%; overflow-x:auto;">
-    <div style="width:1800px; height:450px;">
+    <div style="width:1800px; height:400px;">
       <canvas id="player-course-canvas"></canvas>
     </div>
   </div>
@@ -3875,7 +3875,9 @@ new Chart(canvas, {
   type: "bar",
 
   data: {
-    labels: courses,
+    labels: courses.map(course =>
+  course.replace(/\s+Golf Club\b/gi, "").trim()
+),
 
     datasets: seasons.map((season, index) => ({
       label: season,
