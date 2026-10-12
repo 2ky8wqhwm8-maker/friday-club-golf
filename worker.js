@@ -1549,6 +1549,106 @@ if (!newerResult) {
 }
 
 // ========================================
+// SAVE PREPARED HANDICAPS
+// ========================================
+
+if (
+  url.pathname === "/api/admin/prepared-handicaps" &&
+  request.method === "POST"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+
+    const golfDayId = Number(body.golf_day_id);
+    const handicaps = body.handicaps;
+
+    if (
+      !Number.isInteger(golfDayId) ||
+      golfDayId <= 0 ||
+      !Array.isArray(handicaps)
+    ) {
+      return Response.json(
+        { error: "Invalid handicap data." },
+        { status: 400 }
+      );
+    }
+
+    const golfDay = await env.DB.prepare(`
+      SELECT id
+      FROM golf_days
+      WHERE id = ?
+    `).bind(golfDayId).first();
+
+    if (!golfDay) {
+      return Response.json(
+        { error: "Golf Day not found." },
+        { status: 404 }
+      );
+    }
+
+    const statements = [];
+
+    for (const item of handicaps) {
+      const playerId = Number(item.player_id);
+      const handicap = Number(item.handicap);
+
+      if (
+        !Number.isInteger(playerId) ||
+        playerId <= 0 ||
+        item.handicap === null ||
+        item.handicap === "" ||
+        !Number.isFinite(handicap) ||
+        handicap < 0 ||
+        handicap > 54
+      ) {
+        return Response.json(
+          { error: "Invalid player or handicap." },
+          { status: 400 }
+        );
+      }
+
+      statements.push(
+        env.DB.prepare(`
+          INSERT INTO prepared_handicaps
+            (golf_day_id, player_id, handicap)
+          VALUES (?, ?, ?)
+          ON CONFLICT(golf_day_id, player_id)
+          DO UPDATE SET
+            handicap = excluded.handicap,
+            updated_at = CURRENT_TIMESTAMP
+        `).bind(golfDayId, playerId, handicap)
+      );
+    }
+
+    if (statements.length) {
+      await env.DB.batch(statements);
+    }
+
+    return Response.json({
+      success: true,
+      saved: handicaps.length
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to save prepared handicaps.",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
+    
+// ========================================
 // GOLF CLUBS - ADMINISTRATION (ADD, UPDATE, DELETE
 // ========================================
     
