@@ -1029,6 +1029,7 @@ header {
 <script>
 
 let viewingAsMemberId = null;
+let currentUserIsAdmin = false;
   
 function formatUKDate(dateString) {
   const [year, month, day] = dateString.split("-");
@@ -1059,6 +1060,8 @@ async function checkMembership() {
 
     const data = await response.json();
 
+    currentUserIsAdmin = data.isAdmin === true;
+    
  if (data.isAdmin) {
    document.getElementById("main-admin-button").style.display = "inline-block";
   
