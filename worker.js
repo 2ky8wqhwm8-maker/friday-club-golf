@@ -1188,6 +1188,57 @@ ORDER BY gd.play_date DESC
     );
   }
 }
+
+// ========================================
+// PLAYER COURSE AVERAGES — ALL SEASONS
+// ========================================
+
+if (url.pathname === "/api/player-course-averages") {
+  try {
+    const playerId = Number(url.searchParams.get("player_id"));
+
+    if (!Number.isInteger(playerId) || playerId <= 0) {
+      return Response.json(
+        { error: "Invalid player." },
+        { status: 400 }
+      );
+    }
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        s.name AS season_name,
+        c.name AS course_name,
+        COUNT(r.id) AS rounds_played,
+        ROUND(AVG(r.stableford_score), 2) AS average_score
+      FROM results r
+      JOIN golf_days gd ON gd.id = r.golf_day_id
+      JOIN courses c ON c.id = gd.course_id
+      JOIN seasons s ON s.id = gd.season_id
+      JOIN players p ON p.id = r.player_id
+      WHERE r.player_id = ?
+        AND p.membership_status = 'approved'
+      GROUP BY s.id, s.name, c.id, c.name
+      ORDER BY s.name ASC, c.name ASC
+    `).bind(playerId).all();
+
+    return Response.json({
+      results
+    }, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
+
+  } catch (error) {
+    return Response.json(
+      {
+        error: "Unable to load course averages",
+        details: error.message
+      },
+      { status: 500 }
+    );
+  }
+}
     
 if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") {
 
