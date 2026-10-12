@@ -3861,7 +3861,10 @@ const chartData = courses.map(course => {
 });
 
 console.log("Chart data:", chartData);
+container.innerHTML = '<canvas id="player-course-canvas"></canvas>';
 
+const canvas = document.getElementById("player-course-canvas");
+    
   } catch (error) {
     container.textContent = "Unable to load course averages.";
   }
