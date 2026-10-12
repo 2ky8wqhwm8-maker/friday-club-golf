@@ -3730,10 +3730,19 @@ const response = await fetch(
         ${label}
       </div>
     </div>
-  `).join("")}
+    `).join("")}
 </div>
-      <div class="table-container">
-        <table>
+
+<!-- Stableford averages by course and season -->
+<div style="margin: 20px 0;">
+  <h3>Stableford Average by Course and Season</h3>
+  <div id="player-course-chart">
+    Loading chart...
+  </div>
+</div>
+
+<div class="table-container">
+  <table>
           <thead>
             <tr>
               <th>Golf Day</th>
