@@ -1427,6 +1427,7 @@ const { results } = await env.DB.prepare(`
   }
 }
 
+
 if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
 
   if (!isAdmin) {
@@ -1442,7 +1443,12 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
     const golfDayId = Number(body.golf_day_id);
     const results = body.results;
 
-    if (!Number.isInteger(golfDayId) || !Array.isArray(results)) {
+    if (
+      !Number.isInteger(golfDayId) ||
+      golfDayId <= 0 ||
+      !Array.isArray(results) ||
+      results.length === 0
+    ) {
       return Response.json(
         { error: "Invalid results data." },
         { status: 400 }
@@ -1450,114 +1456,193 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
     }
 
     const golfDay = await env.DB.prepare(`
-  SELECT id, play_date, results_submitted
-  FROM golf_days
-  WHERE id = ?
-  LIMIT 1
-`).bind(golfDayId).first();
+      SELECT id, play_date, results_submitted
+      FROM golf_days
+      WHERE id = ?
+      LIMIT 1
+    `).bind(golfDayId).first();
 
     if (!golfDay) {
       return Response.json(
-        { error: "Golf day not found." },
+        { error: "Golf Day not found." },
         { status: 404 }
       );
-      if (golfDay.results_submitted === 1) {
-  return Response.json(
-    {
-      error: "Results for this Golf Day have already been submitted."
-    },
-    { status: 409 }
-  );
-}
     }
+
+    if (golfDay.results_submitted === 1) {
+      return Response.json(
+        { error: "Results for this Golf Day have already been submitted." },
+        { status: 409 }
+      );
+    }
+
+    // Load handicaps prepared for this Golf Day.
+    const prepared = await env.DB.prepare(`
+      SELECT player_id, handicap
+      FROM prepared_handicaps
+      WHERE golf_day_id = ?
+    `).bind(golfDayId).all();
+
+    const preparedMap = new Map(
+      prepared.results.map(p => [Number(p.player_id), Number(p.handicap)])
+    );
+
+    // Validate every result before writing anything.
+    const seenPlayers = new Set();
+    const validatedResults = [];
 
     for (const result of results) {
       const playerId = Number(result.player_id);
-      const handicap = Number(result.handicap);
       const score = Number(result.stableford_score);
+      const handicap = preparedMap.has(playerId)
+        ? preparedMap.get(playerId)
+        : Number(result.handicap);
 
       if (
         !Number.isInteger(playerId) ||
-        !Number.isFinite(handicap) ||
+        playerId <= 0 ||
+        seenPlayers.has(playerId) ||
+        result.stableford_score === null ||
+        result.stableford_score === "" ||
         !Number.isInteger(score) ||
-        score < 0
+        score < 0 ||
+        !Number.isFinite(handicap) ||
+        handicap < 0 ||
+        handicap > 54
       ) {
         return Response.json(
-          { error: "Invalid player result." },
+          { error: "Invalid or duplicate player result." },
           { status: 400 }
         );
       }
 
-const existingResult = await env.DB.prepare(`
-  SELECT id
-  FROM results
-  WHERE golf_day_id = ?
-    AND player_id = ?
-  LIMIT 1
-`).bind(
-  golfDayId,
-  playerId
-).first();
+      seenPlayers.add(playerId);
 
-if (existingResult) {
-  await env.DB.prepare(`
-    UPDATE results
-    SET stableford_score = ?,
-        handicap = ?
-    WHERE id = ?
-  `).bind(
-    score,
-    handicap,
-    existingResult.id
-  ).run();
-
-} else {
-  await env.DB.prepare(`
-    INSERT INTO results
-      (golf_day_id, player_id, stableford_score, handicap)
-    VALUES (?, ?, ?, ?)
-  `).bind(
-    golfDayId,
-    playerId,
-    score,
-    handicap
-  ).run();
-  
-}
-
-   const newerResult = await env.DB.prepare(`
-  SELECT r.id
-  FROM results r
-  JOIN golf_days g ON g.id = r.golf_day_id
-  WHERE r.player_id = ?
-    AND g.play_date > ?
-  LIMIT 1
-`).bind(playerId, golfDay.play_date).first();
-
-if (!newerResult) {
-  await env.DB.prepare(`
-    UPDATE players
-    SET handicap = ?
-    WHERE id = ?
-  `).bind(handicap, playerId).run();
-}   
-      
+      validatedResults.push({
+        playerId,
+        score,
+        handicap
+      });
     }
 
+    const statements = [];
+
+    // Reject duplicate submissions atomically.
+// SQLite aborts the batch if the Golf Day is already submitted.
+// Abort the batch if this Golf Day is already submitted.
+statements.push(
+  env.DB.prepare(`
+    SELECT CASE
+      WHEN results_submitted = 0 THEN 1
+      ELSE json_extract('invalid', '$')
+    END
+    FROM golf_days
+    WHERE id = ?
+  `).bind(golfDayId)
+);
+
+    // Mark the Golf Day as submitted.
+statements.push(
+  env.DB.prepare(`
+    UPDATE golf_days
+    SET results_submitted = 1
+    WHERE id = ?
+      AND results_submitted = 0
+  `).bind(golfDayId)
+);
+    
+    // Save all Stableford results.
+    for (const result of validatedResults) {
+      statements.push(
+        env.DB.prepare(`
+          INSERT INTO results
+            (golf_day_id, player_id, stableford_score, handicap)
+          VALUES (?, ?, ?, ?)
+          ON CONFLICT(golf_day_id, player_id)
+          DO UPDATE SET
+            stableford_score = excluded.stableford_score,
+            handicap = excluded.handicap
+        `).bind(
+          golfDayId,
+          result.playerId,
+          result.score,
+          result.handicap
+        )
+      );
+    }
+
+    // Update current handicaps for all prepared players,
+    // including golfers who did not participate.
+    for (const player of prepared.results) {
+      statements.push(
+        env.DB.prepare(`
+          UPDATE players
+          SET handicap = ?
+          WHERE id = ?
+            AND NOT EXISTS (
+              SELECT 1
+              FROM results r
+              JOIN golf_days g ON g.id = r.golf_day_id
+              WHERE r.player_id = ?
+                AND g.play_date > ?
+            )
+        `).bind(
+          player.handicap,
+          player.player_id,
+          player.player_id,
+          golfDay.play_date
+        )
+      );
+    }
+
+    // For participating golfers without a prepared handicap,
+    // retain the existing current-handicap update behaviour.
+    for (const result of validatedResults) {
+      if (preparedMap.has(result.playerId)) continue;
+
+      statements.push(
+        env.DB.prepare(`
+          UPDATE players
+          SET handicap = ?
+          WHERE id = ?
+            AND NOT EXISTS (
+              SELECT 1
+              FROM results r
+              JOIN golf_days g ON g.id = r.golf_day_id
+              WHERE r.player_id = ?
+                AND g.play_date > ?
+            )
+        `).bind(
+          result.handicap,
+          result.playerId,
+          result.playerId,
+          golfDay.play_date
+        )
+      );
+    }
+
+
+    
+    // All statements succeed or all are rolled back.
+    await env.DB.batch(statements);
+
     return Response.json({
-      success: true
+      success: true,
+      saved: validatedResults.length,
+      handicaps_updated: prepared.results.length
     });
 
   } catch (error) {
     return Response.json(
       {
-        error: "Unable to save results",
+        error: "Unable to submit Golf Day results.",
         details: error.message
       },
       { status: 500 }
     );
   }
 }
+
 
 // ========================================
 // SAVE PREPARED HANDICAPS
@@ -1625,8 +1710,12 @@ if (
         item.handicap === null ||
         item.handicap === "" ||
         !Number.isFinite(handicap) ||
-        handicap < 0 ||
-        handicap > 54
+(!preparedMap.has(playerId) &&
+  (result.handicap === null ||
+   result.handicap === undefined ||
+   result.handicap === "")) ||
+handicap < 0 ||
+handicap > 54
       ) {
         return Response.json(
           { error: "Invalid player or handicap." },
