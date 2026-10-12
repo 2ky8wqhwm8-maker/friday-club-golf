@@ -2137,6 +2137,7 @@ async function savePreparedHandicaps() {
 // RESULTS - SAVE
 // ========================================
   
+
 async function saveResults() {
   const golfDayId =
     document.getElementById("results-golf-day").value;
@@ -2145,36 +2146,84 @@ async function saveResults() {
     document.getElementById("results-message");
 
   if (!golfDayId) {
-    alert("Please select a golf day.");
+    alert("Please select a Golf Day.");
     return;
   }
 
   try {
-    const response = await fetch("/api/admin/score-players");
+    const response = await fetch(
+      `/api/admin/score-players?golf_day_id=${encodeURIComponent(golfDayId)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load players.");
+    }
+
     const data = await response.json();
 
     const results = [];
+    const handicaps = [];
 
     for (const player of data.players) {
-      const handicap =
-        document.getElementById(`handicap-${player.id}`).value;
+      const handicapInput =
+        document.getElementById(`handicap-${player.id}`);
 
-      const score =
-        document.getElementById(`score-${player.id}`).value;
+      const scoreInput =
+        document.getElementById(`score-${player.id}`);
 
-      if (score === "") {
+      if (!handicapInput || !scoreInput) {
+        throw new Error("Player entry fields are missing.");
+      }
+
+      const handicapText = handicapInput.value.trim();
+      const scoreText = scoreInput.value.trim();
+
+      if (
+        handicapText === "" ||
+        !Number.isFinite(Number(handicapText)) ||
+        Number(handicapText) < 0 ||
+        Number(handicapText) > 54
+      ) {
+        alert(`Please enter a valid handicap for ${player.first_name} ${player.last_name}.`);
+        return;
+      }
+
+      const handicap = Number(handicapText);
+
+      // Include every golfer's handicap, even if they didn't play.
+      handicaps.push({
+        player_id: player.id,
+        handicap: handicap
+      });
+
+      // A blank score means the golfer didn't participate.
+      if (scoreText === "") {
         continue;
+      }
+
+      const score = Number(scoreText);
+
+      if (!Number.isInteger(score) || score < 0) {
+        alert(`Please enter a valid Stableford score for ${player.first_name} ${player.last_name}.`);
+        return;
       }
 
       results.push({
         player_id: player.id,
-        handicap: Number(handicap),
-        stableford_score: Number(score)
+        handicap: handicap,
+        stableford_score: score
       });
     }
 
     if (results.length === 0) {
       alert("Please enter at least one Stableford score.");
+      return;
+    }
+
+    if (!confirm(
+      `Submit ${results.length} Stableford results and update ${handicaps.length} handicaps?\n\n` +
+      "This Golf Day will be locked after submission."
+    )) {
       return;
     }
 
@@ -2185,24 +2234,28 @@ async function saveResults() {
       },
       body: JSON.stringify({
         golf_day_id: Number(golfDayId),
-        results: results
+        results: results,
+        handicaps: handicaps
       })
     });
 
     const saveData = await saveResponse.json();
 
     if (!saveResponse.ok) {
-      alert(saveData.error || "Unable to save results.");
+      alert(saveData.error || "Unable to submit results.");
       return;
     }
 
-    alert("Results saved successfully.");
-document.getElementById("results-golf-day").value = "";
-document.getElementById("results-players").innerHTML = "";
+    alert("Golf Day results submitted successfully.");
+
+    document.getElementById("results-golf-day").value = "";
+    document.getElementById("results-players").innerHTML = "";
+
     loadLeague();
 
   } catch (error) {
-    message.textContent = "Unable to save results.";
+    message.textContent =
+      "Unable to submit results: " + error.message;
   }
 }
 
