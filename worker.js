@@ -1476,16 +1476,44 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
       );
     }
 
-    // Load handicaps prepared for this Golf Day.
-    const prepared = await env.DB.prepare(`
-      SELECT player_id, handicap
-      FROM prepared_handicaps
-      WHERE golf_day_id = ?
-    `).bind(golfDayId).all();
+   // Read the latest handicaps submitted from the screen.
+const submittedHandicaps = body.handicaps;
 
-    const preparedMap = new Map(
-      prepared.results.map(p => [Number(p.player_id), Number(p.handicap)])
+if (
+  !Array.isArray(submittedHandicaps) ||
+  submittedHandicaps.length === 0
+) {
+  return Response.json(
+    { error: "No handicaps supplied." },
+    { status: 400 }
+  );
+}
+
+const preparedMap = new Map();
+
+for (const item of submittedHandicaps) {
+  const playerId = Number(item.player_id);
+  const handicap = Number(item.handicap);
+
+  if (
+    !Number.isInteger(playerId) ||
+    playerId <= 0 ||
+    item.handicap === null ||
+    item.handicap === undefined ||
+    item.handicap === "" ||
+    !Number.isFinite(handicap) ||
+    handicap < 0 ||
+    handicap > 54 ||
+    preparedMap.has(playerId)
+  ) {
+    return Response.json(
+      { error: "Invalid or duplicate handicap." },
+      { status: 400 }
     );
+  }
+
+  preparedMap.set(playerId, handicap);
+}
 
     // Validate every result before writing anything.
     const seenPlayers = new Set();
@@ -1494,9 +1522,7 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
     for (const result of results) {
       const playerId = Number(result.player_id);
       const score = Number(result.stableford_score);
-      const handicap = preparedMap.has(playerId)
-        ? preparedMap.get(playerId)
-        : Number(result.handicap);
+      const handicap = preparedMap.get(playerId);
 
       if (
         !Number.isInteger(playerId) ||
@@ -1527,9 +1553,7 @@ if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
 
     const statements = [];
 
-    // Reject duplicate submissions atomically.
-// SQLite aborts the batch if the Golf Day is already submitted.
-// Abort the batch if this Golf Day is already submitted.
+   // Abort the batch if this Golf Day is already submitted.
 statements.push(
   env.DB.prepare(`
     SELECT CASE
@@ -1550,6 +1574,26 @@ statements.push(
       AND results_submitted = 0
   `).bind(golfDayId)
 );
+
+// Save the final handicaps for this Golf Day.
+// These are included in the same atomic database batch.
+for (const [playerId, handicap] of preparedMap) {
+  statements.push(
+    env.DB.prepare(`
+      INSERT INTO prepared_handicaps
+        (golf_day_id, player_id, handicap)
+      VALUES (?, ?, ?)
+      ON CONFLICT(golf_day_id, player_id)
+      DO UPDATE SET
+        handicap = excluded.handicap,
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(
+      golfDayId,
+      playerId,
+      handicap
+    )
+  );
+}
     
     // Save all Stableford results.
     for (const result of validatedResults) {
@@ -1573,7 +1617,7 @@ statements.push(
 
     // Update current handicaps for all prepared players,
     // including golfers who did not participate.
-    for (const player of prepared.results) {
+    for (const [playerId, handicap] of preparedMap) {
       statements.push(
         env.DB.prepare(`
           UPDATE players
@@ -1587,50 +1631,23 @@ statements.push(
                 AND g.play_date > ?
             )
         `).bind(
-          player.handicap,
-          player.player_id,
-          player.player_id,
-          golfDay.play_date
-        )
+  handicap,
+  playerId,
+  playerId,
+  golfDay.play_date
+)
       );
     }
 
-    // For participating golfers without a prepared handicap,
-    // retain the existing current-handicap update behaviour.
-    for (const result of validatedResults) {
-      if (preparedMap.has(result.playerId)) continue;
-
-      statements.push(
-        env.DB.prepare(`
-          UPDATE players
-          SET handicap = ?
-          WHERE id = ?
-            AND NOT EXISTS (
-              SELECT 1
-              FROM results r
-              JOIN golf_days g ON g.id = r.golf_day_id
-              WHERE r.player_id = ?
-                AND g.play_date > ?
-            )
-        `).bind(
-          result.handicap,
-          result.playerId,
-          result.playerId,
-          golfDay.play_date
-        )
-      );
-    }
-
-
-    
+       
     // All statements succeed or all are rolled back.
     await env.DB.batch(statements);
 
     return Response.json({
-      success: true,
-      saved: validatedResults.length,
-      handicaps_updated: prepared.results.length
-    });
+  success: true,
+  saved: validatedResults.length,
+  handicaps_updated: preparedMap.size
+});
 
   } catch (error) {
     return Response.json(
@@ -1710,10 +1727,6 @@ if (
         item.handicap === null ||
         item.handicap === "" ||
         !Number.isFinite(handicap) ||
-(!preparedMap.has(playerId) &&
-  (result.handicap === null ||
-   result.handicap === undefined ||
-   result.handicap === "")) ||
 handicap < 0 ||
 handicap > 54
       ) {
