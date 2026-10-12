@@ -846,8 +846,13 @@ header {
   </select>
 
   <div id="results-players"></div>
+
+<button type="button" onclick="savePreparedHandicaps()">
+  Save Prepared Handicaps
+</button>
+
 <button type="button" onclick="saveResults()">
-  Save Results
+  Submit Golf Day Results
 </button>
   <div id="results-message"></div>
 
@@ -2049,6 +2054,85 @@ async function loadScorePlayers() {
   }
 }
 
+// ========================================
+// SAVE PREPARED HANDICAPS
+// ========================================
+
+async function savePreparedHandicaps() {
+
+  const golfDayId =
+    document.getElementById("results-golf-day").value;
+
+  if (!golfDayId) {
+    alert("Please select a Golf Day.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/admin/score-players?golf_day_id=${golfDayId}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load players.");
+    }
+
+    const data = await response.json();
+    const handicaps = [];
+
+    for (const player of data.players) {
+
+      const input = document.getElementById(
+        `handicap-${player.id}`
+      );
+
+      if (!input || input.value.trim() === "") {
+        continue;
+      }
+
+      handicaps.push({
+        player_id: player.id,
+        handicap: Number(input.value)
+      });
+    }
+
+    if (handicaps.length === 0) {
+      alert("No handicaps entered.");
+      return;
+    }
+
+    const saveResponse = await fetch(
+      "/api/admin/prepared-handicaps",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          golf_day_id: Number(golfDayId),
+          handicaps: handicaps
+        })
+      }
+    );
+
+    const saveData = await saveResponse.json();
+
+    if (!saveResponse.ok) {
+      alert(
+        saveData.error || "Unable to save prepared handicaps."
+      );
+      return;
+    }
+
+    alert(
+      `${saveData.saved} handicaps saved for the selected Golf Day.`
+    );
+
+  } catch (error) {
+    alert("Unable to save prepared handicaps: " + error.message);
+  }
+}
+  
 // ========================================
 // RESULTS - SAVE
 // ========================================
