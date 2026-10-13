@@ -1669,6 +1669,19 @@ const golfDayDescription = golfDay
     const best = scores[0].score;
     const winners = scores.filter(r => r.score === best);
     const over36 = scores.filter(r => r.score >= 36).length;
+    const performances = scores
+  .filter(r =>
+    r.seasonAverage !== null &&
+    Number.isFinite(r.seasonAverage)
+  )
+  .map(r => ({
+    ...r,
+    improvement: r.score - r.seasonAverage
+  }))
+  .sort((a, b) => b.improvement - a.improvement);
+
+const performanceOfDay =
+  performances.length > 0 ? performances[0] : null;
 
     const winnerNames = winners.map(r => r.name).join(" and ");
 
