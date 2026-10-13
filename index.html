@@ -2575,7 +2575,145 @@ async function savePreparedHandicaps() {
 // ========================================
 // RESULTS - SAVE
 // ========================================
-  
+
+async function saveAmendments() {
+  const select = document.getElementById("results-golf-day");
+  const golfDayId = Number(select.value);
+  const selectedOption = select.selectedOptions[0];
+
+  if (!golfDayId || selectedOption?.dataset.submitted !== "1") {
+    alert("Please select a completed Golf Day.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/admin/score-players?golf_day_id=${encodeURIComponent(golfDayId)}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load existing results.");
+    }
+
+    const data = await response.json();
+    const amendments = [];
+    const deletions = [];
+    const changes = [];
+
+    for (const player of data.players) {
+      const handicapInput =
+        document.getElementById(`handicap-${player.id}`);
+      const scoreInput =
+        document.getElementById(`score-${player.id}`);
+
+      if (!handicapInput || !scoreInput) {
+        throw new Error("Player entry fields are missing.");
+      }
+
+      const name = `${player.first_name} ${player.last_name}`;
+      const handicapText = handicapInput.value.trim();
+      const scoreText = scoreInput.value.trim();
+
+      const handicap = Number(handicapText);
+
+      if (
+        handicapText === "" ||
+        !Number.isFinite(handicap) ||
+        handicap < 0 ||
+        handicap > 54
+      ) {
+        alert(`Invalid handicap for ${name}.`);
+        return;
+      }
+
+      let score = null;
+
+      if (scoreText !== "") {
+        score = Number(scoreText);
+
+        if (!Number.isInteger(score) || score < 0) {
+          alert(`Invalid Stableford score for ${name}.`);
+          return;
+        }
+      }
+
+      const previousScore =
+        player.stableford_score == null
+          ? null
+          : Number(player.stableford_score);
+
+      const previousHandicap = Number(player.handicap);
+
+      if (
+        score === previousScore &&
+        handicap === previousHandicap
+      ) {
+        continue;
+      }
+
+      amendments.push({
+        player_id: player.id,
+        handicap: handicap,
+        stableford_score: score
+      });
+
+      if (previousScore !== null && score === null) {
+        deletions.push(`${name}: ${previousScore} points`);
+      }
+
+      changes.push(
+        `${name}: handicap ${previousHandicap} → ${handicap}, ` +
+        `Stableford ${previousScore ?? "—"} → ${score ?? "—"}`
+      );
+    }
+
+    if (amendments.length === 0) {
+      alert("No amendments have been made.");
+      return;
+    }
+
+    let message =
+      `Save ${amendments.length} amendment(s)?\n\n` +
+      changes.join("\n");
+
+    if (deletions.length > 0) {
+      message +=
+        "\n\nWARNING: The following results will be deleted:\n" +
+        deletions.join("\n");
+    }
+
+    if (!confirm(message)) {
+      return;
+    }
+
+    const saveResponse = await fetch("/api/admin/amend-results", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        golf_day_id: golfDayId,
+        amendments: amendments
+      })
+    });
+
+    const saveData = await saveResponse.json();
+
+    if (!saveResponse.ok) {
+      throw new Error(
+        saveData.error || "Unable to save amendments."
+      );
+    }
+
+    alert(`${saveData.amended} amendment(s) saved successfully.`);
+
+    await loadScorePlayers();
+    loadLeague();
+
+  } catch (error) {
+    alert("Unable to save amendments: " + error.message);
+  }
+}
 
 async function saveResults() {
   const golfDayId =
