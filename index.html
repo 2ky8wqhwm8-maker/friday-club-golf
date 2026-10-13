@@ -1597,6 +1597,74 @@ async function loadGolfDayResults() {
   }
 }
 
+function getHistoricalLeaguePositions(golfDayId, includeDay) {
+  const players = window.golfLeaguePlayers || [];
+  const days = window.golfDayDetails || [];
+  const results = window.golfLeagueScores || [];
+
+  const selectedDay = days.find(
+    day => Number(day.id) === Number(golfDayId)
+  );
+
+  if (!selectedDay) return [];
+
+  const includedDayIds = new Set(
+    days
+      .filter(day =>
+        includeDay
+          ? day.play_date <= selectedDay.play_date
+          : day.play_date < selectedDay.play_date
+      )
+      .map(day => Number(day.id))
+  );
+
+  const rankings = players.map(player => {
+    const scores = results
+      .filter(result =>
+        Number(result.player_id) === Number(player.id) &&
+        includedDayIds.has(Number(result.golf_day_id)) &&
+        result.stableford_score !== null &&
+        result.stableford_score !== ""
+      )
+      .map(result => Number(result.stableford_score))
+      .filter(score => Number.isFinite(score));
+
+    const average = scores.length
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : null;
+
+    return {
+      id: Number(player.id),
+      name: `${player.first_name} ${player.last_name}`,
+      played: scores.length,
+      average
+    };
+  });
+
+  rankings.sort((a, b) => {
+    if (a.average === null) return 1;
+    if (b.average === null) return -1;
+    return b.average - a.average;
+  });
+
+  let previousAverage = null;
+  let previousPosition = 0;
+
+  rankings.forEach((player, index) => {
+    if (player.average === null) {
+      player.position = null;
+    } else if (player.average === previousAverage) {
+      player.position = previousPosition;
+    } else {
+      player.position = index + 1;
+      previousPosition = player.position;
+      previousAverage = player.average;
+    }
+  });
+
+  return rankings;
+}
+  
 function getAverageBeforeGolfDay(playerId, golfDayId) {
   const days = window.golfDayDetails || [];
   const results = window.golfLeagueScores || [];
