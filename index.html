@@ -1597,6 +1597,41 @@ async function loadGolfDayResults() {
   }
 }
 
+function getAverageBeforeGolfDay(playerId, golfDayId) {
+  const days = window.golfDayDetails || [];
+  const results = window.golfLeagueScores || [];
+
+  const selectedDay = days.find(
+    day => Number(day.id) === Number(golfDayId)
+  );
+
+  if (!selectedDay) return null;
+
+  const earlierDayIds = new Set(
+    days
+      .filter(day => day.play_date < selectedDay.play_date)
+      .map(day => Number(day.id))
+  );
+
+  const previousScores = results
+    .filter(result =>
+      Number(result.player_id) === Number(playerId) &&
+      earlierDayIds.has(Number(result.golf_day_id)) &&
+      result.stableford_score !== null &&
+      result.stableford_score !== ""
+    )
+    .map(result => Number(result.stableford_score))
+    .filter(score => Number.isFinite(score));
+
+  if (previousScores.length === 0) return null;
+
+  const total = previousScores.reduce(
+    (sum, score) => sum + score, 0
+  );
+
+  return total / previousScores.length;
+}
+  
 async function showGolfDayReport(golfDayId) {
   const golfDay = (window.golfDayDetails || []).find(
   day => Number(day.id) === Number(golfDayId)
@@ -3481,6 +3516,7 @@ const response = await fetch(
 
 window.golfDayDetails = data.golf_days;
 window.golfLeaguePlayers = data.players;
+window.golfLeagueScores = data.scores;
 
 const scoreMap = {};
 
