@@ -1486,6 +1486,8 @@ async function loadGolfDays() {
 
       option.value = golfDay.id;
 
+      option.dataset.submitted = golfDay.results_submitted;
+
 option.textContent =
   formatUKDate(golfDay.play_date) +
   " — " +
