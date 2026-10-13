@@ -869,7 +869,11 @@ header {
 
   <div id="results-players"></div>
 
-<button type="button" onclick="savePreparedHandicaps()">
+<button
+  type="button"
+  id="save-prepared-handicaps-button"
+  onclick="savePreparedHandicaps()"
+>
   Save Prepared Handicaps
 </button>
 
@@ -2393,6 +2397,9 @@ async function loadScorePlayers() {
 
   const isSubmitted =
     selectedOption?.dataset.submitted === "1";
+
+  document.getElementById("save-prepared-handicaps-button").style.display =
+  isSubmitted ? "none" : "inline-block";
 
   document.getElementById("save-amendments-button").style.display =
     isSubmitted ? "inline-block" : "none";
