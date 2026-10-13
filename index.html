@@ -1017,22 +1017,31 @@ header {
 
 </div>
     
-  <div id="main-results" style="display: none;">
+    <div id="main-results" style="display: none;">
+
   <div id="golf-day-results-view">
-  <h2>Golf Day Results</h2>
-  <label for="view-results-golf-day">Golf Day</label>
+    <h2>Golf Day Results</h2>
 
-<select id="view-results-golf-day" onchange="loadGolfDayResults()">
-  <option value="">Loading golf days...</option>
-</select>
+    <label for="view-results-golf-day">Golf Day</label>
 
-<div id="golf-day-results">
-  Select a golf day to view the results.
+    <select id="view-results-golf-day" onchange="loadGolfDayResults()">
+      <option value="">Loading golf days...</option>
+    </select>
+
+    <div id="golf-day-results">
+      Select a golf day to view the results.
+    </div>
+
+  </div> <!-- End of golf-day-results-view -->
+
+  <div id="player-results-view" style="display: none;">
+  </div>
+
+  <div id="golf-day-report" style="display: none;">
 </div>
-</div>
 
-<div id="player-results-view" style="display: none;">
-</div>    
+</div> <!-- End of main-results -->
+
 </main>
 
 <footer>
@@ -1580,6 +1589,128 @@ async function loadGolfDayResults() {
   }
 }
 
+async function showGolfDayReport(golfDayId) {
+  const report = document.getElementById("golf-day-report");
+  if (!report) return;
+
+  document.getElementById("main-home").style.display = "none";
+  document.getElementById("admin-card").style.display = "none";
+  document.getElementById("main-results").style.display = "block";
+  document.getElementById("golf-day-results-view").style.display = "none";
+  document.getElementById("player-results-view").style.display = "none";
+
+  report.style.display = "block";
+  report.textContent = "Loading Golf Day Report...";
+
+  try {
+    const response = await fetch(
+      `/api/golf-day-results?golf_day_id=${encodeURIComponent(golfDayId)}`
+    );
+
+    if (!response.ok) throw new Error("Unable to load results");
+
+    const data = await response.json();
+
+    const scores = (data.results || [])
+      .filter(r => r.stableford_score !== null &&
+                   r.stableford_score !== undefined &&
+                   r.stableford_score !== "")
+      .map(r => ({
+        name: `${r.first_name} ${r.last_name}`,
+        handicap: r.handicap,
+        score: Number(r.stableford_score)
+      }))
+      .filter(r => Number.isFinite(r.score))
+      .sort((a, b) => b.score - a.score);
+
+    if (!scores.length) {
+      report.innerHTML = `
+        <h2>Golf Day Report</h2>
+        <p>No results available for this Golf Day.</p>
+        <button onclick="closeGolfDayReport()">Back to League Table</button>
+      `;
+      return;
+    }
+
+    const total = scores.reduce((sum, r) => sum + r.score, 0);
+    const average = (total / scores.length).toFixed(1);
+    const best = scores[0].score;
+    const winners = scores.filter(r => r.score === best);
+    const over36 = scores.filter(r => r.score >= 36).length;
+
+    const winnerNames = winners.map(r => r.name).join(" and ");
+    const narrative = winners.length > 1
+      ? `${winnerNames} shared first place with ${best} Stableford points.`
+      : `${winnerNames} led the field with ${best} Stableford points.`;
+
+    const stats = [
+      ["Players", scores.length],
+      ["Average Score", average],
+      ["Best Score", best],
+      ["36+ Scores", over36]
+    ];
+
+    report.innerHTML = `
+      <h2>Golf Day Report</h2>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;">
+        ${stats.map(([label, value]) => `
+          <div style="background:#f0f4f0;padding:12px;
+                      border-radius:8px;text-align:center;min-width:110px;">
+            <div style="font-size:22px;font-weight:bold;">${value}</div>
+            <div style="font-size:12px;">${label}</div>
+          </div>
+        `).join("")}
+      </div>
+
+      <h3>Friday's Talking Points</h3>
+      <p>${narrative} The ${scores.length} golfers averaged
+      ${average} points, with ${over36} scoring 36 or more.</p>
+
+      <h3>Full Results</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Player</th>
+              <th class="number">H'cap</th>
+              <th class="number">Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scores.map((r, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${r.name}</td>
+                <td class="number">${r.handicap ?? "—"}</td>
+                <td class="number">${r.score}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" onclick="closeGolfDayReport()">
+        Back to League Table
+      </button>
+    `;
+
+  } catch (error) {
+    report.innerHTML = `
+      <h2>Golf Day Report</h2>
+      <p>Unable to load Golf Day Report.</p>
+      <button onclick="closeGolfDayReport()">Back to League Table</button>
+    `;
+  }
+}
+
+function closeGolfDayReport() {
+  document.getElementById("golf-day-report").style.display = "none";
+  document.getElementById("main-results").style.display = "none";
+  document.getElementById("main-home").style.display = "block";
+}
+  
 // ========================================
 // NEXT GOLF DAY NOTICE
 // ========================================
@@ -3270,12 +3401,20 @@ const response = await fetch(
       const shortDate = parts[2] + "." + parts[1];
 
       html += `
-        <th class="golf-day-heading">
-          <div>
-            ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
-          </div>
-        </th>
-      `;
+  <th class="golf-day-heading">
+    <a
+      href="#"
+      onclick="showGolfDayReport(${day.id}); return false;"
+      style="
+        color: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+      "
+    >
+      ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
+    </a>
+  </th>
+`;
     });
 
     html += `
