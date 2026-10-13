@@ -1609,11 +1609,7 @@ const golfDayDescription = golfDay
   const report = document.getElementById("golf-day-report");
   if (!report) return;
 
-  const golfDay = leagueData?.golf_days?.find(
-  day => Number(day.id) === Number(golfDayId)
-);
-
-  document.getElementById("main-home").style.display = "none";
+    document.getElementById("main-home").style.display = "none";
   document.getElementById("admin-card").style.display = "none";
   document.getElementById("main-results").style.display = "block";
   document.getElementById("golf-day-results-view").style.display = "none";
