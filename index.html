@@ -2382,6 +2382,15 @@ async function deleteGolfDay(golfDayId) {
   
 async function loadScorePlayers() {
 
+    const selectedOption =
+    document.getElementById("results-golf-day").selectedOptions[0];
+
+  const isSubmitted =
+    selectedOption?.dataset.submitted === "1";
+
+  document.getElementById("save-amendments-button").style.display =
+    isSubmitted ? "inline-block" : "none";
+  
   const golfDayId =
     document.getElementById("results-golf-day").value;
 
