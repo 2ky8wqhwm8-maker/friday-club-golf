@@ -484,6 +484,13 @@ header {
   box-sizing: border-box;
   font-size: 14px;
 }
+
+/* Compact Golf Day Report results */
+#golf-day-report-table th,
+#golf-day-report-table td {
+  padding: 5px 8px;
+  line-height: 1.2;
+}
     
   </style>
 
@@ -1669,7 +1676,7 @@ async function showGolfDayReport(golfDayId) {
       ${average} points, with ${over36} scoring 36 or more.</p>
 
       <h3>Full Results</h3>
-      <div class="table-container">
+      <table id="golf-day-report-table">
         <table>
           <thead>
             <tr>
