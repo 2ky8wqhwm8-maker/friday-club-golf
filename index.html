@@ -1745,6 +1745,26 @@ if (Number(average) >= 33) {
       <p>${narrative} The field of ${scores.length} golfers
 averaged ${average} Stableford points.</p>
 
+<h3>Performance of the Day</h3>
+
+${performanceOfDay ? `
+  <p>
+    <strong>${performanceOfDay.name}</strong>
+    scored ${performanceOfDay.score} Stableford points,
+    compared with a season average of
+    ${performanceOfDay.seasonAverage.toFixed(1)}.
+
+    That's
+    <strong>
+      ${performanceOfDay.improvement >= 0 ? "+" : ""}
+      ${performanceOfDay.improvement.toFixed(1)} points
+    </strong>
+    against their season average.
+  </p>
+` : `
+  <p>Season averages are not available.</p>
+`}
+
       <h3>Full Results</h3>
 <div class="table-container">
   <table id="golf-day-report-table">
