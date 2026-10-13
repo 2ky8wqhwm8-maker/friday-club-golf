@@ -2708,7 +2708,17 @@ async function saveAmendments() {
     alert(`${saveData.amended} amendment(s) saved successfully.`);
 
     await loadScorePlayers();
-    loadLeague();
+await loadLeague();
+
+if (document.getElementById("view-results-golf-day").value) {
+  await loadGolfDayResults();
+}
+if (
+  currentPlayerResultsId !== null &&
+  document.getElementById("player-results-view").style.display !== "none"
+) {
+  await showPlayerResults(currentPlayerResultsId);
+}
 
   } catch (error) {
     alert("Unable to save amendments: " + error.message);
@@ -2828,7 +2838,8 @@ async function saveResults() {
     document.getElementById("results-golf-day").value = "";
     document.getElementById("results-players").innerHTML = "";
 
-    loadLeague();
+    await loadGolfDays();
+await loadLeague();
 
   } catch (error) {
     message.textContent =
@@ -4382,8 +4393,11 @@ async function updateVersion(id) {
 // ========================================
 // INDIVIDUAL PLAYER RESULTS
 // ========================================
+let currentPlayerResultsId = null;
   
 async function showPlayerResults(playerId) {
+
+  currentPlayerResultsId = playerId;
 
   try {
     const selectedSeason =
