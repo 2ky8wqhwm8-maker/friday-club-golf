@@ -1633,8 +1633,12 @@ const golfDayDescription = golfDay
                r.stableford_score !== "")
   .map(r => {
     const leaguePlayer = (window.golfLeaguePlayers || []).find(
-      p => Number(p.id) === Number(r.player_id)
-    );
+  p =>
+    p.first_name?.trim().toLowerCase() ===
+      r.first_name?.trim().toLowerCase() &&
+    p.last_name?.trim().toLowerCase() ===
+      r.last_name?.trim().toLowerCase()
+);
 
     const seasonAverage =
       leaguePlayer?.average_score == null
