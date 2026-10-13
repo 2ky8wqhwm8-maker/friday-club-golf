@@ -1857,6 +1857,32 @@ if (Number(average) >= 33) {
       ["36+ Scores", over36]
     ];
 
+const fullResultsRows = scores.map((r, i) => {
+  const movement = leagueMovements.find(
+    p => p.name === r.name
+  );
+
+  const changeText = !movement || movement.before == null
+    ? "New"
+    : movement.change > 0
+      ? `▲ ${movement.change}`
+      : movement.change < 0
+        ? `▼ ${Math.abs(movement.change)}`
+        : "—";
+
+  return `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${r.name}</td>
+      <td class="number">${r.handicap ?? "—"}</td>
+      <td class="number">${r.score}</td>
+      <td class="number">${movement?.before ?? "—"}</td>
+      <td class="number">${movement?.after ?? "—"}</td>
+      <td class="number">${changeText}</td>
+    </tr>
+  `;
+}).join("");
+    
     report.innerHTML = `
       <h2>Golf Day Report</h2>
 
@@ -1927,31 +1953,7 @@ points before this round.
 `;
 
   } catch (error) {
-    const fullResultsRows = scores.map((r, i) => {
-  const movement = leagueMovements.find(
-    p => p.name === r.name
-  );
-
-  const changeText = !movement || movement.before == null
-    ? "New"
-    : movement.change > 0
-      ? `▲ ${movement.change}`
-      : movement.change < 0
-        ? `▼ ${Math.abs(movement.change)}`
-        : "—";
-
-  return `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${r.name}</td>
-      <td class="number">${r.handicap ?? "—"}</td>
-      <td class="number">${r.score}</td>
-      <td class="number">${movement?.before ?? "—"}</td>
-      <td class="number">${movement?.after ?? "—"}</td>
-      <td class="number">${changeText}</td>
-    </tr>
-  `;
-}).join("");
+    
     report.innerHTML = `
       <h2>Golf Day Report</h2>
       <p>Unable to load Golf Day Report.</p>
