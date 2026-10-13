@@ -1941,9 +1941,15 @@ points before this round.
           </tr>
         `;
       }).join("")}
-    </tbody>
+        </tbody>
   </table>
 </div>
+
+<button type="button" onclick="closeGolfDayReport()">
+  Back to League Table
+</button>
+`;
+
   } catch (error) {
     report.innerHTML = `
       <h2>Golf Day Report</h2>
