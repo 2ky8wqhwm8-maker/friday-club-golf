@@ -1428,6 +1428,139 @@ const { results } = await env.DB.prepare(`
   }
 }
 
+if (
+  url.pathname === "/api/admin/amend-results" &&
+  request.method === "POST"
+) {
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const golfDayId = Number(body.golf_day_id);
+    const amendments = body.amendments;
+
+    if (
+      !Number.isInteger(golfDayId) ||
+      golfDayId <= 0 ||
+      !Array.isArray(amendments) ||
+      amendments.length === 0
+    ) {
+      return Response.json(
+        { error: "Invalid amendment data." },
+        { status: 400 }
+      );
+    }
+
+    const golfDay = await env.DB.prepare(`
+      SELECT id, results_submitted
+      FROM golf_days
+      WHERE id = ?
+    `).bind(golfDayId).first();
+
+    if (!golfDay || Number(golfDay.results_submitted) !== 1) {
+      return Response.json(
+        { error: "Golf Day results have not been submitted." },
+        { status: 409 }
+      );
+    }
+
+    const statements = [];
+    const seenPlayers = new Set();
+
+    for (const item of amendments) {
+      const playerId = Number(item.player_id);
+      const handicap = Number(item.handicap);
+      const score = item.stableford_score;
+
+      if (
+        !Number.isInteger(playerId) ||
+        playerId <= 0 ||
+        seenPlayers.has(playerId) ||
+        item.handicap === null ||
+        item.handicap === undefined ||
+        item.handicap === "" ||
+        !Number.isFinite(handicap) ||
+        handicap < 0 ||
+        handicap > 54
+      ) {
+        return Response.json(
+          { error: "Invalid player or handicap." },
+          { status: 400 }
+        );
+      }
+
+      seenPlayers.add(playerId);
+
+      if (score === null || score === "") {
+        // Remove an incorrectly entered result.
+        statements.push(
+          env.DB.prepare(`
+            DELETE FROM results
+            WHERE golf_day_id = ?
+              AND player_id = ?
+          `).bind(golfDayId, playerId)
+        );
+      } else {
+        const points = Number(score);
+
+        if (!Number.isInteger(points) || points < 0) {
+          return Response.json(
+            { error: "Invalid Stableford score." },
+            { status: 400 }
+          );
+        }
+
+        statements.push(
+          env.DB.prepare(`
+            INSERT INTO results
+              (golf_day_id, player_id, stableford_score, handicap)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(golf_day_id, player_id)
+            DO UPDATE SET
+              stableford_score = excluded.stableford_score,
+              handicap = excluded.handicap
+          `).bind(
+            golfDayId,
+            playerId,
+            points,
+            handicap
+          )
+        );
+      }
+
+      // Preserve the historical handicap separately.
+      statements.push(
+        env.DB.prepare(`
+          INSERT INTO prepared_handicaps
+            (golf_day_id, player_id, handicap)
+          VALUES (?, ?, ?)
+          ON CONFLICT(golf_day_id, player_id)
+          DO UPDATE SET
+            handicap = excluded.handicap,
+            updated_at = CURRENT_TIMESTAMP
+        `).bind(golfDayId, playerId, handicap)
+      );
+    }
+
+    await env.DB.batch(statements);
+
+    return Response.json({
+      success: true,
+      amended: amendments.length
+    });
+
+  } catch (error) {
+    return Response.json(
+      { error: "Unable to amend Golf Day results." },
+      { status: 500 }
+    );
+  }
+}
 
 if (url.pathname === "/api/admin/save-results" && request.method === "POST") {
 
