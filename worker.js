@@ -995,10 +995,11 @@ if (url.pathname === "/api/admin/golf-days") {
   try {
     const { results } = await env.DB.prepare(`
       SELECT
-        gd.id,
-        gd.play_date,
-        gd.notes,
-        c.name AS course_name,
+  gd.id,
+  gd.play_date,
+  gd.notes,
+  gd.results_submitted,
+  c.name AS course_name,
         c.location AS course_location
       FROM golf_days gd
       JOIN courses c
