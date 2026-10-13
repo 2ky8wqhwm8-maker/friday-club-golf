@@ -1479,7 +1479,10 @@ async function loadGolfDays() {
 option.textContent =
   formatUKDate(golfDay.play_date) +
   " — " +
-  golfDay.course_name;
+  golfDay.course_name +
+  (Number(golfDay.results_submitted) === 1
+    ? " — Results Submitted"
+    : " — Awaiting Results");
 
       select.appendChild(option);
     });
