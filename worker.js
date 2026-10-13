@@ -1275,15 +1275,27 @@ if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") 
       );
     }
 
-    await env.DB.prepare(`
-      DELETE FROM results
-      WHERE golf_day_id = ?
-    `).bind(golfDayId).run();
+   await env.DB.batch([
+  env.DB.prepare(`
+    DELETE FROM golf_day_notice
+    WHERE golf_day_id = ?
+  `).bind(golfDayId),
 
-    await env.DB.prepare(`
-      DELETE FROM golf_days
-      WHERE id = ?
-    `).bind(golfDayId).run();
+  env.DB.prepare(`
+    DELETE FROM results
+    WHERE golf_day_id = ?
+  `).bind(golfDayId),
+
+  env.DB.prepare(`
+    DELETE FROM prepared_handicaps
+    WHERE golf_day_id = ?
+  `).bind(golfDayId),
+
+  env.DB.prepare(`
+    DELETE FROM golf_days
+    WHERE id = ?
+  `).bind(golfDayId)
+]);
 
     return Response.json({
       success: true
