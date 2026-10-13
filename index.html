@@ -1789,15 +1789,16 @@ ${performanceOfDay ? `
   <p>
     <strong>${performanceOfDay.name}</strong>
     scored ${performanceOfDay.score} Stableford points,
-    compared with a season average of
-    ${performanceOfDay.seasonAverage.toFixed(1)}.
+    compared with an average of
+${performanceOfDay.seasonAverage.toFixed(1)}
+points before this round.
 
     That's
     <strong>
       ${performanceOfDay.improvement >= 0 ? "+" : ""}
       ${performanceOfDay.improvement.toFixed(1)} points
     </strong>
-    against their season average.
+    above or below their pre-round average.
   </p>
 ` : `
   <p>Season averages are not available.</p>
