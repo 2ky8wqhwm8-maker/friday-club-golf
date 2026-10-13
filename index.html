@@ -3402,17 +3402,19 @@ const response = await fetch(
 
       html += `
   <th class="golf-day-heading">
-    <a
-      href="#"
-      onclick="showGolfDayReport(${day.id}); return false;"
-      style="
-        color: inherit;
-        text-decoration: underline;
-        cursor: pointer;
-      "
-    >
-      ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
-    </a>
+    <div>
+      <a
+        href="#"
+        onclick="showGolfDayReport(${day.id}); return false;"
+        style="
+          color: inherit;
+          text-decoration: underline;
+          cursor: pointer;
+        "
+      >
+        ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
+      </a>
+    </div>
   </th>
 `;
     });
