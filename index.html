@@ -1675,10 +1675,9 @@ const golfDayDescription = golfDay
       r.last_name?.trim().toLowerCase()
 );
 
-    const seasonAverage =
-      leaguePlayer?.average_score == null
-        ? null
-        : Number(leaguePlayer.average_score);
+    const seasonAverage = leaguePlayer
+  ? getAverageBeforeGolfDay(leaguePlayer.id, golfDayId)
+  : null;
 
     const score = Number(r.stableford_score);
 
