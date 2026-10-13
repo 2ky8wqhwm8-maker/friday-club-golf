@@ -3427,6 +3427,7 @@ const response = await fetch(
     const data = await response.json();
 
 window.golfDayDetails = data.golf_days;
+window.golfLeaguePlayers = data.players;
 
 const scoreMap = {};
 
