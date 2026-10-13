@@ -1655,9 +1655,38 @@ const golfDayDescription = golfDay
     const over36 = scores.filter(r => r.score >= 36).length;
 
     const winnerNames = winners.map(r => r.name).join(" and ");
-    const narrative = winners.length > 1
-      ? `${winnerNames} shared first place with ${best} Stableford points.`
-      : `${winnerNames} led the field with ${best} Stableford points.`;
+
+const runnerUp = scores.find(r => r.score < best);
+
+let narrative = "";
+
+if (winners.length > 1) {
+  narrative =
+    `${winnerNames} shared the honours with ${best} Stableford points each.`;
+} else {
+  narrative =
+    `${winnerNames} topped the leaderboard with ${best} Stableford points.`;
+
+  if (runnerUp) {
+    const margin = best - runnerUp.score;
+
+    narrative +=
+      ` ${runnerUp.name} finished second on ${runnerUp.score}, ` +
+      `${margin} point${margin === 1 ? "" : "s"} behind.`;
+  }
+}
+
+if (over36 > 0) {
+  narrative +=
+    ` ${over36} golfer${over36 === 1 ? "" : "s"} ` +
+    `recorded 36 points or better.`;
+}
+
+if (Number(average) >= 33) {
+  narrative += " Overall, it was a particularly high-scoring day.";
+} else if (Number(average) < 27) {
+  narrative += " Overall, scoring proved difficult for the field.";
+}
 
     const stats = [
       ["Players", scores.length],
@@ -1684,8 +1713,8 @@ const golfDayDescription = golfDay
       </div>
 
       <h3>Friday's Talking Points</h3>
-      <p>${narrative} The ${scores.length} golfers averaged
-      ${average} points, with ${over36} scoring 36 or more.</p>
+      <p>${narrative} The field of ${scores.length} golfers
+averaged ${average} Stableford points.</p>
 
       <h3>Full Results</h3>
 <div class="table-container">
