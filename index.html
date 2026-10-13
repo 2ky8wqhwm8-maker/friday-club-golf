@@ -2394,6 +2394,9 @@ async function loadScorePlayers() {
 
   document.getElementById("save-amendments-button").style.display =
     isSubmitted ? "inline-block" : "none";
+
+  document.getElementById("submit-results-button").style.display =
+  isSubmitted ? "none" : "inline-block";
   
   const golfDayId =
     document.getElementById("results-golf-day").value;
