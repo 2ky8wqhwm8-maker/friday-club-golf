@@ -1628,16 +1628,32 @@ const golfDayDescription = golfDay
     const data = await response.json();
 
     const scores = (data.results || [])
-      .filter(r => r.stableford_score !== null &&
-                   r.stableford_score !== undefined &&
-                   r.stableford_score !== "")
-      .map(r => ({
-        name: `${r.first_name} ${r.last_name}`,
-        handicap: r.handicap,
-        score: Number(r.stableford_score)
-      }))
-      .filter(r => Number.isFinite(r.score))
-      .sort((a, b) => b.score - a.score);
+  .filter(r => r.stableford_score !== null &&
+               r.stableford_score !== undefined &&
+               r.stableford_score !== "")
+  .map(r => {
+    const leaguePlayer = (window.golfLeaguePlayers || []).find(
+      p => Number(p.id) === Number(r.player_id)
+    );
+
+    const seasonAverage =
+      leaguePlayer?.average_score == null
+        ? null
+        : Number(leaguePlayer.average_score);
+
+    const score = Number(r.stableford_score);
+
+    return {
+      name: `${r.first_name} ${r.last_name}`,
+      handicap: r.handicap,
+      score: score,
+      seasonAverage: Number.isFinite(seasonAverage)
+        ? seasonAverage
+        : null
+    };
+  })
+  .filter(r => Number.isFinite(r.score))
+  .sort((a, b) => b.score - a.score);
 
     if (!scores.length) {
       report.innerHTML = `
