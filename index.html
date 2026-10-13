@@ -1598,9 +1598,20 @@ async function loadGolfDayResults() {
 }
 
 async function showGolfDayReport(golfDayId) {
+  const golfDay = (window.golfDayDetails || []).find(
+  day => Number(day.id) === Number(golfDayId)
+);
+
+const golfDayDescription = golfDay
+  ? `${formatUKDate(golfDay.play_date)} — ${golfDay.course_name}`
+  : "Golf Day";
   console.log("Golf Day Report ID:", golfDayId);
   const report = document.getElementById("golf-day-report");
   if (!report) return;
+
+  const golfDay = leagueData?.golf_days?.find(
+  day => Number(day.id) === Number(golfDayId)
+);
 
   document.getElementById("main-home").style.display = "none";
   document.getElementById("admin-card").style.display = "none";
@@ -1662,7 +1673,11 @@ async function showGolfDayReport(golfDayId) {
     report.innerHTML = `
       <h2>Golf Day Report</h2>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;">
+<h3 style="margin: 5px 0 15px; color: #555;">
+  ${golfDayDescription}
+</h3>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;">
         ${stats.map(([label, value]) => `
           <div style="background:#f0f4f0;padding:12px;
                       border-radius:8px;text-align:center;min-width:110px;">
@@ -3385,7 +3400,10 @@ const response = await fetch(
     }
 
     const data = await response.json();
-          const scoreMap = {};
+
+window.golfDayDetails = data.golf_days;
+
+const scoreMap = {};
 
     data.scores.forEach(result => {
       scoreMap[
