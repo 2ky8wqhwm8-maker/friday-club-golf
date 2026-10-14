@@ -1333,6 +1333,29 @@ const bestAverageLeaders = bestAverageResults.results.filter(
     Number(player.average_score) ===
     Number(bestAverageResults.results[0]?.average_score)
 );
+
+// Most Scores of 36 Points or More
+const scores36Results = await env.DB.prepare(`
+  SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(r.id) AS scores_36_plus
+  FROM results r
+  JOIN players p ON p.id = r.player_id
+  JOIN golf_days gd ON gd.id = r.golf_day_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score >= 36
+  GROUP BY p.id, p.first_name, p.last_name
+  ORDER BY scores_36_plus DESC, p.last_name ASC
+`).bind(season.id).all();
+
+const scores36Leaders = scores36Results.results.filter(
+  player =>
+    Number(player.scores_36_plus) ===
+    Number(scores36Results.results[0]?.scores_36_plus)
+);
     
     return Response.json({
   season: season.name,
@@ -1343,7 +1366,8 @@ const bestAverageLeaders = bestAverageResults.results.filter(
   mostConsistent: mostConsistent,
   mostImproved: mostImproved,
 mostRoundsPlayed: roundsLeaders,
-bestAverage: bestAverageLeaders
+bestAverage: bestAverageLeaders,
+scores36Leaders: scores36Leaders
 });;
 
   } catch (error) {
