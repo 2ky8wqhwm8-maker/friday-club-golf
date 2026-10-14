@@ -3983,6 +3983,52 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
+
+<div class="highlight-award" style="grid-column: 1 / -1;">
+
+  <h3>Best Round at Each Course</h3>
+
+  ${data.bestRoundsByCourse?.length ? (() => {
+
+    const courses = {};
+
+    data.bestRoundsByCourse.forEach(round => {
+      if (!courses[round.course_name]) {
+        courses[round.course_name] = [];
+      }
+      courses[round.course_name].push(round);
+    });
+
+    return Object.entries(courses).map(([course, rounds]) => `
+      <div style="margin-top: 18px;">
+
+        <h4>${course}</h4>
+
+        <div class="highlight-number">
+          ${rounds[0].stableford_score} points
+        </div>
+
+        ${rounds.length > 1
+          ? "<div>Joint Record Holders</div>"
+          : ""}
+
+        ${rounds.map(round => `
+          <div style="margin-top: 8px;">
+            ${round.first_name} ${round.last_name}
+            —
+            ${new Date(round.play_date + "T12:00:00")
+              .toLocaleDateString("en-GB")}
+          </div>
+        `).join("")}
+
+      </div>
+    `).join("");
+
+  })() : `
+    <div>No course records available yet.</div>
+  `}
+
+</div>
 </div>
     `;
 
