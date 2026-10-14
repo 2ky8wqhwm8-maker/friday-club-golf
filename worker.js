@@ -1166,12 +1166,37 @@ if (!member) {
         AND r.stableford_score IS NOT NULL
     `).bind(season.id).first();
 
+    const highestScore = await env.DB.prepare(`
+  SELECT
+    p.first_name,
+    p.last_name,
+    r.stableford_score,
+    gd.play_date,
+    c.name AS course_name
+  FROM results r
+  JOIN players p
+    ON p.id = r.player_id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  JOIN courses c
+    ON c.id = gd.course_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score IS NOT NULL
+  ORDER BY
+    r.stableford_score DESC,
+    gd.play_date ASC
+  LIMIT 1
+`).bind(season.id).first();
+    
     return Response.json({
-      season: season.name,
-      golfDaysPlayed: golfDays.total,
-      roundsPlayed: scores.rounds_played,
-      averageScore: scores.average_score
-    });
+  season: season.name,
+  golfDaysPlayed: golfDays.total,
+  roundsPlayed: scores.rounds_played,
+  averageScore: scores.average_score,
+  highestScore: highestScore
+});
 
   } catch (error) {
     return Response.json(
