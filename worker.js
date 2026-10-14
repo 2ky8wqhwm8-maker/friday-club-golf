@@ -1173,10 +1173,19 @@ if (!season) {
 ORDER BY gd.play_date DESC
 `).bind(playerId, season.id).all();
 
+const golfDaysHeld = await env.DB.prepare(`
+  SELECT COUNT(*) AS total
+  FROM golf_days
+  WHERE season_id = ?
+    AND play_date <= date('now')
+    AND results_submitted = 1
+`).bind(season.id).first();
+    
     return Response.json({
   player: player,
   season: season.name,
-  results: results
+  results: results,
+  golfDaysHeld: golfDaysHeld.total
 });
 
   } catch (error) {
