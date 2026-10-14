@@ -3691,6 +3691,7 @@ let leagueData = null;
     const data =
       await response.json();
     leagueData = data;
+    console.log("SEASON HIGHLIGHTS DATA:", data);
     console.log("LEAGUE DATA:", data.season, data.players.find(p => p.last_name === "Piggott"));
     document.getElementById(
       "season-title"
