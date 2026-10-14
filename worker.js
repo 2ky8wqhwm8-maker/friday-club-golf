@@ -1189,13 +1189,42 @@ if (!member) {
     gd.play_date ASC
   LIMIT 1
 `).bind(season.id).first();
+
+    // Most Consistent Golfer
+const mostConsistent = await env.DB.prepare(`
+  SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(r.id) AS rounds_played,
+    ROUND(AVG(r.stableford_score), 1) AS average_score,
+    ROUND(
+      SQRT(
+        AVG(r.stableford_score * r.stableford_score)
+        - AVG(r.stableford_score) * AVG(r.stableford_score)
+      ), 2
+    ) AS consistency
+  FROM results r
+  JOIN players p
+    ON p.id = r.player_id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score IS NOT NULL
+  GROUP BY p.id, p.first_name, p.last_name
+  HAVING COUNT(r.id) >= 10
+  ORDER BY consistency ASC, average_score DESC
+  LIMIT 1
+`).bind(season.id).first();
     
     return Response.json({
   season: season.name,
   golfDaysPlayed: golfDays.total,
   roundsPlayed: scores.rounds_played,
   averageScore: scores.average_score,
-  highestScore: highestScore
+  highestScore: highestScore,
+  mostConsistent: mostConsistent
 });
 
   } catch (error) {
