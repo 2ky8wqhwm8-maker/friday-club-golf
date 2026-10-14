@@ -1379,6 +1379,34 @@ const scores40Leaders = scores40Results.results.filter(
     Number(player.scores_40_plus) ===
     Number(scores40Results.results[0]?.scores_40_plus)
 );
+
+// Best Round at Each Course
+const bestRoundsByCourse = await env.DB.prepare(`
+  SELECT
+    c.name AS course_name,
+    p.first_name,
+    p.last_name,
+    r.stableford_score,
+    gd.play_date
+  FROM results r
+  JOIN players p ON p.id = r.player_id
+  JOIN golf_days gd ON gd.id = r.golf_day_id
+  JOIN courses c ON c.id = gd.course_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score IS NOT NULL
+    AND r.stableford_score = (
+      SELECT MAX(r2.stableford_score)
+      FROM results r2
+      JOIN golf_days gd2 ON gd2.id = r2.golf_day_id
+      WHERE gd2.course_id = gd.course_id
+        AND gd2.season_id = gd.season_id
+        AND gd2.results_submitted = 1
+        AND gd2.play_date <= date('now')
+    )
+  ORDER BY c.name, p.last_name, gd.play_date
+`).bind(season.id).all();
     
     return Response.json({
   season: season.name,
@@ -1391,7 +1419,8 @@ const scores40Leaders = scores40Results.results.filter(
 mostRoundsPlayed: roundsLeaders,
 bestAverage: bestAverageLeaders,
 scores36Leaders: scores36Leaders,
-scores40Leaders: scores40Leaders
+scores40Leaders: scores40Leaders,
+bestRoundsByCourse: bestRoundsByCourse.results
 });;
 
   } catch (error) {
