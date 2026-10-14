@@ -3733,6 +3733,43 @@ async function loadSeasonHighlights() {
         </div>
 
       </div>
+
+      <div style="
+  grid-column: 1 / -1;
+  background: #f2f6f2;
+  border: 1px solid #d5e2d5;
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+">
+
+  <h3>Highest Stableford Score</h3>
+
+  ${data.highestScore ? `
+    <div class="highlight-number">
+      ${data.highestScore.stableford_score} points
+    </div>
+
+    <div>
+      ${data.highestScore.first_name}
+      ${data.highestScore.last_name}
+    </div>
+
+    <div>
+      ${data.highestScore.course_name}
+    </div>
+
+    <div>
+      ${new Date(data.highestScore.play_date + "T12:00:00")
+        .toLocaleDateString("en-GB")}
+    </div>
+  ` : `
+    <div>No results recorded yet</div>
+  `}
+
+</div>
+
+</div>
     `;
 
   } catch (error) {
