@@ -1988,8 +1988,17 @@ points before this round.
 
 function closeGolfDayReport() {
   document.getElementById("golf-day-report").style.display = "none";
-  document.getElementById("main-results").style.display = "none";
-  document.getElementById("main-home").style.display = "block";
+
+  if (golfDayReportFromPlayer) {
+    document.getElementById("main-results").style.display = "block";
+    document.getElementById("player-results-view").style.display = "block";
+    document.getElementById("main-home").style.display = "none";
+  } else {
+    document.getElementById("main-results").style.display = "none";
+    document.getElementById("main-home").style.display = "block";
+  }
+
+  golfDayReportFromPlayer = false;
 }
   
 // ========================================
@@ -3857,7 +3866,7 @@ const scoreMap = {};
     <div>
       <a
         href="#"
-        onclick="showGolfDayReport(${day.id}); return false;"
+        onclick="golfDayReportFromPlayer = false; showGolfDayReport(${day.id}); return false;"
         style="
           color: inherit;
           text-decoration: underline;
@@ -4401,6 +4410,7 @@ async function updateVersion(id) {
 // INDIVIDUAL PLAYER RESULTS
 // ========================================
 let currentPlayerResultsId = null;
+let golfDayReportFromPlayer = false;
   
 async function showPlayerResults(playerId) {
 
@@ -4515,9 +4525,12 @@ const percentagePlayed = golfDaysHeld > 0
             ${data.results.map(result => `
               <tr>
                 <td>
-                  ${formatUKDate(result.play_date)}
-                  — ${result.course_name}
-                </td>
+  <a href="#"
+   onclick="golfDayReportFromPlayer = true; showGolfDayReport(${result.golf_day_id}); return false;">
+    ${formatUKDate(result.play_date)}
+    — ${result.course_name}
+  </a>
+</td>
                 <td class="number">
                   ${result.handicap ?? "—"}
                 </td>
