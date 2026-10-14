@@ -492,6 +492,24 @@ header {
   height: auto;
   line-height: 1.2;
 }
+
+/* Season Highlights */
+
+.highlight-stat {
+  background: #f2f6f2;
+  border: 1px solid #d5e2d5;
+  border-radius: 10px;
+  padding: 20px 12px;
+  text-align: center;
+  color: #333;
+}
+
+.highlight-number {
+  font-size: 30px;
+  font-weight: bold;
+  color: #246b45;
+  margin-bottom: 8px;
+}
     
   </style>
 
@@ -3039,6 +3057,7 @@ document.getElementById("main-results").style.display = "none";
 
   if (section === "highlights") {
   document.getElementById("main-highlights").style.display = "block";
+  loadSeasonHighlights();
 }
   
   if (section === "admin") {
@@ -3663,6 +3682,64 @@ async function rejectMember(playerId) {
   }
 }  
 
+async function loadSeasonHighlights() {
+
+  const container =
+    document.getElementById("season-highlights-content");
+
+  container.textContent = "Loading season highlights...";
+
+  try {
+
+    const selectedSeason =
+      document.getElementById("season-selector").value;
+
+    const response = await fetch(
+      "/api/season-highlights" +
+      (selectedSeason ? "?season=" + encodeURIComponent(selectedSeason) : "")
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load season highlights.");
+    }
+
+    const data = await response.json();
+
+    container.innerHTML = `
+      <h3>${data.season}</h3>
+
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      ">
+
+        <div class="highlight-stat">
+          <div class="highlight-number">${data.golfDaysPlayed}</div>
+          <div>Golf Days Played</div>
+        </div>
+
+        <div class="highlight-stat">
+          <div class="highlight-number">${data.roundsPlayed}</div>
+          <div>Rounds Played</div>
+        </div>
+
+        <div class="highlight-stat">
+          <div class="highlight-number">
+            ${data.averageScore == null ? "—" : Number(data.averageScore).toFixed(1)}
+          </div>
+          <div>Average Stableford Score</div>
+        </div>
+
+      </div>
+    `;
+
+  } catch (error) {
+    container.textContent = error.message;
+  }
+}
+  
 // ========================================
 // LOAD LEAGUE TABLE
 // ========================================
