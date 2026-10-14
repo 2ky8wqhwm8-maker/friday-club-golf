@@ -3768,7 +3768,34 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
+<div class="highlight-stat" style="grid-column: 1 / -1;">
 
+  <h3>Most Consistent Golfer</h3>
+
+  ${data.mostConsistent ? `
+    <div class="highlight-number">
+      ${data.mostConsistent.first_name}
+      ${data.mostConsistent.last_name}
+    </div>
+
+    <div>
+      Rounds Played: ${data.mostConsistent.rounds_played}
+    </div>
+
+    <div>
+      Average Stableford Score:
+      ${data.mostConsistent.average_score}
+    </div>
+
+    <div>
+      Consistency Rating:
+      ${data.mostConsistent.consistency}
+    </div>
+  ` : `
+    <div>No golfer has completed 10 rounds yet.</div>
+  `}
+
+</div>
 </div>
     `;
 
