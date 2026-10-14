@@ -3831,18 +3831,25 @@ async function loadSeasonHighlights() {
 
   <h3>Most Rounds Played</h3>
 
-  ${data.mostRoundsPlayed ? `
-    <div class="highlight-number">
-      ${data.mostRoundsPlayed.first_name}
-      ${data.mostRoundsPlayed.last_name}
-    </div>
+  ${data.mostRoundsPlayed?.length ? `
+  <div class="highlight-number">
+    ${data.mostRoundsPlayed.length > 1
+      ? "Joint Leaders"
+      : "Most Rounds Played"}
+  </div>
 
-    <div>
-      ${data.mostRoundsPlayed.rounds_played} rounds played
+  ${data.mostRoundsPlayed.map(player => `
+    <div style="margin-top: 10px;">
+      <strong>
+        ${player.first_name} ${player.last_name}
+      </strong>
+      — ${player.rounds_played} rounds
     </div>
-  ` : `
-    <div>No rounds recorded yet.</div>
-  `}
+  `).join("")}
+
+` : `
+  <div>No rounds recorded yet.</div>
+`}
 
 </div>
 </div>
