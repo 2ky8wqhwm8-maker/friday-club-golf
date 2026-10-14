@@ -3796,6 +3796,37 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
+<div class="highlight-stat" style="grid-column: 1 / -1;">
+
+  <h3>Most Improved Golfer</h3>
+
+  ${data.mostImproved ? `
+    <div class="highlight-number">
+      ${data.mostImproved.first_name}
+      ${data.mostImproved.last_name}
+    </div>
+
+    <div>
+      Rounds Played: ${data.mostImproved.rounds_played}
+    </div>
+
+    <div>
+      First 5 Average: ${data.mostImproved.earlierAverage}
+    </div>
+
+    <div>
+      Last 5 Average: ${data.mostImproved.recentAverage}
+    </div>
+
+    <div>
+      Improvement:
+      +${data.mostImproved.improvement} points
+    </div>
+  ` : `
+    <div>No qualifying improvement recorded yet.</div>
+  `}
+
+</div>
 </div>
     `;
 
