@@ -1103,6 +1103,85 @@ if (url.pathname === "/api/golf-day-results") {
   }
 }
 
+// Season Highlights
+if (url.pathname === "/api/season-highlights") {
+  try {
+
+    const member = await env.DB.prepare(`
+  SELECT id
+  FROM players
+  WHERE LOWER(email) = LOWER(?)
+    AND membership_status = 'approved'
+  LIMIT 1
+`).bind(email).first();
+
+if (!member) {
+  return Response.json(
+    { error: "Approved membership required." },
+    { status: 403 }
+  );
+}
+
+    const requestedSeason = url.searchParams.get("season");
+
+    const season = await env.DB.prepare(`
+      SELECT id, name
+      FROM seasons
+      WHERE
+        (? IS NULL AND status = 'current')
+        OR
+        (? IS NOT NULL AND id = ?)
+      LIMIT 1
+    `).bind(
+      requestedSeason,
+      requestedSeason,
+      requestedSeason
+    ).first();
+
+    if (!season) {
+      return Response.json(
+        { error: "Season not found." },
+        { status: 404 }
+      );
+    }
+
+    const golfDays = await env.DB.prepare(`
+      SELECT COUNT(*) AS total
+      FROM golf_days
+      WHERE season_id = ?
+        AND results_submitted = 1
+        AND play_date <= date('now')
+    `).bind(season.id).first();
+
+    const scores = await env.DB.prepare(`
+      SELECT
+        COUNT(r.id) AS rounds_played,
+        ROUND(AVG(r.stableford_score), 1) AS average_score
+      FROM results r
+      JOIN golf_days gd
+        ON gd.id = r.golf_day_id
+      WHERE gd.season_id = ?
+        AND gd.results_submitted = 1
+        AND gd.play_date <= date('now')
+        AND r.stableford_score IS NOT NULL
+    `).bind(season.id).first();
+
+    return Response.json({
+      season: season.name,
+      golfDaysPlayed: golfDays.total,
+      roundsPlayed: scores.rounds_played,
+      averageScore: scores.average_score
+    });
+
+  } catch (error) {
+    return Response.json(
+      { error: "Unable to load season highlights." },
+      { status: 500 }
+    );
+  }
+}
+// End Season Highlights
+    
 if (url.pathname === "/api/player-results") {
 
   try {
