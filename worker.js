@@ -1283,6 +1283,26 @@ for (const player of playerRounds.values()) {
 if (mostImproved && mostImproved.improvement <= 0) {
   mostImproved = null;
 }
+
+// Most Rounds Played
+const mostRoundsPlayed = await env.DB.prepare(`
+  SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(r.id) AS rounds_played
+  FROM results r
+  JOIN players p
+    ON p.id = r.player_id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score IS NOT NULL
+  GROUP BY p.id, p.first_name, p.last_name
+  ORDER BY rounds_played DESC, p.last_name ASC
+  LIMIT 1
+`).bind(season.id).first();
     
     return Response.json({
   season: season.name,
@@ -1291,8 +1311,9 @@ if (mostImproved && mostImproved.improvement <= 0) {
   averageScore: scores.average_score,
   highestScore: highestScore,
   mostConsistent: mostConsistent,
-  mostImproved: mostImproved
-});
+  mostImproved: mostImproved,
+  mostRoundsPlayed: mostRoundsPlayed
+});;
 
   } catch (error) {
     return Response.json(
