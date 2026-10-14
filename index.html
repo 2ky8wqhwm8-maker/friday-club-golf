@@ -3852,6 +3852,40 @@ async function loadSeasonHighlights() {
 `}
 
 </div>
+<div class="highlight-stat" style="grid-column: 1 / -1;">
+
+  <h3>Best Average Stableford Score</h3>
+
+  ${data.bestAverage?.length ? `
+
+    ${data.bestAverage.length > 1
+      ? "<h4>Joint Leaders</h4>"
+      : ""}
+
+    ${data.bestAverage.map(player => `
+      <div style="margin-top: 12px;">
+
+        <div class="highlight-number">
+          ${player.first_name} ${player.last_name}
+        </div>
+
+        <div>
+          Average Stableford Score:
+          ${Number(player.average_score).toFixed(2)}
+        </div>
+
+        <div>
+          Rounds Played: ${player.rounds_played}
+        </div>
+
+      </div>
+    `).join("")}
+
+  ` : `
+    <div>No golfer has completed 10 rounds yet.</div>
+  `}
+
+</div>
 </div>
     `;
 
