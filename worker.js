@@ -1300,9 +1300,14 @@ const mostRoundsPlayed = await env.DB.prepare(`
     AND gd.play_date <= date('now')
     AND r.stableford_score IS NOT NULL
   GROUP BY p.id, p.first_name, p.last_name
-  ORDER BY rounds_played DESC, p.last_name ASC
-  LIMIT 1
-`).bind(season.id).first();
+    ORDER BY rounds_played DESC, p.last_name ASC
+`).bind(season.id).all();
+
+    const roundsLeaders = mostRoundsPlayed.results.filter(
+  player =>
+    Number(player.rounds_played) ===
+    Number(mostRoundsPlayed.results[0]?.rounds_played)
+);
     
     return Response.json({
   season: season.name,
@@ -1312,7 +1317,7 @@ const mostRoundsPlayed = await env.DB.prepare(`
   highestScore: highestScore,
   mostConsistent: mostConsistent,
   mostImproved: mostImproved,
-  mostRoundsPlayed: mostRoundsPlayed
+  mostRoundsPlayed: roundsLeaders
 });;
 
   } catch (error) {
