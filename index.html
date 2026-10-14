@@ -495,6 +495,28 @@ header {
 
 /* Season Highlights */
 
+/* Season Highlights award cards */
+
+.highlight-award {
+  background: #f8faf8;
+  border: 1px solid #d5e2d5;
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  color: #333;
+}
+
+.highlight-award h3 {
+  color: #246b45;
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.highlight-award .highlight-number {
+  font-size: 28px;
+}
+
 .highlight-stat {
   background: #f2f6f2;
   border: 1px solid #d5e2d5;
@@ -3787,15 +3809,7 @@ async function loadSeasonHighlights() {
     <div>No golfer has completed 10 rounds yet.</div>
   `}
 
-</div>
-      <div style="
-  grid-column: 1 / -1;
-  background: #f2f6f2;
-  border: 1px solid #d5e2d5;
-  border-radius: 10px;
-  padding: 18px;
-  text-align: center;
-">
+<div class="highlight-award" style="grid-column: 1 / -1;">
 
 
 
@@ -3824,7 +3838,7 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
-<div class="highlight-stat" style="grid-column: 1 / -1;">
+<div class="highlight-award" style="grid-column: 1 / -1;">
 
   <h3>Most Consistent Golfer</h3>
 
@@ -3852,7 +3866,7 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
-<div class="highlight-stat" style="grid-column: 1 / -1;">
+<div class="highlight-award" style="grid-column: 1 / -1;">
 
   <h3>Most Improved Golfer</h3>
 
@@ -3883,23 +3897,25 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
-<div class="highlight-stat" style="grid-column: 1 / -1;">
+<div class="highlight-award" style="grid-column: 1 / -1;">
 
   <h3>Most Rounds Played</h3>
 
   ${data.mostRoundsPlayed?.length ? `
+  ${data.mostRoundsPlayed.length > 1 ? `
   <div class="highlight-number">
-    ${data.mostRoundsPlayed.length > 1
-      ? "Joint Leaders"
-      : "Most Rounds Played"}
+    Joint Leaders
   </div>
+` : ""}
 
   ${data.mostRoundsPlayed.map(player => `
     <div style="margin-top: 10px;">
-      <strong>
-        ${player.first_name} ${player.last_name}
-      </strong>
-      — ${player.rounds_played} rounds
+      <div class="highlight-number">
+  ${player.first_name} ${player.last_name}
+</div>
+<div>
+  ${player.rounds_played} rounds played
+</div>
     </div>
   `).join("")}
 
