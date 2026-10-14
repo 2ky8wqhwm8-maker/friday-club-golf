@@ -4427,6 +4427,12 @@ const response = await fetch(
 
     const roundsPlayed = scores.length;
 
+    const golfDaysHeld = Number(data.golfDaysHeld) || 0;
+
+const percentagePlayed = golfDaysHeld > 0
+  ? ((roundsPlayed / golfDaysHeld) * 100).toFixed(1) + "%"
+  : "—";
+
     const averageScore = roundsPlayed
       ? (scores.reduce((a, b) => a + b, 0) / roundsPlayed).toFixed(2)
       : "—";
@@ -4464,6 +4470,7 @@ const response = await fetch(
 ">
   ${[
   ["Rounds Played", roundsPlayed],
+  ["Golf Days Played %", percentagePlayed],
   ["Season Average", averageScore],
   ["Best Round", bestScore],
   ["Worst Round", worstScore],
