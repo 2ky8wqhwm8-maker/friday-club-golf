@@ -1788,7 +1788,11 @@ const golfDayDescription = golfDay
       report.innerHTML = `
         <h2>Golf Day Report</h2>
         <p>No results available for this Golf Day.</p>
-        <button onclick="closeGolfDayReport()">Back to League Table</button>
+        <button type="button" onclick="closeGolfDayReport()">
+  ${golfDayReportFromPlayer
+    ? "Back to Player Statistics"
+    : "Back to League Table"}
+</button>
       `;
       return;
     }
@@ -1970,8 +1974,10 @@ points before this round.
   </table>
 </div>
 
-<button type="button" onclick="closeGolfDayReport()">
-  Back to League Table
+<button onclick="closeGolfDayReport()">
+  ${golfDayReportFromPlayer
+    ? "Back to Player Statistics"
+    : "Back to League Table"}
 </button>
 `;
 
@@ -1980,7 +1986,11 @@ points before this round.
     report.innerHTML = `
       <h2>Golf Day Report</h2>
       <p>Unable to load Golf Day Report.</p>
-      <button onclick="closeGolfDayReport()">Back to League Table</button>
+      <button onclick="closeGolfDayReport()">
+  ${golfDayReportFromPlayer
+    ? "Back to Player Statistics"
+    : "Back to League Table"}
+</button>
     `;
   }
 }
