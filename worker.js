@@ -1308,6 +1308,31 @@ const mostRoundsPlayed = await env.DB.prepare(`
     Number(player.rounds_played) ===
     Number(mostRoundsPlayed.results[0]?.rounds_played)
 );
+
+// Best Average Stableford Score
+const bestAverageResults = await env.DB.prepare(`
+  SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(r.id) AS rounds_played,
+    ROUND(AVG(r.stableford_score), 2) AS average_score
+  FROM results r
+  JOIN players p ON p.id = r.player_id
+  JOIN golf_days gd ON gd.id = r.golf_day_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score IS NOT NULL
+  GROUP BY p.id, p.first_name, p.last_name
+  HAVING COUNT(r.id) >= 10
+  ORDER BY average_score DESC, p.last_name ASC
+`).bind(season.id).all();
+
+const bestAverageLeaders = bestAverageResults.results.filter(
+  player =>
+    Number(player.average_score) ===
+    Number(bestAverageResults.results[0]?.average_score)
+);
     
     return Response.json({
   season: season.name,
@@ -1317,7 +1342,8 @@ const mostRoundsPlayed = await env.DB.prepare(`
   highestScore: highestScore,
   mostConsistent: mostConsistent,
   mostImproved: mostImproved,
-  mostRoundsPlayed: roundsLeaders
+mostRoundsPlayed: roundsLeaders,
+bestAverage: bestAverageLeaders
 });;
 
   } catch (error) {
