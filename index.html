@@ -527,6 +527,7 @@ header {
   <button type="button" onclick="showMainSection('form')">Form Table</button>
   <button type="button" onclick="showMainSection('availability')">Availability</button>  
   <button type="button" onclick="showMainSection('results')">Results</button>
+  <button type="button" onclick="showMainSection('results')">Results</button>
   <button
   type="button"
   id="main-admin-button"
@@ -1042,6 +1043,23 @@ header {
   </div>
 
 </div>
+
+    <!-- Season Highlights -->
+<div id="main-highlights" style="display: none;">
+
+  <h2>Season Highlights</h2>
+
+  <p>
+    A running summary of the Friday Club Golf Society season.
+    Statistics will update as new golf day results are submitted.
+  </p>
+
+  <div id="season-highlights-content">
+    Loading season highlights...
+  </div>
+
+</div>
+<!-- End of Season Highlights -->
     
     <div id="main-results" style="display: none;">
 
@@ -3011,6 +3029,7 @@ document.getElementById("main-results").style.display = "none";
   
   if (section === "results") {
     document.getElementById("main-results").style.display = "block";
+    document.getElementById("main-highlights").style.display = "none";
 
     document.getElementById("golf-day-results-view").style.display = "block";
     document.getElementById("player-results-view").style.display = "none";
@@ -3018,6 +3037,10 @@ document.getElementById("main-results").style.display = "none";
     loadResultsGolfDays();
   }
 
+  if (section === "highlights") {
+  document.getElementById("main-highlights").style.display = "block";
+}
+  
   if (section === "admin") {
     document.getElementById("admin-card").style.display = "block";
   }
