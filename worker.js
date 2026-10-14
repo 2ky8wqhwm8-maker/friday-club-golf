@@ -1159,10 +1159,11 @@ if (!season) {
 
     const { results } = await env.DB.prepare(`
       SELECT
-        gd.play_date,
-        c.name AS course_name,
-        r.handicap,
-        r.stableford_score
+  gd.id AS golf_day_id,
+  gd.play_date,
+  c.name AS course_name,
+  r.handicap,
+  r.stableford_score
       FROM results r
       JOIN golf_days gd
         ON gd.id = r.golf_day_id
