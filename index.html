@@ -553,7 +553,47 @@ header {
 .clubhouse-leader .highlight-number {
   font-size: 34px;
 }
-    
+
+/* Season Highlights - Course Records Table */
+
+.course-records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.course-records-table th {
+  background: #2e7d32;
+  color: white;
+  padding: 10px 8px;
+  text-align: left;
+}
+
+.course-records-table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.course-records-table tbody tr:nth-child(even) {
+  background: #f2f7f2;
+}
+
+.course-records-table th:nth-child(2),
+.course-records-table td:nth-child(2) {
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .course-records-table {
+    font-size: 12px;
+  }
+
+  .course-records-table th,
+  .course-records-table td {
+    padding: 7px 5px;
+  }
+}
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
@@ -3750,6 +3790,16 @@ async function loadSeasonHighlights() {
 
     container.innerHTML = `
       <h3>${data.season}</h3>
+      <h3 style="
+  margin-top: 25px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #2e7d32;
+  color: #2e7d32;
+  grid-column: 1 / -1;
+">
+  Season Overview
+</h3>
 
       <div style="
         display: grid;
@@ -3776,6 +3826,17 @@ async function loadSeasonHighlights() {
         </div>
 
       </div>
+
+     <h3 style="
+  margin-top: 30px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #2e7d32;
+  color: #2e7d32;
+  grid-column: 1 / -1;
+">
+  Player Awards
+</h3> 
 <div class="clubhouse-leader" style="grid-column: 1 / -1;">
 
   <h3>Clubhouse Leader</h3>
@@ -3988,45 +4049,33 @@ async function loadSeasonHighlights() {
 
   <h3>Best Round at Each Course</h3>
 
-  ${data.bestRoundsByCourse?.length ? (() => {
-
-    const courses = {};
-
-    data.bestRoundsByCourse.forEach(round => {
-      if (!courses[round.course_name]) {
-        courses[round.course_name] = [];
-      }
-      courses[round.course_name].push(round);
-    });
-
-    return Object.entries(courses).map(([course, rounds]) => `
-      <div style="margin-top: 18px;">
-
-        <h4>${course}</h4>
-
-        <div class="highlight-number">
-          ${rounds[0].stableford_score} points
-        </div>
-
-        ${rounds.length > 1
-          ? "<div>Joint Record Holders</div>"
-          : ""}
-
-        ${rounds.map(round => `
-          <div style="margin-top: 8px;">
-            ${round.first_name} ${round.last_name}
-            —
-            ${new Date(round.play_date + "T12:00:00")
-              .toLocaleDateString("en-GB")}
-          </div>
+  ${data.bestRoundsByCourse?.length ? `
+  <div style="overflow-x: auto;">
+    <table class="course-records-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Best Score</th>
+          <th>Player</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.bestRoundsByCourse.map(round => `
+          <tr>
+            <td>${round.course_name}</td>
+            <td><strong>${round.stableford_score}</strong></td>
+            <td>${round.first_name} ${round.last_name}</td>
+            <td>${new Date(round.play_date + "T12:00:00")
+              .toLocaleDateString("en-GB")}</td>
+          </tr>
         `).join("")}
-
-      </div>
-    `).join("");
-
-  })() : `
-    <div>No course records available yet.</div>
-  `}
+      </tbody>
+    </table>
+  </div>
+` : `
+  <div>No course records available yet.</div>
+`}
 
 </div>
 </div>
