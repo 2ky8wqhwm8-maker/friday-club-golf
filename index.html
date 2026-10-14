@@ -578,8 +578,19 @@ header {
   background: #f2f7f2;
 }
 
+/* Course and player names aligned left */
+.course-records-table th:nth-child(1),
+.course-records-table td:nth-child(1),
+.course-records-table th:nth-child(3),
+.course-records-table td:nth-child(3) {
+  text-align: left;
+}
+
+/* Scores and dates centred */
 .course-records-table th:nth-child(2),
-.course-records-table td:nth-child(2) {
+.course-records-table td:nth-child(2),
+.course-records-table th:nth-child(4),
+.course-records-table td:nth-child(4) {
   text-align: center;
 }
 
@@ -4061,15 +4072,31 @@ async function loadSeasonHighlights() {
         </tr>
       </thead>
       <tbody>
-        ${data.bestRoundsByCourse.map(round => `
-          <tr>
-            <td>${round.course_name}</td>
-            <td><strong>${round.stableford_score}</strong></td>
-            <td>${round.first_name} ${round.last_name}</td>
-            <td>${new Date(round.play_date + "T12:00:00")
-              .toLocaleDateString("en-GB")}</td>
-          </tr>
-        `).join("")}
+        ${Object.entries(
+  data.bestRoundsByCourse.reduce((courses, round) => {
+    if (!courses[round.course_name]) {
+      courses[round.course_name] = [];
+    }
+    courses[round.course_name].push(round);
+    return courses;
+  }, {})
+).map(([course, rounds]) => `
+  <tr>
+    <td>${course}</td>
+    <td><strong>${rounds[0].stableford_score}</strong></td>
+    <td>
+      ${rounds.map(round =>
+        `${round.first_name} ${round.last_name}`
+      ).join("<br>")}
+    </td>
+    <td>
+      ${rounds.map(round =>
+        new Date(round.play_date + "T12:00:00")
+          .toLocaleDateString("en-GB")
+      ).join("<br>")}
+    </td>
+  </tr>
+`).join("")}
       </tbody>
     </table>
   </div>
