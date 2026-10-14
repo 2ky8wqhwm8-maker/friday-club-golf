@@ -1217,6 +1217,72 @@ const mostConsistent = await env.DB.prepare(`
   ORDER BY consistency ASC, average_score DESC
   LIMIT 1
 `).bind(season.id).first();
+
+    // Most Improved Golfer
+const improvementResults = await env.DB.prepare(`
+  SELECT
+    p.id,
+    p.first_name,
+    p.last_name,
+    r.stableford_score,
+    gd.play_date
+  FROM results r
+  JOIN players p ON p.id = r.player_id
+  JOIN golf_days gd ON gd.id = r.golf_day_id
+  WHERE gd.season_id = ?
+    AND gd.results_submitted = 1
+    AND gd.play_date <= date('now')
+    AND r.stableford_score IS NOT NULL
+  ORDER BY p.id, gd.play_date ASC, gd.id ASC
+`).bind(season.id).all();
+
+const playerRounds = new Map();
+
+for (const round of improvementResults.results) {
+  if (!playerRounds.has(round.id)) {
+    playerRounds.set(round.id, {
+      first_name: round.first_name,
+      last_name: round.last_name,
+      scores: []
+    });
+  }
+
+  playerRounds.get(round.id).scores.push(
+    Number(round.stableford_score)
+  );
+}
+
+let mostImproved = null;
+
+for (const player of playerRounds.values()) {
+  if (player.scores.length < 10) continue;
+
+  const firstFive = player.scores.slice(0, 5);
+  const lastFive = player.scores.slice(-5);
+
+  const earlierAverage =
+    firstFive.reduce((a, b) => a + b, 0) / 5;
+
+  const recentAverage =
+    lastFive.reduce((a, b) => a + b, 0) / 5;
+
+  const improvement = recentAverage - earlierAverage;
+
+  if (!mostImproved || improvement > mostImproved.improvement) {
+    mostImproved = {
+      first_name: player.first_name,
+      last_name: player.last_name,
+      rounds_played: player.scores.length,
+      earlierAverage: Number(earlierAverage.toFixed(1)),
+      recentAverage: Number(recentAverage.toFixed(1)),
+      improvement: Number(improvement.toFixed(1))
+    };
+  }
+}
+
+if (mostImproved && mostImproved.improvement <= 0) {
+  mostImproved = null;
+}
     
     return Response.json({
   season: season.name,
@@ -1224,7 +1290,8 @@ const mostConsistent = await env.DB.prepare(`
   roundsPlayed: scores.rounds_played,
   averageScore: scores.average_score,
   highestScore: highestScore,
-  mostConsistent: mostConsistent
+  mostConsistent: mostConsistent,
+  mostImproved: mostImproved
 });
 
   } catch (error) {
