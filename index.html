@@ -3924,7 +3924,35 @@ async function loadSeasonHighlights() {
 `}
 
 </div>
+<div class="highlight-award" style="grid-column: 1 / -1;">
 
+  <h3>Most Scores of 36 Points or More</h3>
+
+  ${data.scores36Leaders?.length ? `
+
+    ${data.scores36Leaders.length > 1
+      ? "<h4>Joint Leaders</h4>"
+      : ""}
+
+    ${data.scores36Leaders.map(player => `
+      <div style="margin-top: 12px;">
+
+        <div class="highlight-number">
+          ${player.first_name} ${player.last_name}
+        </div>
+
+        <div>
+          ${player.scores_36_plus} rounds scoring 36+ points
+        </div>
+
+      </div>
+    `).join("")}
+
+  ` : `
+    <div>No scores of 36 points or more recorded yet.</div>
+  `}
+
+</div>
 </div>
     `;
 
