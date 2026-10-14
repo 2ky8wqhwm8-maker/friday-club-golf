@@ -3827,6 +3827,24 @@ async function loadSeasonHighlights() {
   `}
 
 </div>
+<div class="highlight-stat" style="grid-column: 1 / -1;">
+
+  <h3>Most Rounds Played</h3>
+
+  ${data.mostRoundsPlayed ? `
+    <div class="highlight-number">
+      ${data.mostRoundsPlayed.first_name}
+      ${data.mostRoundsPlayed.last_name}
+    </div>
+
+    <div>
+      ${data.mostRoundsPlayed.rounds_played} rounds played
+    </div>
+  ` : `
+    <div>No rounds recorded yet.</div>
+  `}
+
+</div>
 </div>
     `;
 
