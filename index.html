@@ -4129,10 +4129,11 @@ let leagueData = null;
       document.getElementById("season-selector").value;
 
     const response =
-      await fetch(
-        "/api/league" +
-        (selectedSeason ? "?season=" + selectedSeason : "")
-      );
+  await fetch(
+    "/api/league" +
+    (selectedSeason ? "?season=" + selectedSeason : ""),
+    { cache: "no-store" }
+  );
 
     if (!response.ok) {
       throw new Error(
