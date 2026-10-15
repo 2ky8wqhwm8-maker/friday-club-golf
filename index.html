@@ -2718,7 +2718,8 @@ async function savePreparedHandicaps() {
       );
       return;
     }
-
+        await loadLeague();
+    await loadExistingMembers();
     alert(
       `${saveData.saved} handicaps saved for the selected Golf Day.`
     );
