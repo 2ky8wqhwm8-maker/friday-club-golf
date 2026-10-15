@@ -2100,31 +2100,7 @@ for (const [playerId, handicap] of preparedMap) {
       );
     }
 
-    // Update current handicaps for all prepared players,
-    // including golfers who did not participate.
-    for (const [playerId, handicap] of preparedMap) {
-      statements.push(
-        env.DB.prepare(`
-          UPDATE players
-          SET handicap = ?
-          WHERE id = ?
-            AND NOT EXISTS (
-              SELECT 1
-              FROM results r
-              JOIN golf_days g ON g.id = r.golf_day_id
-              WHERE r.player_id = ?
-                AND g.play_date > ?
-            )
-        `).bind(
-  handicap,
-  playerId,
-  playerId,
-  golfDay.play_date
-)
-      );
-    }
-
-       
+      
     // All statements succeed or all are rolled back.
     await env.DB.batch(statements);
 
@@ -2231,6 +2207,13 @@ handicap > 54
             handicap = excluded.handicap,
             updated_at = CURRENT_TIMESTAMP
         `).bind(golfDayId, playerId, handicap)
+      );
+            statements.push(
+        env.DB.prepare(`
+          UPDATE players
+          SET handicap = ?
+          WHERE id = ?
+        `).bind(handicap, playerId)
       );
     }
 
