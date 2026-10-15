@@ -3128,8 +3128,9 @@ document.getElementById("main-results").style.display = "none";
   document.getElementById("main-highlights").style.display = "none";
 
   if (section === "home") {
-    document.getElementById("main-home").style.display = "block";
-      }
+  document.getElementById("main-home").style.display = "block";
+  loadLeague();
+}
 
   if (section === "form") {
   document.getElementById("main-form").style.display = "block";
