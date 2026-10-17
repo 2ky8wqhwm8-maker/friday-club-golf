@@ -4361,7 +4361,10 @@ const scoreMap = {};
           cursor: pointer;
         "
       >
-        ${shortDate} ${day.course_name.replace(/golf club/gi, "").trim()}
+        ${shortDate} ${day.course_name
+  .replace(/Cottesmore.*Griffin.*/i, "Cottesmore (Griffin)")
+  .replace(/golf club/gi, "")
+  .trim()}
       </a>
     </div>
   </th>
