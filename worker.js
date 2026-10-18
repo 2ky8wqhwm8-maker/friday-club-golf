@@ -1100,7 +1100,26 @@ if (url.pathname === "/api/golf-day-results") {
     )
   ORDER BY gd2.play_date DESC, gd2.id DESC
   LIMIT 1
-) AS previous_score
+) AS previous_score,
+(
+  SELECT MAX(r3.stableford_score)
+  FROM results r3
+  JOIN golf_days gd3
+    ON gd3.id = r3.golf_day_id
+  JOIN golf_days current_day3
+    ON current_day3.id = r.golf_day_id
+  WHERE r3.player_id = r.player_id
+    AND gd3.season_id = current_day3.season_id
+    AND gd3.results_submitted = 1
+    AND r3.stableford_score IS NOT NULL
+    AND (
+      gd3.play_date < current_day3.play_date
+      OR (
+        gd3.play_date = current_day3.play_date
+        AND gd3.id < current_day3.id
+      )
+    )
+) AS previous_best_score
       FROM results r
       JOIN players p
         ON p.id = r.player_id
