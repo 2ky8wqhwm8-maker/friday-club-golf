@@ -1911,6 +1911,11 @@ const golfDayDescription = golfDay
     r.previous_score === undefined
       ? null
       : Number(r.previous_score),
+  previousBestScore:
+  r.previous_best_score === null ||
+  r.previous_best_score === undefined
+    ? null
+    : Number(r.previous_best_score),
   seasonAverage: Number.isFinite(seasonAverage)
     ? seasonAverage
     : null
@@ -1995,6 +2000,20 @@ const biggestImprovement = improvements.length
       r => r.pointsImproved === improvements[0].pointsImproved
     )
   : [];
+
+const personalBests = scores
+  .filter(r =>
+    r.previousBestScore !== null &&
+    Number.isFinite(r.previousBestScore) &&
+    r.score >= r.previousBestScore
+  )
+  .map(r => ({
+    ...r,
+    personalBestType:
+      r.score > r.previousBestScore
+        ? "New Personal Best"
+        : "Equalled Personal Best"
+  }));
 
     const winnerNames = winners.map(r => r.name).join(" and ");
 
@@ -2119,6 +2138,23 @@ ${biggestImprovement.length ? `
 ` : `
   <p>No golfer improved on their previous round,
   or previous-round results are not available.</p>
+`}
+
+<h3>Personal Bests</h3>
+
+${personalBests.length ? `
+  <ul>
+    ${personalBests.map(r => `
+      <li>
+        <strong>${r.name}</strong> —
+        ${r.score} Stableford points
+        (${r.personalBestType};
+        previous best: ${r.previousBestScore})
+      </li>
+    `).join("")}
+  </ul>
+` : `
+  <p>No personal bests recorded on this golf day.</p>
 `}
 
      <h3>Full Results</h3>
