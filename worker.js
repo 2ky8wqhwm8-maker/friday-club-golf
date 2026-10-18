@@ -1074,10 +1074,34 @@ if (url.pathname === "/api/golf-day-results") {
 
     const { results } = await env.DB.prepare(`
       SELECT
-        p.first_name,
-        p.last_name,
-        r.handicap,
-        r.stableford_score
+        SELECT
+  p.id AS player_id,
+  p.first_name,
+  p.last_name,
+  r.handicap,
+  r.stableford_score
+  ,
+(
+  SELECT r2.stableford_score
+  FROM results r2
+  JOIN golf_days gd2
+    ON gd2.id = r2.golf_day_id
+  JOIN golf_days current_day
+    ON current_day.id = r.golf_day_id
+  WHERE r2.player_id = r.player_id
+    AND gd2.season_id = current_day.season_id
+    AND gd2.results_submitted = 1
+    AND r2.stableford_score IS NOT NULL
+    AND (
+      gd2.play_date < current_day.play_date
+      OR (
+        gd2.play_date = current_day.play_date
+        AND gd2.id < current_day.id
+      )
+    )
+  ORDER BY gd2.play_date DESC, gd2.id DESC
+  LIMIT 1
+) AS previous_score
       FROM results r
       JOIN players p
         ON p.id = r.player_id
