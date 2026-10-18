@@ -605,6 +605,57 @@ header {
   }
 }
 
+/* Golf Day Report section headings */
+
+#golf-day-report h3 {
+  color: #155c3b;
+  background: #edf4ee;
+  padding: 10px 14px;
+  margin: 24px 0 12px;
+  border-left: 4px solid #155c3b;
+  border-radius: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Season Personal Bests */
+
+#<escape>golf-day-report</escape> .season-personal-bests {
+  border: 1px solid #dce8df;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+#<escape>golf-day-report</escape> .season-best-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  border-bottom: 1px solid #dce8df;
+}
+
+#<escape>golf-day-report</escape> .season-best-row:nth-child(even) {
+  background: #f3f7f3;
+}
+
+#<escape>golf-day-report</escape> .season-best-row:last-child {
+  border-bottom: none;
+}
+
+#<escape>golf-day-report</escape> .season-best-row span {
+  text-align: right;
+  font-weight: 600;
+}
+
+#<escape>golf-day-report</escape> .season-best-row small {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  font-weight: normal;
+}
+    
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
@@ -2011,8 +2062,8 @@ const personalBests = scores
     ...r,
     personalBestType:
       r.score > r.previousBestScore
-        ? "New Personal Best"
-        : "Equalled Personal Best"
+        ? "New Season Best"
+: "Equalled Season Best"
   }));
 
     const winnerNames = winners.map(r => r.name).join(" and ");
@@ -2127,34 +2178,43 @@ points before this round.
 <h3>Biggest Improvement</h3>
 
 ${biggestImprovement.length ? `
-  <p>
-    <strong>${biggestImprovement.map(r => r.name).join(" and ")}</strong>
-    improved by
-    <strong>${biggestImprovement[0].pointsImproved} Stableford points</strong>
-    compared with their previous round
-    (${biggestImprovement[0].previousScore} to
-    ${biggestImprovement[0].score}).
-  </p>
+  <div class="season-personal-bests">
+    ${biggestImprovement.map(r => `
+      <div class="season-best-row">
+        <strong>${r.name}</strong>
+        <span>
+          +${r.pointsImproved} points
+          <small>
+            Previous round: ${r.previousScore} —
+            This round: ${r.score}
+          </small>
+        </span>
+      </div>
+    `).join("")}
+  </div>
 ` : `
   <p>No golfer improved on their previous round,
   or previous-round results are not available.</p>
 `}
 
-<h3>Personal Bests</h3>
+<h3>Season Personal Bests</h3>
 
 ${personalBests.length ? `
-  <ul>
+  <div class="season-personal-bests">
     ${personalBests.map(r => `
-      <li>
-        <strong>${r.name}</strong> —
-        ${r.score} Stableford points
-        (${r.personalBestType};
-        previous best: ${r.previousBestScore})
-      </li>
+      <div class="season-best-row">
+        <strong>${r.name}</strong>
+        <span>
+          ${r.score} points
+          <small>
+            ${r.personalBestType} — previous: ${r.previousBestScore}
+          </small>
+        </span>
+      </div>
     `).join("")}
-  </ul>
+  </div>
 ` : `
-  <p>No personal bests recorded on this golf day.</p>
+  <p>No season personal bests recorded on this golf day.</p>
 `}
 
      <h3>Full Results</h3>
