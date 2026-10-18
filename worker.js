@@ -1073,7 +1073,6 @@ if (url.pathname === "/api/golf-day-results") {
     }
 
     const { results } = await env.DB.prepare(`
-      SELECT
         SELECT
   p.id AS player_id,
   p.first_name,
