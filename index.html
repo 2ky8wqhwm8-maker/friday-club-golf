@@ -628,12 +628,13 @@ header {
 }
 
 #golf-day-report .season-best-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   padding: 12px 15px;
   border-bottom: 1px solid #dce8df;
+  max-width: 650px;
 }
 
 #golf-day-report .season-best-row:nth-child(even) {
@@ -645,7 +646,7 @@ header {
 }
 
 #golf-day-report .season-best-row span {
-  text-align: right;
+  text-align: left;
   font-weight: 600;
 }
 
@@ -2157,20 +2158,22 @@ averaged ${average} Stableford points.</p>
 <h3>Performance of the Day</h3>
 
 ${performanceOfDay ? `
-  <p>
-    <strong>${performanceOfDay.name}</strong>
-    scored ${performanceOfDay.score} Stableford points,
-    compared with an average of
-${performanceOfDay.seasonAverage.toFixed(1)}
-points before this round.
-
-    That's
-    <strong>
-      ${performanceOfDay.improvement >= 0 ? "+" : ""}
-      ${performanceOfDay.improvement.toFixed(1)} points
-    </strong>
-    above or below their pre-round average.
-  </p>
+  <div class="season-personal-bests">
+    <div class="season-best-row">
+      <strong>${performanceOfDay.name}</strong>
+      <span>
+        ${performanceOfDay.score} points
+        <small>
+          Pre-round average:
+          ${performanceOfDay.seasonAverage.toFixed(1)}
+          —
+          ${performanceOfDay.improvement >= 0 ? "+" : ""}
+          ${performanceOfDay.improvement.toFixed(1)}
+          points
+        </small>
+      </span>
+    </div>
+  </div>
 ` : `
   <p>Season averages are not available.</p>
 `}
