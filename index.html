@@ -1903,13 +1903,18 @@ const golfDayDescription = golfDay
     const score = Number(r.stableford_score);
 
     return {
-      name: `${r.first_name} ${r.last_name}`,
-      handicap: r.handicap,
-      score: score,
-      seasonAverage: Number.isFinite(seasonAverage)
-        ? seasonAverage
-        : null
-    };
+  name: `${r.first_name} ${r.last_name}`,
+  handicap: r.handicap,
+  score: score,
+  previousScore:
+    r.previous_score === null ||
+    r.previous_score === undefined
+      ? null
+      : Number(r.previous_score),
+  seasonAverage: Number.isFinite(seasonAverage)
+    ? seasonAverage
+    : null
+};
   })
   .filter(r => Number.isFinite(r.score))
   .sort((a, b) => b.score - a.score);
@@ -1972,6 +1977,24 @@ const leagueMovements = scores.map(player => {
 
 const performanceOfDay =
   performances.length > 0 ? performances[0] : null;
+
+    const improvements = scores
+  .filter(r =>
+    r.previousScore !== null &&
+    Number.isFinite(r.previousScore)
+  )
+  .map(r => ({
+    ...r,
+    pointsImproved: r.score - r.previousScore
+  }))
+  .filter(r => r.pointsImproved > 0)
+  .sort((a, b) => b.pointsImproved - a.pointsImproved);
+
+const biggestImprovement = improvements.length
+  ? improvements.filter(
+      r => r.pointsImproved === improvements[0].pointsImproved
+    )
+  : [];
 
     const winnerNames = winners.map(r => r.name).join(" and ");
 
@@ -2082,7 +2105,21 @@ points before this round.
   <p>Season averages are not available.</p>
 `}
 
+<h3>Biggest Improvement</h3>
 
+${biggestImprovement.length ? `
+  <p>
+    <strong>${biggestImprovement.map(r => r.name).join(" and ")}</strong>
+    improved by
+    <strong>${biggestImprovement[0].pointsImproved} Stableford points</strong>
+    compared with their previous round
+    (${biggestImprovement[0].previousScore} to
+    ${biggestImprovement[0].score}).
+  </p>
+` : `
+  <p>No golfer improved on their previous round,
+  or previous-round results are not available.</p>
+`}
 
      <h3>Full Results</h3>
 <div class="table-container">
