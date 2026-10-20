@@ -5450,7 +5450,8 @@ vertical-align: middle;
       isMe && !isViewingAsMember
   ? `<button
              type="button"
-             onclick="changeAvailability('${dateString}', '${entry?.status || ""}')"
+             onclick="changeAvailability('${dateString}', this.dataset.status, this)"
+data-status="${entry?.status || ""}"
             style="
   width: 32px;
   height: 20px;
@@ -5634,49 +5635,65 @@ max-width: 120px;
 // ========================================
 // CHANGE PLAYER AVAILABILITY
 // ========================================  
-async function changeAvailability(playDate, currentStatus) {
+async function changeAvailability(playDate, currentStatus, button) {
+
+  if (button.disabled) return;
 
   let newStatus;
 
   if (!currentStatus || currentStatus === "unsure") {
-  newStatus = "available";
-} else if (currentStatus === "available") {
-  newStatus = "unavailable";
-} else if (currentStatus === "unavailable") {
-  newStatus = "unsure";
-} else {
-  newStatus = "available";
-}
+    newStatus = "available";
+  } else if (currentStatus === "available") {
+    newStatus = "unavailable";
+  } else {
+    newStatus = "unsure";
+  }
+
+  button.disabled = true;
 
   try {
 
-    const response = await fetch(
-      "/api/availability/save",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          play_date: playDate,
-          status: newStatus
-        })
-      }
-    );
+    const response = await fetch("/api/availability/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        play_date: playDate,
+        status: newStatus
+      })
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data.error || "Unable to save availability"
-      );
+      throw new Error(data.error || "Unable to save availability");
     }
 
-    await loadAvailabilityGrid();
+    // Update only the clicked button
+    button.dataset.status = newStatus;
+
+    if (newStatus === "available") {
+      button.textContent = "✓";
+      button.style.background = "#d4edda";
+      button.style.color = "#155724";
+    } else if (newStatus === "unavailable") {
+      button.textContent = "✗";
+      button.style.background = "#f8d7da";
+      button.style.color = "#721c24";
+    } else {
+      button.textContent = "?";
+      button.style.background = "#fff3cd";
+      button.style.color = "#856404";
+    }
 
   } catch (error) {
 
     alert("Unable to update your availability.");
+
+  } finally {
+
+    button.disabled = false;
 
   }
 }
