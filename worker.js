@@ -845,9 +845,9 @@ if (
       String(body.status || "").trim();
 
     if (
-      !playDate ||
-      !["available", "unavailable"].includes(status)
-    ) {
+  !playDate ||
+  !["available", "unavailable", "unsure"].includes(status)
+) {
       return Response.json(
         { error: "Invalid availability." },
         { status: 400 }
