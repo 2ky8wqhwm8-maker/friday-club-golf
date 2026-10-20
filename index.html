@@ -5899,10 +5899,12 @@ const golfDayCells = fridays.map(friday => {
 padding: 3px 0;
 font-size: 12px;
 ">
-  ${(golfDay.course_name || "Golf Planned")
-  .replace(/Cottesmore.*Griffin.*/i, "Cottesmore (Griffin)")
-  .replace(/ Golf Club$/i, "")
-  .replace(/ Golf Course$/i, "")}
+  ${golfDay.course_name
+  ? golfDay.course_name
+      .replace(/Cottesmore.*Griffin.*/i, "Cottesmore (Griffin)")
+      .replace(/ Golf Club$/i, "")
+      .replace(/ Golf Course$/i, "")
+  : "—"}
 </div> 
     </td>
   `;
