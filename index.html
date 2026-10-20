@@ -2505,7 +2505,7 @@ row.innerHTML = `
 
     <span>
       <strong>${formatUKDate(golfDay.play_date)}</strong>
-      — ${golfDay.course_name}
+      — }
     </span>
 
     <button
@@ -5527,7 +5527,9 @@ const golfDayCells = fridays.map(friday => {
   }
 
   const background =
-    golfDay.status === "booked"
+  !golfDay.course_id
+    ? "rgb(240, 242, 244)"
+    : golfDay.status === "booked"
       ? "rgb(190, 235, 190)"
       : "rgb(255, 220, 170)";
 
@@ -5545,9 +5547,11 @@ padding: 1px 0;
 font-size: 10px;
 white-space: nowrap;
 ">
-  ${(golfDay.course_name || "Golf Planned")
-  .replace(/golf club/gi, "")
-  .trim()}
+  ${golfDay.course_name
+  ? golfDay.course_name
+      .replace(/golf club/gi, "")
+      .trim()
+  : "—"}
 </div>
     </td>
   `;
@@ -5881,7 +5885,9 @@ const golfDayCells = fridays.map(friday => {
   }
 
   const background =
-    golfDay.status === "booked"
+  !golfDay.course_id
+    ? "rgb(240, 242, 244)"
+    : golfDay.status === "booked"
       ? "rgb(190, 235, 190)"
       : "rgb(255, 220, 170)";
 
