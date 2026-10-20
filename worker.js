@@ -7,9 +7,10 @@ const adminPlayer = await env.DB.prepare(`
   SELECT id
   FROM players
   WHERE LOWER(email) = LOWER(?)
-    AND role = 'admin'
-    AND membership_status = 'approved'
-  LIMIT 1
+  AND role = 'admin'
+  AND membership_status = 'approved'
+  AND active = 1
+LIMIT 1
 `).bind(email).first();
 
 const isAdmin = !!adminPlayer;
@@ -844,6 +845,9 @@ if (
     const status =
       String(body.status || "").trim();
 
+    const requestedPlayerId =
+  Number(body.player_id || 0);
+
     if (
   !playDate ||
   !["available", "unavailable", "unsure"].includes(status)
@@ -870,6 +874,36 @@ if (
       );
     }
 
+    let targetPlayerId = player.id;
+
+if (requestedPlayerId && requestedPlayerId !== player.id) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  const targetPlayer = await env.DB.prepare(`
+    SELECT id
+    FROM players
+    WHERE id = ?
+      AND membership_status = 'approved'
+      AND active = 1
+    LIMIT 1
+  `).bind(requestedPlayerId).first();
+
+  if (!targetPlayer) {
+    return Response.json(
+      { error: "Selected member not found or inactive." },
+      { status: 404 }
+    );
+  }
+
+  targetPlayerId = targetPlayer.id;
+}
+    
     await env.DB.prepare(`
       INSERT INTO availability
         (player_id, play_date, status, updated_at)
@@ -879,10 +913,10 @@ if (
         status = excluded.status,
         updated_at = CURRENT_TIMESTAMP
     `).bind(
-      player.id,
-      playDate,
-      status
-    ).run();
+  targetPlayerId,
+  playDate,
+  status
+).run();
 
     return Response.json({
       success: true
