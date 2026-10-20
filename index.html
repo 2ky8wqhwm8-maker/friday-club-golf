@@ -3568,13 +3568,14 @@ async function viewAsMember(playerId) {
 );
 
   if (!member) {
-    alert("Member not found.");
-    return;
-  if (!member.active || member.membership_status !== "approved") {
+  alert("Member not found.");
+  return;
+}
+
+if (!member.active || member.membership_status !== "approved") {
   alert("You can only view approved, active members.");
   return;
 }
-  }
 
   viewingAsMemberId = playerId;
 
@@ -5447,7 +5448,7 @@ font-size: 13px;
 vertical-align: middle;
   ">
     ${
-      isMe && !isViewingAsMember
+      isMe
   ? `<button
              type="button"
              onclick="changeAvailability('${dateString}', this.dataset.status, this)"
@@ -5663,9 +5664,10 @@ async function changeAvailability(playDate, currentStatus, button) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        play_date: playDate,
-        status: newStatus
-      })
+  play_date: playDate,
+  status: newStatus,
+  player_id: viewingAsMemberId || null
+})
     });
 
     const data = await response.json();
