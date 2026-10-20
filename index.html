@@ -5551,7 +5551,7 @@ white-space: nowrap;
   ? golfDay.course_name
       .replace(/golf club/gi, "")
       .trim()
-  : "—"}
+  : '<span style="writing-mode: horizontal-tb; display: inline-block; transform: rotate(180deg);">—</span>'}
 </div>
     </td>
   `;
@@ -5910,7 +5910,7 @@ font-size: 12px;
       .replace(/Cottesmore.*Griffin.*/i, "Cottesmore (Griffin)")
       .replace(/ Golf Club$/i, "")
       .replace(/ Golf Course$/i, "")
-  : "—"}
+  : '<span style="writing-mode: horizontal-tb; display: inline-block; transform: rotate(180deg);">—</span>'}
 </div> 
     </td>
   `;
