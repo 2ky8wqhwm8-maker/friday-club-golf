@@ -5638,13 +5638,15 @@ async function changeAvailability(playDate, currentStatus) {
 
   let newStatus;
 
-  if (!currentStatus) {
-    newStatus = "available";
-  } else if (currentStatus === "available") {
-    newStatus = "unavailable";
-  } else {
-    newStatus = "available";
-  }
+  if (!currentStatus || currentStatus === "unsure") {
+  newStatus = "available";
+} else if (currentStatus === "available") {
+  newStatus = "unavailable";
+} else if (currentStatus === "unavailable") {
+  newStatus = "unsure";
+} else {
+  newStatus = "available";
+}
 
   try {
 
