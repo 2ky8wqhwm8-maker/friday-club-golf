@@ -1672,6 +1672,15 @@ if (url.pathname === "/api/admin/delete-golf-day" && request.method === "POST") 
     WHERE golf_day_id = ?
   `).bind(golfDayId),
 
+    env.DB.prepare(`
+    UPDATE planned_golf_days
+    SET
+      course_id = NULL,
+      golf_day_id = NULL,
+      status = 'planned'
+    WHERE golf_day_id = ?
+  `).bind(golfDayId),
+
   env.DB.prepare(`
     DELETE FROM golf_days
     WHERE id = ?
