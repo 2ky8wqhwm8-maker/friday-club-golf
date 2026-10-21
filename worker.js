@@ -2945,6 +2945,91 @@ if (url.pathname === "/api/end-season/check") {
 
   }
 }
+
+// ========================================
+// END SEASON - STANDINGS PREVIEW
+// ========================================
+
+if (url.pathname === "/api/end-season/preview") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const season = await env.DB.prepare(`
+      SELECT id, name, minimum_rounds
+      FROM seasons
+      WHERE status = 'current'
+      LIMIT 1
+    `).first();
+
+    if (!season) {
+      return Response.json(
+        { error: "No current season found." },
+        { status: 404 }
+      );
+    }
+
+    const { results: players } = await env.DB.prepare(`
+      SELECT
+        p.id AS player_id,
+        p.first_name,
+        p.last_name,
+        COUNT(r.id) AS rounds_played,
+        ROUND(AVG(r.stableford_score), 2) AS average_score
+      FROM players p
+      LEFT JOIN results r
+        ON r.player_id = p.id
+        AND r.golf_day_id IN (
+          SELECT id
+          FROM golf_days
+          WHERE season_id = ?
+        )
+      WHERE p.active = 1
+      GROUP BY p.id, p.first_name, p.last_name
+      ORDER BY
+        average_score DESC,
+        p.last_name ASC,
+        p.first_name ASC
+    `).bind(season.id).all();
+
+    let position = 0;
+
+    const standings = players.map(player => {
+
+      const eligible =
+        player.rounds_played >= season.minimum_rounds;
+
+      return {
+        ...player,
+        eligible,
+        final_position: eligible ? ++position : null
+      };
+
+    });
+
+    return Response.json({
+      season: season.name,
+      minimum_rounds: season.minimum_rounds,
+      standings
+    }, {
+      headers: { "Cache-Control": "no-store" }
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to preview final standings." },
+      { status: 500 }
+    );
+
+  }
+}
     
 // ========================================
 // MEMBER-FACING LEAGUE & RESULTS
