@@ -5268,9 +5268,9 @@ function loadPlayerHandicapChart(results) {
   ).join(" ");
 
   const labelEvery = Math.max(
-    1,
-    Math.ceil(history.length / 9)
-  );
+  1,
+  Math.ceil(history.length / 6)
+);
 
   const dateLabel = date => {
     const [year, month, day] = date.split("-");
@@ -5329,7 +5329,7 @@ function loadPlayerHandicapChart(results) {
       `).join("")}
 
       ${history.map((r, i) =>
-        i % labelEvery === 0 || i === history.length - 1
+  i % labelEvery === 0
           ? `
             <text
               x="${x(i)}"
