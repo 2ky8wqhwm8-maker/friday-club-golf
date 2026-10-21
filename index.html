@@ -3371,9 +3371,12 @@ if (section === "end-season") {
       return response.json();
     })
     .then(data => {
-      message.textContent = data.reason +
-        " Outstanding Golf Days: " + data.outstanding_golf_days + ".";
-    })
+  message.textContent = data.reason +
+    " Outstanding Golf Days: " + data.outstanding_golf_days + ".";
+
+  document.getElementById("end-season-button").disabled =
+    data.allowed !== true;
+})
     .catch(() => {
       message.textContent = "Unable to check season closure.";
     });
