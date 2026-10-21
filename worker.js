@@ -2879,6 +2879,72 @@ if (url.pathname === "/api/current-season") {
 
   }
 }
+
+// ========================================
+// END SEASON ELIGIBILITY CHECK
+// ========================================
+
+if (url.pathname === "/api/end-season/check") {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  try {
+
+    const season = await env.DB.prepare(`
+      SELECT id, name, end_date
+      FROM seasons
+      WHERE status = 'current'
+      LIMIT 1
+    `).first();
+
+    if (!season) {
+      return Response.json({
+        allowed: false,
+        reason: "No current season found."
+      });
+    }
+
+    const outstanding = await env.DB.prepare(`
+      SELECT COUNT(*) AS total
+      FROM golf_days
+      WHERE season_id = ?
+        AND COALESCE(results_submitted, 0) = 0
+    `).bind(season.id).first();
+
+    const dateReached =
+      new Date().toISOString().slice(0, 10) >= season.end_date;
+
+    const outstandingCount = Number(outstanding.total);
+
+    const allowed =
+      dateReached && outstandingCount === 0;
+
+    return Response.json({
+      season: season.name,
+      end_date: season.end_date,
+      allowed,
+      outstanding_golf_days: outstandingCount,
+      reason: !dateReached
+        ? "Season cannot close before 31 December."
+        : outstandingCount > 0
+          ? "Some Golf Day results have not been submitted."
+          : "Season is ready to close."
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to check season closure." },
+      { status: 500 }
+    );
+
+  }
+}
     
 // ========================================
 // MEMBER-FACING LEAGUE & RESULTS
