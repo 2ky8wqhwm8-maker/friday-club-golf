@@ -5139,6 +5139,15 @@ const percentagePlayed = golfDaysHeld > 0
   </div>
 </div>
 
+<!-- Handicap history across the season -->
+<div style="margin: 20px 0; width: 100%; min-width: 0;">
+  <h3>Handicap History</h3>
+  <div id="player-handicap-chart"
+       style="width: 100%; min-width: 0;">
+    Loading chart...
+  </div>
+</div>
+
 <div class="table-container">
   <table>
           <thead>
@@ -5713,15 +5722,7 @@ min-width: 50px;
 }).join("");
 
 container.innerHTML = `
-  <!-- Handicap history across the season -->
-<div style="margin: 20px 0; width: 100%; min-width: 0;">
-  <h3>Handicap History</h3>
-  <div id="player-handicap-chart"
-       style="width: 100%; min-width: 0;">
-    Loading chart...
-  </div>
-</div>
-  <div class="table-container">
+    <div class="table-container">
     <table style="width: 100%; min-width: 520px;">
       <thead>
         <tr>
