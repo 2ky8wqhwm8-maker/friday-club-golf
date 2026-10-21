@@ -3048,7 +3048,7 @@ if (
   }
 
     const season = await env.DB.prepare(`
-    SELECT id, name, end_date
+    SELECT id, name, end_date, minimum_rounds
     FROM seasons
     WHERE status = 'current'
     LIMIT 1
@@ -3119,6 +3119,42 @@ if (
       { status: 409 }
     );
   }
+
+  const { results: players } = await env.DB.prepare(`
+  SELECT
+    p.id AS player_id,
+    COUNT(r.id) AS rounds_played,
+    ROUND(AVG(r.stableford_score), 2) AS average_score
+  FROM players p
+  LEFT JOIN results r
+    ON r.player_id = p.id
+    AND r.golf_day_id IN (
+      SELECT id
+      FROM golf_days
+      WHERE season_id = ?
+    )
+  WHERE p.active = 1
+  GROUP BY p.id, p.first_name, p.last_name
+  ORDER BY
+    average_score DESC,
+    p.last_name ASC,
+    p.first_name ASC
+`).bind(season.id).all();
+
+let finalPosition = 0;
+
+const finalStandings = players.map(player => {
+  const eligible =
+    player.rounds_played >= season.minimum_rounds;
+
+  return {
+    player_id: player.player_id,
+    rounds_played: player.rounds_played,
+    average_score: player.average_score,
+    eligible: eligible ? 1 : 0,
+    final_position: eligible ? ++finalPosition : null
+  };
+});
   
   return Response.json(
     { error: "Season closing is not yet enabled." },
