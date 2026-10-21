@@ -3155,6 +3155,27 @@ const finalStandings = players.map(player => {
     final_position: eligible ? ++finalPosition : null
   };
 });
+
+const archiveStatements = finalStandings.map(player =>
+  env.DB.prepare(`
+    INSERT INTO season_final_standings (
+      season_id,
+      player_id,
+      final_position,
+      rounds_played,
+      average_score,
+      eligible
+    )
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).bind(
+    season.id,
+    player.player_id,
+    player.final_position,
+    player.rounds_played,
+    player.average_score,
+    player.eligible
+  )
+);
   
   return Response.json(
     { error: "Season closing is not yet enabled." },
