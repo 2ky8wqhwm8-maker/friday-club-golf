@@ -3047,10 +3047,45 @@ if (
     );
   }
 
+    const season = await env.DB.prepare(`
+    SELECT id, name, end_date
+    FROM seasons
+    WHERE status = 'current'
+    LIMIT 1
+  `).first();
+
+  if (!season) {
+    return Response.json(
+      { error: "No current season found." },
+      { status: 400 }
+    );
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (today < season.end_date) {
+    return Response.json(
+      { error: "Season cannot close before 31 December." },
+      { status: 400 }
+    );
+  }
+
+  const outstanding = await env.DB.prepare(`
+    SELECT COUNT(*) AS total
+    FROM golf_days
+    WHERE season_id = ?
+      AND COALESCE(results_submitted, 0) = 0
+  `).bind(season.id).first();
+
+  if (Number(outstanding.total) > 0) {
+    return Response.json(
+      { error: "Some Golf Day results have not been submitted." },
+      { status: 400 }
+    );
+  }
+
   return Response.json(
-    {
-      error: "Season closing is not yet enabled."
-    },
+    { error: "Season closing is not yet enabled." },
     { status: 503 }
   );
 
