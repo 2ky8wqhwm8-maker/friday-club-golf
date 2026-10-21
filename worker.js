@@ -3096,6 +3096,29 @@ if (
       { status: 409 }
     );
   }
+
+  const nextYear =
+    Number(season.end_date.slice(0, 4)) + 1;
+
+  const nextSeasonName = `${nextYear} Season`;
+
+  const existingNextSeason = await env.DB.prepare(`
+    SELECT id
+    FROM seasons
+    WHERE name = ?
+       OR start_date = ?
+    LIMIT 1
+  `).bind(
+    nextSeasonName,
+    `${nextYear}-01-01`
+  ).first();
+
+  if (existingNextSeason) {
+    return Response.json(
+      { error: "The next season already exists." },
+      { status: 409 }
+    );
+  }
   
   return Response.json(
     { error: "Season closing is not yet enabled." },
