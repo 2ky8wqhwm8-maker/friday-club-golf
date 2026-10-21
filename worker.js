@@ -3030,6 +3030,31 @@ if (url.pathname === "/api/end-season/preview") {
 
   }
 }
+
+// ========================================
+// END SEASON - CLOSE
+// ========================================
+
+if (
+  url.pathname === "/api/end-season/close" &&
+  request.method === "POST"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  return Response.json(
+    {
+      error: "Season closing is not yet enabled."
+    },
+    { status: 503 }
+  );
+
+}
     
 // ========================================
 // MEMBER-FACING LEAGUE & RESULTS
