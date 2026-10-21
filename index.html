@@ -3346,6 +3346,24 @@ document.getElementById("admin-versions").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
 
+  if (section === "end-season") {
+  fetch("/api/current-season")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Unable to load season");
+      }
+      return response.json();
+    })
+    .then(data => {
+      document.getElementById("end-season-current").textContent =
+        data.season ? data.season.name : "No current season";
+    })
+    .catch(() => {
+      document.getElementById("end-season-current").textContent =
+        "Unable to load current season";
+    });
+}
+
   if (section === "planning") {
   loadAdminAvailabilityPlanning();
 }
