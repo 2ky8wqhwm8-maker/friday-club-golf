@@ -2850,6 +2850,35 @@ WHERE gd.play_date >= date('now')
 
   }
 }
+
+// ========================================
+// CURRENT SEASON INFORMATION
+// ========================================
+
+if (url.pathname === "/api/current-season") {
+
+  try {
+
+    const season = await env.DB.prepare(`
+      SELECT id, name, start_date, end_date, minimum_rounds
+      FROM seasons
+      WHERE status = 'current'
+      LIMIT 1
+    `).first();
+
+    return Response.json({
+      season: season || null
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to load current season." },
+      { status: 500 }
+    );
+
+  }
+}
     
 // ========================================
 // MEMBER-FACING LEAGUE & RESULTS
