@@ -3357,6 +3357,29 @@ document.getElementById("admin-versions").style.display = "none";
 
   document.getElementById("admin-" + section).style.display = "block";
 
+if (section === "end-season") {
+
+  const message = document.getElementById("end-season-message");
+
+  message.textContent = "Checking whether the season can be closed...";
+
+  fetch("/api/end-season/check", { cache: "no-store" })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Unable to check season");
+      }
+      return response.json();
+    })
+    .then(data => {
+      message.textContent = data.reason +
+        " Outstanding Golf Days: " + data.outstanding_golf_days + ".";
+    })
+    .catch(() => {
+      message.textContent = "Unable to check season closure.";
+    });
+
+}
+  
   if (section === "end-season") {
   fetch("/api/current-season")
     .then(response => {
