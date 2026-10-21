@@ -3084,6 +3084,19 @@ if (
     );
   }
 
+    const existingArchive = await env.DB.prepare(`
+    SELECT COUNT(*) AS total
+    FROM season_final_standings
+    WHERE season_id = ?
+  `).bind(season.id).first();
+
+  if (Number(existingArchive.total) > 0) {
+    return Response.json(
+      { error: "This season has already been archived." },
+      { status: 409 }
+    );
+  }
+  
   return Response.json(
     { error: "Season closing is not yet enabled." },
     { status: 503 }
