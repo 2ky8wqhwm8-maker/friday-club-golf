@@ -3176,6 +3176,36 @@ const archiveStatements = finalStandings.map(player =>
     player.eligible
   )
 );
+
+const rolloverStatements = [
+  env.DB.prepare(`
+    UPDATE seasons
+    SET status = 'completed'
+    WHERE id = ?
+      AND status = 'current'
+  `).bind(season.id),
+
+  env.DB.prepare(`
+    INSERT INTO seasons (
+      name,
+      start_date,
+      end_date,
+      minimum_rounds,
+      status
+    )
+    VALUES (?, ?, ?, ?, 'current')
+  `).bind(
+    nextSeasonName,
+    `${nextYear}-01-01`,
+    `${nextYear}-12-31`,
+    season.minimum_rounds
+  )
+];
+
+const seasonTransaction = [
+  ...archiveStatements,
+  ...rolloverStatements
+];
   
   return Response.json(
     { error: "Season closing is not yet enabled." },
