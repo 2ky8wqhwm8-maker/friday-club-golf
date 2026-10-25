@@ -3539,6 +3539,27 @@ if (url.pathname === "/api/club-records") {
   ORDER BY gd.play_date ASC, p.last_name ASC
 `).all();
 
+const personalBests = await env.DB.prepare(`
+  SELECT
+    p.id AS player_id,
+    p.first_name,
+    p.last_name,
+    MAX(r.stableford_score) AS best_score
+  FROM players p
+  JOIN results r
+    ON r.player_id = p.id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  WHERE COALESCE(gd.results_submitted, 0) = 1
+  GROUP BY
+    p.id,
+    p.first_name,
+    p.last_name
+  ORDER BY
+    p.last_name,
+    p.first_name
+`).all();
+    
     return Response.json({
   highest_stableford: highestScore.results
 }, {
