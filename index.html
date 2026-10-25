@@ -4118,6 +4118,17 @@ const record = records[0];
 
 }).join("");
 
+    const personalBests = data.personal_bests || [];
+
+const personalRecordsRows = personalBests.map(player => `
+  <tr>
+    <td>${player.first_name} ${player.last_name}</td>
+    <td style="text-align: center;">
+      ${player.best_score}
+    </td>
+  </tr>
+`).join("");
+
     container.innerHTML = `
       <div style="
         padding: 15px;
