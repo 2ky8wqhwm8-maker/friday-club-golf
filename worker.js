@@ -3687,6 +3687,10 @@ previousStandings.results.forEach((player, index) => {
     let currentPosition = 0;
 
 players.results.forEach(player => {
+    if (season.status === "completed") {
+    player.position_change = null;
+    return;
+  }
   if (player.played < season.minimum_rounds) {
     player.position_change = null;
     return;
