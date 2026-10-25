@@ -3379,6 +3379,28 @@ FROM seasons
             p.first_name ASC
         `).bind(season.id).all();
 
+        let archivedStandings = [];
+
+if (season.status === "completed") {
+
+  const archive = await env.DB.prepare(`
+    SELECT
+      player_id,
+      final_position,
+      rounds_played,
+      average_score,
+      eligible
+    FROM season_final_standings
+    WHERE season_id = ?
+    ORDER BY
+      average_score DESC,
+      final_position ASC
+  `).bind(season.id).all();
+
+  archivedStandings = archive.results;
+
+}
+
         for (const player of results) {
 
           const recent = await env.DB.prepare(`
