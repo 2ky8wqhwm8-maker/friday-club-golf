@@ -1458,31 +1458,40 @@ const scores40Leaders = scores40Results.results.filter(
 
 // Best Round at Each Course
 const bestRoundsByCourse = await env.DB.prepare(`
+ WITH course_best AS (
   SELECT
-    c.name AS course_name,
-    p.first_name,
-    p.last_name,
-    r.stableford_score,
-    gd.play_date
+    gd.course_id,
+    MAX(r.stableford_score) AS best_score
   FROM results r
-  JOIN players p ON p.id = r.player_id
-  JOIN golf_days gd ON gd.id = r.golf_day_id
-  JOIN courses c ON c.id = gd.course_id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
   WHERE gd.season_id = ?
     AND gd.results_submitted = 1
     AND gd.play_date <= date('now')
     AND r.stableford_score IS NOT NULL
-    AND r.stableford_score = (
-      SELECT MAX(r2.stableford_score)
-      FROM results r2
-      JOIN golf_days gd2 ON gd2.id = r2.golf_day_id
-      WHERE gd2.course_id = gd.course_id
-        AND gd2.season_id = gd.season_id
-        AND gd2.results_submitted = 1
-        AND gd2.play_date <= date('now')
-    )
-  ORDER BY c.name, p.last_name, gd.play_date
-`).bind(season.id).all();
+  GROUP BY gd.course_id
+)
+SELECT
+  c.name AS course_name,
+  p.first_name,
+  p.last_name,
+  r.stableford_score,
+  gd.play_date
+FROM course_best cb
+JOIN golf_days gd
+  ON gd.course_id = cb.course_id
+JOIN results r
+  ON r.golf_day_id = gd.id
+ AND r.stableford_score = cb.best_score
+JOIN players p
+  ON p.id = r.player_id
+JOIN courses c
+  ON c.id = gd.course_id
+WHERE gd.season_id = ?
+  AND gd.results_submitted = 1
+  AND gd.play_date <= date('now')
+ORDER BY c.name, p.last_name, gd.play_date
+.bind(season.id, season.id).all();
     
     return Response.json({
   season: season.name,
@@ -3540,33 +3549,38 @@ if (url.pathname === "/api/club-records") {
 `).all();
 
 const personalBests = await env.DB.prepare(`
+ WITH best_scores AS (
   SELECT
-    p.id AS player_id,
-    p.first_name,
-    p.last_name,
-    r.stableford_score AS best_score,
-    gd.play_date,
-    c.name AS course_name
-  FROM players p
-  JOIN results r
-    ON r.player_id = p.id
+    r.player_id,
+    MAX(r.stableford_score) AS best_score
+  FROM results r
   JOIN golf_days gd
     ON gd.id = r.golf_day_id
-  JOIN courses c
-    ON c.id = gd.course_id
-  WHERE COALESCE(gd.results_submitted, 0) = 1
-    AND r.stableford_score = (
-      SELECT MAX(r2.stableford_score)
-      FROM results r2
-      JOIN golf_days gd2
-        ON gd2.id = r2.golf_day_id
-      WHERE r2.player_id = p.id
-        AND COALESCE(gd2.results_submitted, 0) = 1
-    )
-  ORDER BY
-    p.last_name,
-    p.first_name,
-    gd.play_date
+  WHERE gd.results_submitted = 1
+  GROUP BY r.player_id
+)
+SELECT
+  p.id AS player_id,
+  p.first_name,
+  p.last_name,
+  r.stableford_score AS best_score,
+  gd.play_date,
+  c.name AS course_name
+FROM best_scores bs
+JOIN players p
+  ON p.id = bs.player_id
+JOIN results r
+  ON r.player_id = bs.player_id
+  AND r.stableford_score = bs.best_score
+JOIN golf_days gd
+  ON gd.id = r.golf_day_id
+JOIN courses c
+  ON c.id = gd.course_id
+WHERE gd.results_submitted = 1
+ORDER BY
+  p.last_name,
+  p.first_name,
+  gd.play_date
 `).all();
     
     return Response.json({
