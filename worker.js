@@ -3251,10 +3251,30 @@ const safetyStatement = env.DB.prepare(`
   END
 `).bind(season.id, season.id);
   
+const verifyRollover = env.DB.prepare(`
+  SELECT CASE
+    WHEN EXISTS (
+      SELECT 1
+      FROM seasons
+      WHERE id = ?
+        AND status = 'completed'
+    )
+    AND EXISTS (
+      SELECT 1
+      FROM seasons
+      WHERE name = ?
+        AND status = 'current'
+    )
+    THEN 1
+    ELSE json_extract('invalid', '$')
+  END
+`).bind(season.id, nextSeasonName);
+
 const seasonTransaction = [
   safetyStatement,
   ...archiveStatements,
-  ...rolloverStatements
+  ...rolloverStatements,
+  verifyRollover
 ];
 
 const executeSeasonTransaction = async () => {
