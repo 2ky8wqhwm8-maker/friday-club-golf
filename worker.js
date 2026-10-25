@@ -3277,14 +3277,25 @@ const seasonTransaction = [
   verifyRollover
 ];
 
-const executeSeasonTransaction = async () => {
-  return await env.DB.batch(seasonTransaction);
-};
-  
+try {
+
+  await env.DB.batch(seasonTransaction);
+
+  return Response.json({
+    success: true,
+    message: `${season.name} closed successfully. ${nextSeasonName} created.`
+  });
+
+} catch (error) {
+
+  console.error("Season closing failed:", error);
+
   return Response.json(
-    { error: "Season closing is not yet enabled." },
-    { status: 503 }
+    { error: "Unable to close the season. No changes were saved." },
+    { status: 500 }
   );
+
+}
 
 }
     
