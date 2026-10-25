@@ -3544,20 +3544,29 @@ const personalBests = await env.DB.prepare(`
     p.id AS player_id,
     p.first_name,
     p.last_name,
-    MAX(r.stableford_score) AS best_score
+    r.stableford_score AS best_score,
+    gd.play_date,
+    c.name AS course_name
   FROM players p
   JOIN results r
     ON r.player_id = p.id
   JOIN golf_days gd
     ON gd.id = r.golf_day_id
+  JOIN courses c
+    ON c.id = gd.course_id
   WHERE COALESCE(gd.results_submitted, 0) = 1
-  GROUP BY
-    p.id,
-    p.first_name,
-    p.last_name
+    AND r.stableford_score = (
+      SELECT MAX(r2.stableford_score)
+      FROM results r2
+      JOIN golf_days gd2
+        ON gd2.id = r2.golf_day_id
+      WHERE r2.player_id = p.id
+        AND COALESCE(gd2.results_submitted, 0) = 1
+    )
   ORDER BY
     p.last_name,
-    p.first_name
+    p.first_name,
+    gd.play_date
 `).all();
     
     return Response.json({
