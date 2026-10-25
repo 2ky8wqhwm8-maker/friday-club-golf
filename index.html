@@ -3348,6 +3348,26 @@ document.getElementById("main-results").style.display = "none";
   }
 }
 
+async function closeSeason() {
+
+  const button = document.getElementById("end-season-button");
+
+  if (!button || button.disabled) return;
+
+  const confirmed = confirm(
+    "Are you sure you want to close the current season?\n\n" +
+    "This will archive the final league standings and create the next season.\n\n" +
+    "This action cannot be undone from the website."
+  );
+
+  if (!confirmed) return;
+
+  alert(
+    "The season-closing operation is not yet enabled. " +
+    "No changes have been made."
+  );
+}
+  
 // ========================================
 // ADMINISTRATION NAVIGATION
 // ========================================
