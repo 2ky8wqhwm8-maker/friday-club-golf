@@ -3561,7 +3561,8 @@ const personalBests = await env.DB.prepare(`
 `).all();
     
     return Response.json({
-  highest_stableford: highestScore.results
+  highest_stableford: highestScore.results,
+  personal_bests: personalBests.results
 }, {
       headers: {
         "Cache-Control": "no-store"
