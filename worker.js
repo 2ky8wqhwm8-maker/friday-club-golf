@@ -3678,8 +3678,19 @@ previousStandings.results.forEach((player, index) => {
         played: archived.rounds_played,
         average_score: archived.average_score,
         final_position: archived.final_position,
-        eligible: Boolean(archived.eligible)
+                eligible: Boolean(archived.eligible)
       };
+    })
+    .sort((a, b) => {
+      if (a.eligible !== b.eligible) {
+        return a.eligible ? -1 : 1;
+      }
+
+      if (a.eligible && b.eligible) {
+        return a.final_position - b.final_position;
+      }
+
+      return Number(b.average_score) - Number(a.average_score);
     });
 
 }
