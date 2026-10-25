@@ -3646,6 +3646,44 @@ previousStandings.results.forEach((player, index) => {
         p.first_name ASC
     `).bind(season.id).all();
 
+    if (season.status === "completed") {
+
+  const archive = await env.DB.prepare(`
+    SELECT
+      player_id,
+      final_position,
+      rounds_played,
+      average_score,
+      eligible
+    FROM season_final_standings
+    WHERE season_id = ?
+  `).bind(season.id).all();
+
+  const archivedByPlayer = new Map(
+    archive.results.map(row => [
+      Number(row.player_id),
+      row
+    ])
+  );
+
+  players.results = players.results
+    .filter(player =>
+      archivedByPlayer.has(Number(player.id))
+    )
+    .map(player => {
+      const archived = archivedByPlayer.get(Number(player.id));
+
+      return {
+        ...player,
+        played: archived.rounds_played,
+        average_score: archived.average_score,
+        final_position: archived.final_position,
+        eligible: Boolean(archived.eligible)
+      };
+    });
+
+}
+
     let currentPosition = 0;
 
 players.results.forEach(player => {
