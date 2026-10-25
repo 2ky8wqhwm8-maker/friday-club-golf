@@ -3342,7 +3342,7 @@ FROM seasons
           );
         }
 
-        const { results } = await env.DB.prepare(`
+        let { results } = await env.DB.prepare(`
           SELECT
             p.id,
             p.first_name,
