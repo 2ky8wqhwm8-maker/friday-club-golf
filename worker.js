@@ -3540,8 +3540,8 @@ if (url.pathname === "/api/club-records") {
 `).all();
 
     return Response.json({
-      highest_stableford: highestScore
-    }, {
+  highest_stableford: highestScore.results
+}, {
       headers: {
         "Cache-Control": "no-store"
       }
