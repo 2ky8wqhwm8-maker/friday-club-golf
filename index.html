@@ -4120,11 +4120,36 @@ const record = records[0];
 
     const personalBests = data.personal_bests || [];
 
-const personalRecordsRows = personalBests.map(player => {
+const groupedPersonalBests = new Map();
+
+personalBests.forEach(player => {
+  if (!groupedPersonalBests.has(player.player_id)) {
+    groupedPersonalBests.set(player.player_id, {
+      ...player,
+      achievements: []
+    });
+  }
+
+  groupedPersonalBests.get(player.player_id)
+    .achievements.push(player);
+});
+
+const personalRecordsRows = Array.from(
+  groupedPersonalBests.values()
+).map(player => {
+
+  const achievements = player.achievements.map(a => {
 
   const date = new Date(
-    player.play_date + "T12:00:00"
+    a.play_date + "T12:00:00"
   ).toLocaleDateString("en-GB");
+
+  return {
+    course: a.course_name,
+    date: date
+  };
+
+});
 
   return `
     <tr>
@@ -4132,8 +4157,12 @@ const personalRecordsRows = personalBests.map(player => {
       <td style="text-align: center;">
         ${player.best_score}
       </td>
-      <td>${player.course_name}</td>
-      <td>${date}</td>
+      <td>
+  ${achievements.map(a => a.course).join("<br>")}
+</td>
+<td>
+  ${achievements.map(a => a.date).join("<br>")}
+</td>
     </tr>
   `;
 
