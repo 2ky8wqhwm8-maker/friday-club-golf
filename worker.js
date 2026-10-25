@@ -3322,8 +3322,8 @@ if (!member) {
         const requestedSeason = url.searchParams.get("season");
 
 const season = await env.DB.prepare(`
-  SELECT id, name, minimum_rounds
-  FROM seasons
+  SELECT id, name, minimum_rounds, status
+FROM seasons
   WHERE
     (? IS NULL AND status = 'current')
     OR
