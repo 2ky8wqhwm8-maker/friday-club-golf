@@ -4436,9 +4436,12 @@ let leagueData = null;
       let position = "—";
 
       if (player.eligible) {
-        officialPosition++;
-        position = officialPosition;
-      }
+  officialPosition++;
+
+  position = player.final_position != null
+    ? player.final_position
+    : officialPosition;
+}
 
       const average =
         player.average_score === null
