@@ -3134,8 +3134,9 @@ if (
       WHERE season_id = ?
     )
   WHERE p.active = 1
-  GROUP BY p.id, p.first_name, p.last_name
-  ORDER BY
+GROUP BY p.id, p.first_name, p.last_name
+HAVING COUNT(r.id) > 0
+ORDER BY
     average_score DESC,
     p.last_name ASC,
     p.first_name ASC
@@ -3182,8 +3183,15 @@ const rolloverStatements = [
     UPDATE seasons
     SET status = 'completed'
     WHERE id = ?
-      AND status = 'current'
-  `).bind(season.id),
+  AND status = 'current'
+  AND end_date <= DATE('now')
+  AND NOT EXISTS (
+    SELECT 1
+    FROM golf_days
+    WHERE season_id = ?
+      AND COALESCE(results_submitted, 0) = 0
+  )
+  `).bind(season.id, season.id),
 
   env.DB.prepare(`
     INSERT INTO seasons (
@@ -3202,6 +3210,13 @@ const rolloverStatements = [
   )
 ];
 
+if (finalStandings.length === 0) {
+  return Response.json(
+    { error: "Cannot close a season without final standings." },
+    { status: 400 }
+  );
+}
+  
 const seasonTransaction = [
   ...archiveStatements,
   ...rolloverStatements
