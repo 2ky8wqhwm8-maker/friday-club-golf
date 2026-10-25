@@ -4120,14 +4120,24 @@ const record = records[0];
 
     const personalBests = data.personal_bests || [];
 
-const personalRecordsRows = personalBests.map(player => `
-  <tr>
-    <td>${player.first_name} ${player.last_name}</td>
-    <td style="text-align: center;">
-      ${player.best_score}
-    </td>
-  </tr>
-`).join("");
+const personalRecordsRows = personalBests.map(player => {
+
+  const date = new Date(
+    player.play_date + "T12:00:00"
+  ).toLocaleDateString("en-GB");
+
+  return `
+    <tr>
+      <td>${player.first_name} ${player.last_name}</td>
+      <td style="text-align: center;">
+        ${player.best_score}
+      </td>
+      <td>${player.course_name}</td>
+      <td>${date}</td>
+    </tr>
+  `;
+
+}).join("");
 
     container.innerHTML = `
       <div style="
@@ -4150,9 +4160,11 @@ const personalRecordsRows = personalBests.map(player => `
       ">
         <thead>
           <tr>
-            <th style="text-align: left;">Player</th>
-            <th style="text-align: center;">Best Score</th>
-          </tr>
+  <th style="text-align: left;">Player</th>
+  <th style="text-align: center;">Best Score</th>
+  <th style="text-align: left;">Course</th>
+  <th style="text-align: left;">Date</th>
+</tr>
         </thead>
         <tbody>
           ${personalRecordsRows}
