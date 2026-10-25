@@ -3213,12 +3213,13 @@ AND NOT EXISTS (
   FROM seasons
   WHERE name = ?
 )
+
   `).bind(
   nextSeasonName,
   `${nextYear}-01-01`,
   `${nextYear}-12-31`,
   season.minimum_rounds,
-  season.id,
+    season.id,
   nextSeasonName
 )
 ];
