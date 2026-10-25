@@ -3235,6 +3235,10 @@ const seasonTransaction = [
   ...archiveStatements,
   ...rolloverStatements
 ];
+
+const executeSeasonTransaction = async () => {
+  return await env.DB.batch(seasonTransaction);
+};
   
   return Response.json(
     { error: "Season closing is not yet enabled." },
