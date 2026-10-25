@@ -4138,8 +4138,26 @@ const personalRecordsRows = personalBests.map(player => `
       ">
         <h3>Highest Stableford Score</h3>
         <p><strong>${record.stableford_score} points</strong></p>
-        ${recordHolders}
+                ${recordHolders}
       </div>
+
+      <h3>Personal Best Stableford Scores</h3>
+
+      <table style="
+        width: 100%;
+        border-collapse: collapse;
+        max-width: 600px;
+      ">
+        <thead>
+          <tr>
+            <th style="text-align: left;">Player</th>
+            <th style="text-align: center;">Best Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${personalRecordsRows}
+        </tbody>
+      </table>
     `;
 
   } catch (error) {
