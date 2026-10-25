@@ -3401,6 +3401,28 @@ if (season.status === "completed") {
 
 }
 
+if (season.status === "completed" && archivedStandings.length > 0) {
+
+  const archivedByPlayer = new Map(
+    archivedStandings.map(player => [
+      player.player_id,
+      player
+    ])
+  );
+
+  for (const player of results) {
+
+    const archived = archivedByPlayer.get(player.id);
+
+    if (archived) {
+      player.played = archived.rounds_played;
+      player.average_score = archived.average_score;
+      player.eligible = archived.eligible === 1;
+      player.final_position = archived.final_position;
+    }
+  }
+}
+        
         for (const player of results) {
 
           const recent = await env.DB.prepare(`
