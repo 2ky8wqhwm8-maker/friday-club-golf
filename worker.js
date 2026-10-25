@@ -1491,7 +1491,7 @@ WHERE gd.season_id = ?
   AND gd.results_submitted = 1
   AND gd.play_date <= date('now')
 ORDER BY c.name, p.last_name, gd.play_date
-.bind(season.id, season.id).all();
+`).bind(season.id, season.id).all();
     
     return Response.json({
   season: season.name,
@@ -1506,7 +1506,7 @@ bestAverage: bestAverageLeaders,
 scores36Leaders: scores36Leaders,
 scores40Leaders: scores40Leaders,
 bestRoundsByCourse: bestRoundsByCourse.results
-});;
+});
 
   } catch (error) {
     return Response.json(
