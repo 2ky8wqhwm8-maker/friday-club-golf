@@ -4077,6 +4077,54 @@ async function rejectMember(playerId) {
   }
 }  
 
+async function loadClubRecords() {
+
+  const container =
+    document.getElementById("club-records-content");
+
+  container.textContent = "Loading club records...";
+
+  try {
+
+    const response = await fetch("/api/club-records");
+
+    if (!response.ok) {
+      throw new Error("Unable to load club records.");
+    }
+
+    const data = await response.json();
+
+    const record = data.highest_stableford;
+
+    if (!record) {
+      container.textContent = "No club records available yet.";
+      return;
+    }
+
+    const date = new Date(
+      record.play_date + "T12:00:00"
+    ).toLocaleDateString("en-GB");
+
+    container.innerHTML = `
+      <div style="
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      ">
+        <h3>Highest Stableford Score</h3>
+        <p><strong>${record.stableford_score} points</strong></p>
+        <p>${record.first_name} ${record.last_name}</p>
+        <p>${record.course_name} — ${date}</p>
+      </div>
+    `;
+
+  } catch (error) {
+    container.textContent = "Unable to load club records.";
+    console.error(error);
+  }
+}
+  
 async function loadSeasonHighlights() {
 
   const container =
