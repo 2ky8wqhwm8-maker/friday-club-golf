@@ -3230,8 +3230,29 @@ if (finalStandings.length === 0) {
     { status: 400 }
   );
 }
+
+const safetyStatement = env.DB.prepare(`
+  SELECT CASE
+    WHEN (
+      SELECT COUNT(*)
+      FROM seasons
+      WHERE id = ?
+        AND status = 'current'
+        AND end_date <= DATE('now')
+    ) = 1
+    AND NOT EXISTS (
+      SELECT 1
+      FROM golf_days
+      WHERE season_id = ?
+        AND COALESCE(results_submitted, 0) = 0
+    )
+    THEN 1
+    ELSE json_extract('invalid', '$')
+  END
+`).bind(season.id, season.id);
   
 const seasonTransaction = [
+  safetyStatement,
   ...archiveStatements,
   ...rolloverStatements
 ];
