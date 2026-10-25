@@ -3514,24 +3514,30 @@ player.previous_5 = previousRecent.results.map(
 if (url.pathname === "/api/club-records") {
   try {
 
-    const highestScore = await env.DB.prepare(`
-      SELECT
-        p.first_name,
-        p.last_name,
-        r.stableford_score,
-        gd.play_date,
-        c.name AS course_name
-      FROM results r
-      JOIN players p
-        ON p.id = r.player_id
-      JOIN golf_days gd
-        ON gd.id = r.golf_day_id
-      JOIN courses c
-        ON c.id = gd.course_id
-      WHERE COALESCE(gd.results_submitted, 0) = 1
-      ORDER BY r.stableford_score DESC
-      LIMIT 1
-    `).first();
+   const highestScore = await env.DB.prepare(`
+  SELECT
+    p.first_name,
+    p.last_name,
+    r.stableford_score,
+    gd.play_date,
+    c.name AS course_name
+  FROM results r
+  JOIN players p
+    ON p.id = r.player_id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  JOIN courses c
+    ON c.id = gd.course_id
+  WHERE COALESCE(gd.results_submitted, 0) = 1
+    AND r.stableford_score = (
+      SELECT MAX(r2.stableford_score)
+      FROM results r2
+      JOIN golf_days gd2
+        ON gd2.id = r2.golf_day_id
+      WHERE COALESCE(gd2.results_submitted, 0) = 1
+    )
+  ORDER BY gd.play_date ASC, p.last_name ASC
+`).all();
 
     return Response.json({
       highest_stableford: highestScore
