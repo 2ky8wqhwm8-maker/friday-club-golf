@@ -3362,10 +3362,24 @@ async function closeSeason() {
 
   if (!confirmed) return;
 
-  alert(
-    "The season-closing operation is not yet enabled. " +
-    "No changes have been made."
-  );
+    try {
+    const response = await fetch("/api/end-season/close", {
+      method: "POST"
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(result.error || "Unable to close the season.");
+      return;
+    }
+
+    alert("Season closed successfully.");
+    window.location.reload();
+
+  } catch (error) {
+    alert("Unable to contact the server.");
+  }
 }
   
 // ========================================
