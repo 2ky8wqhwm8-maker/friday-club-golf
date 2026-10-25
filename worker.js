@@ -84,7 +84,7 @@ return Response.json({
   }
 
   try {
-    const { results } = await env.DB.prepare(`
+    let { results } = await env.DB.prepare(`
       SELECT
         id,
         first_name,
