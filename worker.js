@@ -3399,6 +3399,14 @@ if (season.status === "completed") {
 
   archivedStandings = archive.results;
 
+  const archivedPlayerIds = new Set(
+  archivedStandings.map(player => Number(player.player_id))
+);
+
+results = results.filter(player =>
+  archivedPlayerIds.has(Number(player.id))
+);
+
 }
 
 if (season.status === "completed" && archivedStandings.length > 0) {
