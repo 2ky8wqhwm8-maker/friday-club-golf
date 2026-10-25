@@ -3339,6 +3339,7 @@ document.getElementById("main-availability").style.display = "none";
 document.getElementById("main-results").style.display = "none";
   document.getElementById("admin-card").style.display = "none";
   document.getElementById("main-highlights").style.display = "none";
+  document.getElementById("main-records").style.display = "none";
 
   if (section === "home") {
   document.getElementById("main-home").style.display = "block";
@@ -3368,6 +3369,10 @@ document.getElementById("main-results").style.display = "none";
   if (section === "highlights") {
   document.getElementById("main-highlights").style.display = "block";
   loadSeasonHighlights();
+}
+
+if (section === "records") {
+  document.getElementById("main-records").style.display = "block";
 }
   
   if (section === "admin") {
