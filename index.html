@@ -4095,7 +4095,7 @@ async function loadClubRecords() {
 
     const data = await response.json();
 
-    const record = data.highest_stableford;
+    const record = data.highest_stableford?.[0];
 
     if (!record) {
       container.textContent = "No club records available yet.";
