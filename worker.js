@@ -3201,13 +3201,26 @@ const rolloverStatements = [
       minimum_rounds,
       status
     )
-    VALUES (?, ?, ?, ?, 'current')
+    SELECT ?, ?, ?, ?, 'current'
+WHERE EXISTS (
+  SELECT 1
+  FROM seasons
+  WHERE id = ?
+    AND status = 'completed'
+)
+AND NOT EXISTS (
+  SELECT 1
+  FROM seasons
+  WHERE name = ?
+)
   `).bind(
-    nextSeasonName,
-    `${nextYear}-01-01`,
-    `${nextYear}-12-31`,
-    season.minimum_rounds
-  )
+  nextSeasonName,
+  `${nextYear}-01-01`,
+  `${nextYear}-12-31`,
+  season.minimum_rounds,
+  season.id,
+  nextSeasonName
+)
 ];
 
 if (finalStandings.length === 0) {
