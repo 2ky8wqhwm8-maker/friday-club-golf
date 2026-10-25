@@ -4103,9 +4103,20 @@ const record = records[0];
       return;
     }
 
-    const date = new Date(
-      record.play_date + "T12:00:00"
-    ).toLocaleDateString("en-GB");
+    const recordHolders = records.map(r => {
+
+  const date = new Date(
+    r.play_date + "T12:00:00"
+  ).toLocaleDateString("en-GB");
+
+  return `
+    <p>
+      <strong>${r.first_name} ${r.last_name}</strong><br>
+      ${r.course_name} — ${date}
+    </p>
+  `;
+
+}).join("");
 
     container.innerHTML = `
       <div style="
@@ -4116,8 +4127,7 @@ const record = records[0];
       ">
         <h3>Highest Stableford Score</h3>
         <p><strong>${record.stableford_score} points</strong></p>
-        <p>${record.first_name} ${record.last_name}</p>
-        <p>${record.course_name} — ${date}</p>
+        ${recordHolders}
       </div>
     `;
 
