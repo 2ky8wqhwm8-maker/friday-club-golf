@@ -3617,7 +3617,7 @@ previousStandings.results.forEach((player, index) => {
 
     
     
-    const players = await env.DB.prepare(`
+    let players = await env.DB.prepare(`
       SELECT
         p.id,
         p.first_name,
