@@ -3472,8 +3472,9 @@ player.previous_5 = previousRecent.results.map(
           
           player.minimum_rounds = season.minimum_rounds;
 
-          player.eligible =
-            player.played >= season.minimum_rounds;
+          if (season.status !== "completed" || player.final_position === undefined) {
+  player.eligible = player.played >= season.minimum_rounds;
+}
         }
 
         return Response.json({
