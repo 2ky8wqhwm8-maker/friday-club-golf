@@ -4168,6 +4168,17 @@ const personalRecordsRows = Array.from(
 
 }).join("");
 
+const courseRecordsRows = (data.course_records || []).map(record => `
+  <tr>
+    <td>${record.course_name}</td>
+    <td style="text-align: center;">
+      ${record.stableford_score}
+    </td>
+    <td>${record.first_name} ${record.last_name}</td>
+    <td>${record.play_date}</td>
+  </tr>
+`).join("");
+    
     container.innerHTML = `
       <div style="
         padding: 15px;
@@ -4199,6 +4210,27 @@ const personalRecordsRows = Array.from(
           ${personalRecordsRows}
         </tbody>
       </table>
+            <h3 style="margin-top: 25px;">All-Time Course Records</h3>
+
+      <div style="overflow-x: auto;">
+        <table style="
+          width: 100%;
+          border-collapse: collapse;
+          max-width: 600px;
+        ">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Course</th>
+              <th style="text-align: center;">Best Score</th>
+              <th style="text-align: left;">Player</th>
+              <th style="text-align: left;">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${courseRecordsRows}
+          </tbody>
+        </table>
+      </div>
     `;
 
   } catch (error) {
