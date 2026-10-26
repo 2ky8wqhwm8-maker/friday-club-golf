@@ -4239,19 +4239,27 @@ const courseRecordsRows = Object.entries(courseRecords)
             <h3 style="margin-top: 25px;">All-Time Course Records</h3>
 
       <div style="overflow-x: auto;">
-        <table style="
-          width: 100%;
-          border-collapse: collapse;
-          max-width: 600px;
-        ">
-          <thead>
-            <tr>
-              <th style="text-align: left;">Course</th>
-              <th style="text-align: center;">Best Score</th>
-              <th style="text-align: left;">Player</th>
-              <th style="text-align: left;">Date</th>
-            </tr>
-          </thead>
+        <table id="course-records-table" style="
+  width: 100%;
+  border-collapse: collapse;
+  max-width: 600px;
+">
+         <thead>
+  <tr>
+    <th onclick="sortCourseRecords(0)" style="text-align: left; cursor: pointer;">
+      Course ↕
+    </th>
+    <th onclick="sortCourseRecords(1)" style="text-align: center; cursor: pointer;">
+      Best Score ↕
+    </th>
+    <th onclick="sortCourseRecords(2)" style="text-align: left; cursor: pointer;">
+      Player ↕
+    </th>
+    <th onclick="sortCourseRecords(3)" style="text-align: left; cursor: pointer;">
+      Date ↕
+    </th>
+  </tr>
+</thead>
           <tbody>
             ${courseRecordsRows}
           </tbody>
@@ -4263,6 +4271,40 @@ const courseRecordsRows = Object.entries(courseRecords)
     container.textContent = "Unable to load club records.";
     console.error(error);
   }
+}
+
+function sortCourseRecords(column) {
+  const table = document.getElementById("course-records-table");
+  if (!table) return;
+
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
+
+  const ascending = table.dataset.sortColumn == column
+    ? table.dataset.sortDirection !== "asc"
+    : true;
+
+  rows.sort((a, b) => {
+    const aValue = a.cells[column].textContent.trim();
+    const bValue = b.cells[column].textContent.trim();
+
+    let comparison;
+
+    if (column === 1) {
+      comparison = Number(aValue) - Number(bValue);
+    } else {
+      comparison = aValue.localeCompare(bValue, "en-GB", {
+        numeric: true
+      });
+    }
+
+    return ascending ? comparison : -comparison;
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
+
+  table.dataset.sortColumn = column;
+  table.dataset.sortDirection = ascending ? "asc" : "desc";
 }
   
 async function loadSeasonHighlights() {
