@@ -4175,7 +4175,7 @@ const courseRecordsRows = (data.course_records || []).map(record => `
       ${record.stableford_score}
     </td>
     <td>${record.first_name} ${record.last_name}</td>
-    <td>${formatUKDate(record.play_date)}</td>
+    <td>${record.play_date.split("-").reverse().join("/")}</td>
   </tr>
 `).join("");
     
