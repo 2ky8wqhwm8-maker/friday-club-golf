@@ -4205,20 +4205,29 @@ const courseRecordsRows = Object.entries(courseRecords)
     </tr>
   `).join("");
 
-const mostRoundsRows = (data.most_rounds_played || [])
-  .map((player, index) => `
-    <tr>
-      <td style="text-align: center;">
-        ${index + 1}
-      </td>
-      <td>
-        ${player.first_name} ${player.last_name}
-      </td>
-      <td style="text-align: center;">
-        ${player.rounds_played}
-      </td>
-    </tr>
-  `).join("");
+const roundsPlayers = data.most_rounds_played || [];
+
+const mostRoundsRows = roundsPlayers
+  .map((player, index) => {
+
+    const position = roundsPlayers.findIndex(
+      p => p.rounds_played === player.rounds_played
+    ) + 1;
+
+    return `
+      <tr>
+        <td style="text-align: center;">
+          ${position}
+        </td>
+        <td>
+          ${player.first_name} ${player.last_name}
+        </td>
+        <td style="text-align: center;">
+          ${player.rounds_played}
+        </td>
+      </tr>
+    `;
+  }).join("");
     
     container.innerHTML = `
       <div style="
