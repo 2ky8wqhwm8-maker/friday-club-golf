@@ -3467,8 +3467,12 @@ if (season.status === "completed" && archivedStandings.length > 0) {
     AND gd.id <> (
       SELECT gd2.id
       FROM golf_days gd2
-      JOIN results r2 ON r2.golf_day_id = gd2.id
       WHERE gd2.season_id = ?
+        AND EXISTS (
+          SELECT 1
+          FROM results r2
+          WHERE r2.golf_day_id = gd2.id
+        )
       ORDER BY gd2.play_date DESC, gd2.id DESC
       LIMIT 1
     )
