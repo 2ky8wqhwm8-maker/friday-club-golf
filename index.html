@@ -4219,19 +4219,29 @@ const courseRecordsRows = Object.entries(courseRecords)
 
       <h3>Personal Best Stableford Scores</h3>
 
-      <table style="
-        width: 100%;
-        border-collapse: collapse;
-        max-width: 600px;
-      ">
+      <table id="personal-bests-table" style="
+  width: 100%;
+  border-collapse: collapse;
+  max-width: 600px;
+">
         <thead>
-          <tr>
-  <th style="text-align: left;">Player</th>
-  <th style="text-align: center;">Best Score</th>
-  <th style="text-align: left;">Course</th>
-  <th style="text-align: left;">Date</th>
-</tr>
-        </thead>
+  <tr>
+    <th onclick="sortPersonalBests(0)"
+        style="text-align: left; cursor: pointer;">
+      Player ↕
+    </th>
+    <th onclick="sortPersonalBests(1)"
+        style="text-align: center; cursor: pointer;">
+      Best Score ↕
+    </th>
+    <th style="text-align: left;">
+      Course
+    </th>
+    <th style="text-align: left;">
+      Date
+    </th>
+  </tr>
+</thead>
         <tbody>
           ${personalRecordsRows}
         </tbody>
@@ -4299,6 +4309,34 @@ function sortCourseRecords(column) {
         numeric: true
       });
     }
+
+    return ascending ? comparison : -comparison;
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
+
+  table.dataset.sortColumn = column;
+  table.dataset.sortDirection = ascending ? "asc" : "desc";
+}
+
+function sortPersonalBests(column) {
+  const table = document.getElementById("personal-bests-table");
+  if (!table) return;
+
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
+
+  const ascending = table.dataset.sortColumn == column
+    ? table.dataset.sortDirection !== "asc"
+    : column === 0;
+
+  rows.sort((a, b) => {
+    const aValue = a.cells[column].textContent.trim();
+    const bValue = b.cells[column].textContent.trim();
+
+    const comparison = column === 1
+      ? Number(aValue) - Number(bValue)
+      : aValue.localeCompare(bValue, "en-GB");
 
     return ascending ? comparison : -comparison;
   });
