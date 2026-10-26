@@ -4204,6 +4204,21 @@ const courseRecordsRows = Object.entries(courseRecords)
       </td>
     </tr>
   `).join("");
+
+const mostRoundsRows = (data.most_rounds_played || [])
+  .map((player, index) => `
+    <tr>
+      <td style="text-align: center;">
+        ${index + 1}
+      </td>
+      <td>
+        ${player.first_name} ${player.last_name}
+      </td>
+      <td style="text-align: center;">
+        ${player.rounds_played}
+      </td>
+    </tr>
+  `).join("");
     
     container.innerHTML = `
       <div style="
@@ -4277,6 +4292,26 @@ const courseRecordsRows = Object.entries(courseRecords)
           </tbody>
         </table>
       </div>
+      <h3 style="margin-top: 25px;">Most Rounds Played (All Time)</h3>
+
+<div style="overflow-x: auto;">
+  <table style="
+    width: 100%;
+    border-collapse: collapse;
+    max-width: 600px;
+  ">
+    <thead>
+      <tr>
+        <th style="text-align: center;">Pos</th>
+        <th style="text-align: left;">Player</th>
+        <th style="text-align: center;">Rounds Played</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${mostRoundsRows}
+    </tbody>
+  </table>
+</div>
     `;
 
   } catch (error) {
