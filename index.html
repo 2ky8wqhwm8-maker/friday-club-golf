@@ -4168,16 +4168,42 @@ const personalRecordsRows = Array.from(
 
 }).join("");
 
-const courseRecordsRows = (data.course_records || []).map(record => `
-  <tr>
-    <td>${record.course_name}</td>
-    <td style="text-align: center;">
-      ${record.stableford_score}
-    </td>
-    <td>${record.first_name} ${record.last_name}</td>
-    <td>${record.play_date.split("-").reverse().join("/")}</td>
-  </tr>
-`).join("");
+const courseRecords = {};
+
+(data.course_records || []).forEach(record => {
+
+  const course = record.course_name;
+
+  if (!courseRecords[course]) {
+    courseRecords[course] = {
+      score: record.stableford_score,
+      achievements: []
+    };
+  }
+
+  courseRecords[course].achievements.push({
+    player: `${record.first_name} ${record.last_name}`,
+    date: record.play_date.split("-").reverse().join("/")
+  });
+
+});
+
+const courseRecordsRows = Object.entries(courseRecords)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([course, details]) => `
+    <tr>
+      <td>${course}</td>
+      <td style="text-align: center;">
+        ${details.score}
+      </td>
+      <td>
+        ${details.achievements.map(a => a.player).join("<br>")}
+      </td>
+      <td>
+        ${details.achievements.map(a => a.date).join("<br>")}
+      </td>
+    </tr>
+  `).join("");
     
     container.innerHTML = `
       <div style="
