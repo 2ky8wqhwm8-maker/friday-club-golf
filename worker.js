@@ -3624,11 +3624,35 @@ const courseRecords = await env.DB.prepare(`
     p.last_name,
     p.first_name
 `).all();
+
+const mostRoundsPlayed = await env.DB.prepare(`
+  SELECT
+    p.id AS player_id,
+    p.first_name,
+    p.last_name,
+    COUNT(*) AS rounds_played
+  FROM results r
+  JOIN players p
+    ON p.id = r.player_id
+  JOIN golf_days gd
+    ON gd.id = r.golf_day_id
+  WHERE gd.results_submitted = 1
+    AND r.stableford_score IS NOT NULL
+  GROUP BY
+    p.id,
+    p.first_name,
+    p.last_name
+  ORDER BY
+    rounds_played DESC,
+    p.last_name,
+    p.first_name
+`).all();
     
     return Response.json({
   highest_stableford: highestScore.results,
   personal_bests: personalBests.results,
-  course_records: courseRecords.results
+  course_records: courseRecords.results,
+  most_rounds_played: mostRoundsPlayed.results
 }, {
       headers: {
         "Cache-Control": "no-store"
