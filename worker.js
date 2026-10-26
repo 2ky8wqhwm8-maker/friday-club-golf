@@ -3588,10 +3588,47 @@ ORDER BY
   p.first_name,
   gd.play_date
 `).all();
+
+const courseRecords = await env.DB.prepare(`
+  WITH course_maximums AS (
+    SELECT
+      gd.course_id,
+      MAX(r.stableford_score) AS best_score
+    FROM results r
+    JOIN golf_days gd
+      ON gd.id = r.golf_day_id
+    WHERE gd.results_submitted = 1
+      AND r.stableford_score IS NOT NULL
+    GROUP BY gd.course_id
+  )
+  SELECT
+    c.name AS course_name,
+    p.first_name,
+    p.last_name,
+    r.stableford_score,
+    gd.play_date
+  FROM course_maximums cm
+  JOIN golf_days gd
+    ON gd.course_id = cm.course_id
+  JOIN results r
+    ON r.golf_day_id = gd.id
+   AND r.stableford_score = cm.best_score
+  JOIN players p
+    ON p.id = r.player_id
+  JOIN courses c
+    ON c.id = gd.course_id
+  WHERE gd.results_submitted = 1
+  ORDER BY
+    c.name,
+    gd.play_date,
+    p.last_name,
+    p.first_name
+`).all();
     
     return Response.json({
   highest_stableford: highestScore.results,
-  personal_bests: personalBests.results
+  personal_bests: personalBests.results,
+  course_records: courseRecords.results
 }, {
       headers: {
         "Cache-Control": "no-store"
