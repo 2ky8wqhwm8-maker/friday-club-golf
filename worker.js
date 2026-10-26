@@ -3524,13 +3524,22 @@ if (url.pathname === "/api/club-records") {
   try {
 
    const highestScore = await env.DB.prepare(`
+  WITH maximum_score AS (
+    SELECT MAX(r.stableford_score) AS score
+    FROM results r
+    JOIN golf_days gd
+      ON gd.id = r.golf_day_id
+    WHERE COALESCE(gd.results_submitted, 0) = 1
+  )
   SELECT
     p.first_name,
     p.last_name,
     r.stableford_score,
     gd.play_date,
     c.name AS course_name
-  FROM results r
+  FROM maximum_score ms
+  JOIN results r
+    ON r.stableford_score = ms.score
   JOIN players p
     ON p.id = r.player_id
   JOIN golf_days gd
@@ -3538,16 +3547,9 @@ if (url.pathname === "/api/club-records") {
   JOIN courses c
     ON c.id = gd.course_id
   WHERE COALESCE(gd.results_submitted, 0) = 1
-    AND r.stableford_score = (
-      SELECT MAX(r2.stableford_score)
-      FROM results r2
-      JOIN golf_days gd2
-        ON gd2.id = r2.golf_day_id
-      WHERE COALESCE(gd2.results_submitted, 0) = 1
-    )
   ORDER BY gd.play_date ASC, p.last_name ASC
 `).all();
-
+    
 const personalBests = await env.DB.prepare(`
  WITH best_scores AS (
   SELECT
