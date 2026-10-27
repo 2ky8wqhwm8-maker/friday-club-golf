@@ -2830,8 +2830,9 @@ if (url.pathname === "/api/golf-day-notice") {
     const notice = await env.DB.prepare(`
       SELECT
         gd.id AS golf_day_id,
-        gd.play_date,
-        c.name AS course_name,
+gd.play_date,
+gd.notes AS golf_day_notes,
+c.name AS course_name,
         c.location AS course_location,
         n.first_tee_time,
         n.message,
