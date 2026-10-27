@@ -3312,9 +3312,13 @@ async function loadNextGolfDayNotice() {
     ? `<p>First tee: <strong>${notice.first_tee_time}</strong></p>`
     : ""}
 
-  ${notice.message
-    ? `<p>${notice.message}</p>`
-    : ""}
+  ${notice.golf_day_notes
+  ? `<p><strong>Notes:</strong> ${notice.golf_day_notes}</p>`
+  : ""}
+
+${notice.message
+  ? `<p><strong>Admin:</strong> ${notice.message}</p>`
+  : ""}
 `;
 
     noticeBox.style.display = "block";
