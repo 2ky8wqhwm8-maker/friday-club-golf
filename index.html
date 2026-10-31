@@ -932,7 +932,10 @@ header {
 </p>
 
 <label for="notice-golf-day">Golf Day</label>
-<select id="notice-golf-day">
+<select
+  id="notice-golf-day"
+  onchange="loadExistingGolfDayNotice()"
+>
   <option value="">Select golf day...</option>
 </select>
 
@@ -2391,6 +2394,58 @@ async function loadNoticeGolfDays() {
   }
 }
 
+async function loadExistingGolfDayNotice() {
+
+  const golfDayId =
+    document.getElementById("notice-golf-day").value;
+
+  const teeTime =
+    document.getElementById("notice-tee-time");
+
+  const message =
+    document.getElementById("notice-message");
+
+  const result =
+    document.getElementById("notice-message-result");
+
+  teeTime.value = "";
+  message.value = "";
+  result.textContent = "";
+
+  if (!golfDayId) return;
+
+  try {
+
+    const response = await fetch(
+      `/api/admin/golf-day-notice?golf_day_id=${golfDayId}`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to load notice."
+      );
+    }
+
+    if (data.notice) {
+      teeTime.value = data.notice.first_tee_time || "";
+      message.value = data.notice.message || "";
+
+      result.textContent =
+        "Existing notice loaded. You can edit and publish it again.";
+    } else {
+      result.textContent =
+        "No existing notice. You can create one.";
+    }
+
+  } catch (error) {
+
+    result.textContent = error.message;
+
+  }
+}
+  
 async function publishGolfDayNotice() {
 
   const golfDayId =
