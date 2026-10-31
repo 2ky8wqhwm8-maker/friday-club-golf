@@ -2748,6 +2748,51 @@ const existingPlayer =
 }
 
 // ========================================
+// DELETE GOLF DAY NOTICE
+// ========================================
+if (
+  url.pathname === "/api/admin/golf-day-notice" &&
+  request.method === "DELETE"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  const golfDayId = Number(
+    url.searchParams.get("golf_day_id")
+  );
+
+  if (!Number.isInteger(golfDayId) || golfDayId <= 0) {
+    return Response.json(
+      { error: "Invalid golf day." },
+      { status: 400 }
+    );
+  }
+
+  try {
+
+    await env.DB.prepare(`
+      DELETE FROM golf_day_notice
+      WHERE golf_day_id = ?
+    `).bind(golfDayId).run();
+
+    return Response.json({ success: true });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to delete golf day notice." },
+      { status: 500 }
+    );
+
+  }
+}
+    
+// ========================================
 // GET EXISTING GOLF DAY NOTICE
 // ========================================
 if (
