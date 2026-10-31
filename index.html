@@ -2425,6 +2425,9 @@ async function loadExistingGolfDayNotice() {
   teeTime.value = "";
   message.value = "";
   result.textContent = "";
+  document.getElementById(
+  "delete-golf-day-notice-button"
+).style.display = "none";
 
   if (!golfDayId) return;
 
@@ -2442,16 +2445,28 @@ async function loadExistingGolfDayNotice() {
       );
     }
 
-    if (data.notice) {
-      teeTime.value = data.notice.first_tee_time || "";
-      message.value = data.notice.message || "";
+    const deleteButton = document.getElementById(
+  "delete-golf-day-notice-button"
+);
 
-      result.textContent =
-        "Existing notice loaded. You can edit and publish it again.";
-    } else {
-      result.textContent =
-        "No existing notice. You can create one.";
-    }
+if (data.notice) {
+
+  teeTime.value = data.notice.first_tee_time || "";
+  message.value = data.notice.message || "";
+
+  deleteButton.style.display = "inline-block";
+
+  result.textContent =
+    "Existing notice loaded. You can edit or delete it.";
+
+} else {
+
+  deleteButton.style.display = "none";
+
+  result.textContent =
+    "No existing notice. You can create one.";
+
+}
 
   } catch (error) {
 
