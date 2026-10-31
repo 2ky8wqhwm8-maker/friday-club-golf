@@ -2798,18 +2798,19 @@ const existingPlayer =
     }
 
     await env.DB.prepare(`
-      DELETE FROM golf_day_notice
-    `).run();
+  DELETE FROM golf_day_notice
+  WHERE golf_day_id = ?
+`).bind(golfDayId).run();
 
-    await env.DB.prepare(`
-      INSERT INTO golf_day_notice
-        (golf_day_id, first_tee_time, message, updated_at)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-    `).bind(
-      golfDayId,
-      firstTeeTime,
-      message
-    ).run();
+await env.DB.prepare(`
+  INSERT INTO golf_day_notice
+    (golf_day_id, first_tee_time, message, updated_at)
+  VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+`).bind(
+  golfDayId,
+  firstTeeTime,
+  message
+).run();
 
     return Response.json({ success: true });
 
