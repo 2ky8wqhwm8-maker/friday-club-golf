@@ -2570,9 +2570,15 @@ async function publishGolfDayNotice() {
     }
 
     result.textContent =
-      "Next Golf Day notice published successfully.";
+  "Next Golf Day notice published successfully.";
 
-    alert("Next Golf Day notice published successfully.");
+// Refresh the notice in the header
+await loadNextGolfDayNotice();
+
+// Refresh the existing notice and Delete button
+await loadExistingGolfDayNotice();
+
+alert("Next Golf Day notice published successfully.");
 
   } catch (error) {
 
