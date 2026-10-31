@@ -2748,6 +2748,58 @@ const existingPlayer =
 }
 
 // ========================================
+// GET EXISTING GOLF DAY NOTICE
+// ========================================
+if (
+  url.pathname === "/api/admin/golf-day-notice" &&
+  request.method === "GET"
+) {
+
+  if (!isAdmin) {
+    return Response.json(
+      { error: "Administrator access required." },
+      { status: 403 }
+    );
+  }
+
+  const golfDayId = Number(
+    url.searchParams.get("golf_day_id")
+  );
+
+  if (!Number.isInteger(golfDayId) || golfDayId <= 0) {
+    return Response.json(
+      { error: "Invalid golf day." },
+      { status: 400 }
+    );
+  }
+
+  try {
+
+    const notice = await env.DB.prepare(`
+      SELECT
+        golf_day_id,
+        first_tee_time,
+        message
+      FROM golf_day_notice
+      WHERE golf_day_id = ?
+      LIMIT 1
+    `).bind(golfDayId).first();
+
+    return Response.json({
+      notice: notice || null
+    });
+
+  } catch (error) {
+
+    return Response.json(
+      { error: "Unable to load golf day notice." },
+      { status: 500 }
+    );
+
+  }
+}
+    
+// ========================================
 // NEXT GOLF DAY NOTICE
 // ========================================
  if (
