@@ -2459,6 +2459,53 @@ async function loadExistingGolfDayNotice() {
 
   }
 }
+
+async function deleteGolfDayNotice() {
+
+  const golfDayId =
+    document.getElementById("notice-golf-day").value;
+
+  const result =
+    document.getElementById("notice-message-result");
+
+  if (!golfDayId) return;
+
+  if (!confirm("Delete the notice for this golf day?")) {
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      `/api/admin/golf-day-notice?golf_day_id=${golfDayId}`,
+      { method: "DELETE" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to delete notice."
+      );
+    }
+
+    document.getElementById("notice-tee-time").value = "";
+    document.getElementById("notice-message").value = "";
+
+    document.getElementById(
+      "delete-golf-day-notice-button"
+    ).style.display = "none";
+
+    result.textContent = "Notice deleted successfully.";
+
+    await loadNextGolfDayNotice();
+
+  } catch (error) {
+
+    result.textContent = error.message;
+
+  }
+}
   
 async function publishGolfDayNotice() {
 
