@@ -5076,6 +5076,29 @@ dayScores.forEach((player, index) => {
 });
 
 preview.textContent = report;
+
+report += "\nCURRENT LEAGUE TABLE\n";
+
+let leaguePosition = 0;
+
+leagueData.players.forEach(player => {
+
+  if (Number(player.played) < Number(leagueData.minimum_rounds)) {
+    return;
+  }
+
+  leaguePosition++;
+
+  report +=
+    leaguePosition + ". " +
+    player.first_name + " " + player.last_name +
+    " — H'cap " + player.handicap +
+    " — Played " + player.played +
+    " — Avg " + Number(player.average_score).toFixed(2) +
+    "\n";
+
+});
+    
 preview.style.whiteSpace = "pre-wrap";
 
   } catch (error) {
