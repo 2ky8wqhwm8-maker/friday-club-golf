@@ -5044,10 +5044,39 @@ if (!leagueResponse.ok) {
 
 const leagueData = await leagueResponse.json();
 
-    preview.textContent =
-      "Latest completed Golf Day: " +
-      formatUKDate(latestDay.play_date) +
-      " — " + latestDay.course_name;
+const dayScores = leagueData.scores
+  .filter(score =>
+    Number(score.golf_day_id) === Number(latestDay.id)
+  )
+  .map(score => {
+    const player = leagueData.players.find(
+      p => Number(p.id) === Number(score.player_id)
+    );
+
+    return {
+      name: player
+        ? player.first_name + " " + player.last_name
+        : "Unknown Player",
+      points: Number(score.stableford_score)
+    };
+  })
+  .sort((a, b) => b.points - a.points);
+
+let report =
+  "Latest completed Golf Day: " +
+  formatUKDate(latestDay.play_date) +
+  " — " + latestDay.course_name +
+  "\n\nStableford Results\n";
+
+dayScores.forEach((player, index) => {
+  report +=
+    (index + 1) + ". " +
+    player.name + " — " +
+    player.points + " pts\n";
+});
+
+preview.textContent = report;
+preview.style.whiteSpace = "pre-wrap";
 
   } catch (error) {
 
