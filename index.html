@@ -5033,6 +5033,17 @@ async function previewWhatsAppResults() {
 
     message.textContent = "";
 
+    const leagueResponse = await fetch(
+  "/api/full-league",
+  { cache: "no-store" }
+);
+
+if (!leagueResponse.ok) {
+  throw new Error("Unable to load league standings.");
+}
+
+const leagueData = await leagueResponse.json();
+
     preview.textContent =
       "Latest completed Golf Day: " +
       formatUKDate(latestDay.play_date) +
