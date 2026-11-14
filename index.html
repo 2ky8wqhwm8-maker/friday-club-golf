@@ -3430,6 +3430,20 @@ document.getElementById("main-form").style.display = "none";
 document.getElementById("main-availability").style.display = "none";
 document.getElementById("main-results").style.display = "none";
   document.getElementById("admin-card").style.display = "none";
+
+// Hide Administration sections when changing main pages
+[
+  "admin-results",
+  "admin-end-season",
+  "admin-versions",
+  "admin-whatsapp-results"
+].forEach(id => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.style.display = "none";
+  }
+});
+  
   document.getElementById("main-highlights").style.display = "none";
   document.getElementById("main-records").style.display = "none";
 
