@@ -5075,8 +5075,6 @@ dayScores.forEach((player, index) => {
     player.points + " pts\n";
 });
 
-preview.textContent = report;
-
 report += "\nCURRENT LEAGUE TABLE\n";
 
 let leaguePosition = 0;
@@ -5098,7 +5096,8 @@ leagueData.players.forEach(player => {
     "\n";
 
 });
-    
+
+preview.textContent = report;
 preview.style.whiteSpace = "pre-wrap";
 
   } catch (error) {
