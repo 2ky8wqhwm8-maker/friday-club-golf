@@ -4993,6 +4993,56 @@ if (score < 20) {
 
 }
 
+async function previewWhatsAppResults() {
+
+  const message = document.getElementById(
+    "whatsapp-results-message"
+  );
+
+  const preview = document.getElementById(
+    "whatsapp-results-preview"
+  );
+
+  message.textContent = "Loading weekly results...";
+  preview.innerHTML = "";
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/golf-days",
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      throw new Error("Unable to load golf days.");
+    }
+
+    const data = await response.json();
+
+    const latestDay = data.golf_days.find(
+      day => Number(day.results_submitted) === 1
+    );
+
+    if (!latestDay) {
+      message.textContent =
+        "No submitted Golf Day results found.";
+      return;
+    }
+
+    message.textContent = "";
+
+    preview.textContent =
+      "Latest completed Golf Day: " +
+      formatUKDate(latestDay.play_date) +
+      " — " + latestDay.course_name;
+
+  } catch (error) {
+
+    message.textContent = error.message;
+
+  }
+}
+  
 async function loadLiveLeague() {
 
   const container =
