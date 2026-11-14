@@ -5044,6 +5044,7 @@ if (!leagueResponse.ok) {
 
 const leagueData = await leagueResponse.json();
 
+
 const dayScores = leagueData.scores
   .filter(score =>
     Number(score.golf_day_id) === Number(latestDay.id)
@@ -5062,20 +5063,81 @@ const dayScores = leagueData.scores
   })
   .sort((a, b) => b.points - a.points);
 
-let report =
-  "Latest completed Golf Day: " +
-  formatUKDate(latestDay.play_date) +
-  " — " + latestDay.course_name +
-  "\n\nStableford Results\n";
+const escapeHTML = value => String(value ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;");
+
+const cellStyle =
+  "padding:7px 10px;border-bottom:1px solid #ddd;";
+
+const headingStyle =
+  "padding:9px 10px;background:#174d32;color:white;text-align:left;";
+
+let html = `
+  <h3>Latest Golf Day Results</h3>
+  <p>
+    <strong>${escapeHTML(formatUKDate(latestDay.play_date))}</strong>
+    — ${escapeHTML(latestDay.course_name)}
+  </p>
+
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="${headingStyle}">Pos</th>
+        <th style="${headingStyle}">Player</th>
+        <th style="${headingStyle}text-align:right;">Points</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+let previousPoints = null;
+let dayPosition = 0;
 
 dayScores.forEach((player, index) => {
-  report +=
-    (index + 1) + ". " +
-    player.name + " — " +
-    player.points + " pts\n";
+
+  if (player.points !== previousPoints) {
+    dayPosition = index + 1;
+  }
+
+  previousPoints = player.points;
+
+  const background = index % 2 === 0
+    ? "#f3f6f4"
+    : "#ffffff";
+
+  html += `
+    <tr style="background:${background};">
+      <td style="${cellStyle}">${dayPosition}</td>
+      <td style="${cellStyle}">${escapeHTML(player.name)}</td>
+      <td style="${cellStyle}text-align:right;">
+        ${player.points}
+      </td>
+    </tr>
+  `;
 });
 
-report += "\nCURRENT LEAGUE TABLE\n";
+html += `
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:25px;">Current League Standings</h3>
+
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="${headingStyle}">Pos</th>
+        <th style="${headingStyle}">Player</th>
+        <th style="${headingStyle}text-align:right;">H'cap</th>
+        <th style="${headingStyle}text-align:right;">Played</th>
+        <th style="${headingStyle}text-align:right;">Average</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
 
 let leaguePosition = 0;
 
@@ -5087,18 +5149,35 @@ leagueData.players.forEach(player => {
 
   leaguePosition++;
 
-  report +=
-    leaguePosition + ". " +
-    player.first_name + " " + player.last_name +
-    " — H'cap " + player.handicap +
-    " — Played " + player.played +
-    " — Avg " + Number(player.average_score).toFixed(2) +
-    "\n";
+  const background = leaguePosition % 2 === 1
+    ? "#f3f6f4"
+    : "#ffffff";
 
+  html += `
+    <tr style="background:${background};">
+      <td style="${cellStyle}">${leaguePosition}</td>
+      <td style="${cellStyle}">
+        ${escapeHTML(player.first_name)} ${escapeHTML(player.last_name)}
+      </td>
+      <td style="${cellStyle}text-align:right;">
+        ${escapeHTML(player.handicap)}
+      </td>
+      <td style="${cellStyle}text-align:right;">
+        ${Number(player.played)}
+      </td>
+      <td style="${cellStyle}text-align:right;">
+        ${Number(player.average_score).toFixed(2)}
+      </td>
+    </tr>
+  `;
 });
 
-preview.textContent = report;
-preview.style.whiteSpace = "pre-wrap";
+html += `
+    </tbody>
+  </table>
+`;
+
+preview.innerHTML = html;
 
   } catch (error) {
 
