@@ -678,6 +678,9 @@ header {
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
   <!-- Cloudflare deployment test 13 October 2026 reconnect test -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
 </head>
 
 <body>
@@ -968,7 +971,7 @@ header {
   type="button"
   id="whatsapp-image-button"
   onclick="copyWhatsAppImage()"
-  style="display:none; margin:10px 0;"
+  style="display:none; margin:0 0 0 8px;"
 >
   Copy Results Image
 </button>
@@ -5221,6 +5224,42 @@ document.getElementById("whatsapp-image-button")
 
     message.textContent = error.message;
 
+  }
+}
+
+async function copyWhatsAppImage() {
+  const preview = document.getElementById("whatsapp-results-preview");
+
+  try {
+    if (!preview || !preview.innerHTML.trim()) {
+      alert("Please preview the weekly results first.");
+      return;
+    }
+
+    const canvas = await html2canvas(preview, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true
+    });
+
+    const blob = await new Promise(resolve =>
+      canvas.toBlob(resolve, "image/png")
+    );
+
+    if (!blob) {
+      throw new Error("Unable to create image.");
+    }
+
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "image/png": blob
+      })
+    ]);
+
+    alert("Results image copied. You can now paste it into WhatsApp.");
+
+  } catch (error) {
+    alert("Unable to copy results image: " + error.message);
   }
 }
   
