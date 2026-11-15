@@ -955,26 +955,28 @@ header {
     WhatsApp group.
   </p>
 
+
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:15px 0;">
+
   <button
     type="button"
     onclick="previewWhatsAppResults()"
+    style="margin:0;"
   >
     Preview Weekly Results
   </button>
 
-  <div
-    id="whatsapp-results-message"
-    style="margin-top: 12px;"
-  ></div>
+  <button
+    type="button"
+    id="whatsapp-image-button"
+    onclick="copyWhatsAppImage()"
+    style="display:none;margin:0;"
+  >
+    Copy Results Image
+  </button>
 
-<button
-  type="button"
-  id="whatsapp-image-button"
-  onclick="copyWhatsAppImage()"
-  style="display:none; margin:0 0 0 8px;"
->
-  Copy Results Image
-</button>
+</div>
+
   
   <div
     id="whatsapp-results-preview"
