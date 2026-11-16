@@ -5244,10 +5244,12 @@ async function copyWhatsAppImage() {
     }
 
     const canvas = await html2canvas(preview, {
-      backgroundColor: "#ffffff",
-      scale: 2,
-      useCORS: true
-    });
+  backgroundColor: "#ffffff",
+  scale: 3,
+  useCORS: true,
+  width: 490,
+  windowWidth: 490
+});
 
     const blob = await new Promise(resolve =>
       canvas.toBlob(resolve, "image/png")
